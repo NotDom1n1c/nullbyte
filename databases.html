@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Databases — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 10px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.db-hero { display: flex; gap: 40px; align-items: center; flex-wrap: wrap; }
+.db-hero .tx { flex: 1 1 360px; }
+
+/* ---- animated cylinder stack logo ---- */
+.db-logo { width: 132px; height: 158px; flex: 0 0 auto; filter: drop-shadow(0 18px 30px rgba(56,135,255,.28)); }
+.db-logo .cyl { opacity: 0; transform: translateY(-26px); animation: dbStack .5s cubic-bezier(.2,.8,.2,1) forwards; }
+.db-logo .cyl:nth-child(1){ animation-delay:.05s } .db-logo .cyl:nth-child(2){ animation-delay:.2s }
+.db-logo .cyl:nth-child(3){ animation-delay:.35s } .db-logo .cyl:nth-child(4){ animation-delay:.5s }
+@keyframes dbStack { to { opacity: 1; transform: translateY(0); } }
+.db-logo .top { fill: var(--violet); }
+.db-logo .body { fill: rgba(56,135,255,.22); stroke: var(--violet); stroke-width: 1.5; }
+.db-logo .sheen { fill: url(#dbSheen); opacity: .9; mix-blend-mode: screen; animation: dbSheen 3.4s ease-in-out infinite; }
+@keyframes dbSheen { 0%,100% { transform: translateX(-40px); opacity:.15 } 50% { transform: translateX(40px); opacity:.8 } }
+.db-logo .glow { fill: var(--violet); opacity: .12; animation: dbGlow 2.8s ease-in-out infinite; }
+@keyframes dbGlow { 0%,100% { opacity:.07 } 50% { opacity:.22 } }
+.db-logo .scan { opacity: 0; }
+.db-logo:hover .scan { opacity: 1; animation: dbScan 1s linear; }
+@keyframes dbScan { 0% { transform: translateY(8px); opacity:0 } 10%{opacity:1} 90%{opacity:1} 100% { transform: translateY(150px); opacity:0 } }
+
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; margin: 30px 0 22px; }
+.seg button { font-family: var(--mono); font-size: .76rem; padding: 10px 18px; border: none; background: transparent; color: var(--muted); cursor: pointer; text-transform: uppercase; letter-spacing: .04em; }
+.seg button.active { background: var(--grad); color: #fff; font-weight: 700; }
+.lvl { display: none; } .lvl.show { display: block; animation: rise .35s ease; }
+
+.panel { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); backdrop-filter: blur(12px); padding: 24px; margin-bottom: 18px; }
+.panel h3 { font-size: 1.2rem; margin-bottom: 6px; }
+.panel p { color: var(--muted); font-size: .94rem; line-height: 1.6; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 18px; }
+
+/* interactive sample table */
+.dbtbl { border-collapse: collapse; font-family: var(--mono); font-size: .82rem; width: 100%; margin-top: 8px; }
+.dbtbl th, .dbtbl td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; cursor: pointer; transition: background .15s; }
+.dbtbl th { color: var(--violet); background: rgba(255,255,255,.03); }
+.dbtbl td:hover, .dbtbl th:hover { background: rgba(56,135,255,.14); }
+.dbtbl .pk { color: var(--pink); }
+.dbtbl tr.hl td { background: rgba(56,135,255,.12); }
+.dbtbl col.hl, .dbtbl td.hlcol { background: rgba(236,72,153,.12); }
+.callout { margin-top: 14px; font-family: var(--mono); font-size: .82rem; color: var(--ink); border-left: 2px solid var(--violet); padding: 8px 0 8px 14px; min-height: 1.2em; }
+
+/* schema diagram */
+.schema { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; position: relative; }
+.ent { border: 1px solid var(--line-2); border-radius: 10px; min-width: 180px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+.ent.lit { border-color: var(--violet); box-shadow: 0 0 0 1px var(--violet), 0 14px 36px -16px var(--violet); }
+.ent h4 { font-family: var(--mono); font-size: .8rem; padding: 8px 12px; background: rgba(56,135,255,.14); color: var(--ink); }
+.ent .f { font-family: var(--mono); font-size: .78rem; color: var(--muted); padding: 6px 12px; border-top: 1px solid var(--line); }
+.ent .f.key { color: var(--pink); }
+.conceptbtns { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; }
+.cbtn { font-family: var(--mono); font-size: .74rem; padding: 8px 13px; border: 1px solid var(--line-2); border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+.cbtn.active { border-color: var(--violet); color: var(--ink); background: rgba(56,135,255,.1); }
+
+.acid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 12px; }
+.acid > div { border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.acid b { font-family: var(--display); font-size: 1.5rem; color: var(--violet); display: block; }
+.acid span { font-size: .85rem; color: var(--muted); }
+
+/* SQL sandbox */
+.sql-wrap { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.sql-head { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: rgba(255,255,255,.03); border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.sql-head .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--violet); }
+#sqlInput { width: 100%; min-height: 96px; resize: vertical; background: #0b0a12; color: var(--ink); font-family: var(--mono); font-size: .92rem; line-height: 1.6; border: none; padding: 16px; outline: none; }
+.sql-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 16px; background: rgba(255,255,255,.02); border-top: 1px solid var(--line); }
+.chip { font-family: var(--mono); font-size: .72rem; padding: 6px 11px; border: 1px solid var(--line-2); border-radius: 7px; color: var(--muted); cursor: pointer; background: transparent; }
+.chip:hover { border-color: var(--violet); color: var(--ink); }
+.sql-out { padding: 16px; font-family: var(--mono); font-size: .82rem; overflow-x: auto; }
+.sql-out table { border-collapse: collapse; width: 100%; }
+.sql-out th, .sql-out td { border: 1px solid var(--line); padding: 7px 12px; text-align: left; white-space: nowrap; }
+.sql-out th { color: var(--violet); background: rgba(255,255,255,.03); }
+.sql-msg { font-family: var(--mono); font-size: .82rem; }
+.sql-msg.err { color: var(--pink); }
+.sql-msg.ok { color: #5cc8ff; }
+.xlink { color: var(--violet); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ DATA ]</span><span class="tag">// databases &amp; sql</span></div>
+  <div class="db-hero">
+    <svg class="db-logo" viewBox="0 0 132 158" xmlns="http://www.w3.org/2000/svg" aria-label="database">
+      <defs>
+        <linearGradient id="dbSheen" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#cfe3ff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <ellipse class="glow" cx="66" cy="150" rx="52" ry="9"/>
+      <g class="cyl"><path class="body" d="M14 116c0 9 23 15 52 15s52-6 52-15v-22c0 9-23 15-52 15s-52-6-52-15z"/><ellipse class="top" cx="66" cy="94" rx="52" ry="13"/></g>
+      <g class="cyl"><path class="body" d="M14 88c0 9 23 15 52 15s52-6 52-15V66c0 9-23 15-52 15s-52-6-52-15z"/><ellipse class="top" cx="66" cy="66" rx="52" ry="13"/></g>
+      <g class="cyl"><path class="body" d="M14 60c0 9 23 15 52 15s52-6 52-15V38c0 9-23 15-52 15s-52-6-52-15z"/><ellipse class="top" cx="66" cy="38" rx="52" ry="13"/></g>
+      <g class="cyl"><ellipse class="top" cx="66" cy="20" rx="52" ry="13"/></g>
+      <rect class="sheen" x="14" y="8" width="40" height="130" rx="6"/>
+      <rect class="scan" x="14" y="8" width="104" height="2" fill="#5cc8ff"/>
+    </svg>
+    <div class="tx">
+      <h1 class="display">Databases.</h1>
+      <p class="lead" style="margin-top:14px">How structured data really works — tables, keys, JOINs, normalization and ACID — then prove it in a live in-browser SQL sandbox against a fake hacker-alias database. Nothing leaves your machine.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" style="padding-bottom:30px">
+  <div class="seg" id="lvlSeg">
+    <button data-l="0" class="active">Beginner</button>
+    <button data-l="1">Intermediate</button>
+    <button data-l="2">Pro</button>
+  </div>
+
+  <!-- BEGINNER -->
+  <div class="lvl show" data-lvl="0">
+    <div class="panel">
+      <h3>What is a database?</h3>
+      <p>A database stores information in <b>tables</b>. Each table is a grid: <b>columns</b> define what kind of data is stored, <b>rows</b> are individual records, and a <b>primary key</b> uniquely identifies each row. Click any header, row, or the key column below to inspect it.</p>
+      <table class="dbtbl" id="introTbl">
+        <thead><tr><th data-c="id">id <span class="pk">PK</span></th><th data-c="alias">alias</th><th data-c="country">country</th><th data-c="threat">threat</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="callout" id="introCallout">Tip: the <span class="pk">id</span> column is the primary key — no two rows share the same id.</div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3>Column</h3><p>A vertical field with one type of value — e.g. every value in <b>country</b> is a country code. Schemas define a type per column (text, integer, date…).</p></div>
+      <div class="panel"><h3>Row</h3><p>One complete record — a single operative with all their attributes. Also called a <b>tuple</b>.</p></div>
+      <div class="panel"><h3>Primary key</h3><p>A column whose value is unique for every row, so any record can be addressed exactly. Often an auto-incrementing <b>id</b>.</p></div>
+      <div class="panel"><h3>Query</h3><p>A question you ask the database in <b>SQL</b>. <span class="xlink">SELECT alias FROM operatives</span> means “give me the alias column from the operatives table.” Try it in the sandbox below.</p></div>
+    </div>
+  </div>
+
+  <!-- INTERMEDIATE -->
+  <div class="lvl" data-lvl="1">
+    <div class="panel">
+      <h3>Relationships &amp; JOINs</h3>
+      <p>Real data is split across tables to avoid repetition. A <b>foreign key</b> (here <span class="xlink">operatives.crew_id</span>) points at another table's primary key (<span class="xlink">crews.id</span>). A <b>JOIN</b> stitches them back together. Pick a concept to light up the schema:</p>
+      <div class="conceptbtns" id="cBtns">
+        <button class="cbtn active" data-k="join">JOIN</button>
+        <button class="cbtn" data-k="index">Index</button>
+        <button class="cbtn" data-k="norm">Normalization</button>
+        <button class="cbtn" data-k="nosql">SQL vs NoSQL vs Graph</button>
+      </div>
+      <div class="schema" id="schema">
+        <div class="ent" data-e="operatives"><h4>operatives</h4><div class="f key">id (PK)</div><div class="f">alias</div><div class="f">country</div><div class="f key">crew_id (FK)</div><div class="f">threat</div></div>
+        <div class="ent" data-e="crews"><h4>crews</h4><div class="f key">id (PK)</div><div class="f">name</div><div class="f">base</div><div class="f">founded</div></div>
+        <div class="ent" data-e="tools"><h4>tools</h4><div class="f key">id (PK)</div><div class="f key">operative_id (FK)</div><div class="f">name</div></div>
+      </div>
+      <div class="callout" id="cExplain"></div>
+    </div>
+  </div>
+
+  <!-- PRO -->
+  <div class="lvl" data-lvl="2">
+    <div class="panel">
+      <h3>Transactions &amp; ACID</h3>
+      <p>A <b>transaction</b> groups statements so they all succeed or all roll back. The guarantees are <b>ACID</b>:</p>
+      <div class="acid" style="margin-top:14px">
+        <div><b>A</b><span>Atomicity — all or nothing.</span></div>
+        <div><b>C</b><span>Consistency — rules always hold.</span></div>
+        <div><b>I</b><span>Isolation — concurrent txns don't collide.</span></div>
+        <div><b>D</b><span>Durability — committed data survives crashes.</span></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3>Query optimization</h3><p>The planner rewrites your query and picks how to execute it. An <b>index</b> turns an O(n) full table scan into an O(log n) lookup. Filter early, select only needed columns, and avoid functions on indexed columns in <span class="xlink">WHERE</span>.</p></div>
+      <div class="panel"><h3>EXPLAIN plans</h3><p>Run <span class="xlink">EXPLAIN</span> before a query to see the strategy — <i>Seq Scan</i> (slow, reads everything) vs <i>Index Scan</i> (fast). Try <span class="xlink">EXPLAIN SELECT * FROM operatives WHERE id = 3</span> in the sandbox.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SQL SANDBOX -->
+<section class="wrap" style="padding-bottom:80px">
+  <div class="shead"><span class="idx">[ RUN ]</span><span class="tag">// sql sandbox — live, in-browser</span></div>
+  <div class="sql-wrap" style="margin-top:18px">
+    <div class="sql-head"><span class="dot"></span> hacker_intel.db — 3 tables · 100% client-side</div>
+    <textarea id="sqlInput" spellcheck="false">SELECT alias, country, threat FROM operatives WHERE threat > 6 ORDER BY threat DESC;</textarea>
+    <div class="sql-bar">
+      <button class="btn btn-primary" id="sqlRun"><svg class="ico"><use href="#i-scope"/></svg> Run query</button>
+      <span style="color:var(--faint);font-family:var(--mono);font-size:.72rem">Examples:</span>
+      <button class="chip" data-q="SELECT * FROM crews;">all crews</button>
+      <button class="chip" data-q="SELECT alias, threat FROM operatives ORDER BY threat DESC LIMIT 3;">top threats</button>
+      <button class="chip" data-q="SELECT o.alias, c.name FROM operatives o JOIN crews c ON o.crew_id = c.id;">JOIN crews</button>
+      <button class="chip" data-q="SELECT country, COUNT(*) FROM operatives GROUP BY country;">count by country</button>
+      <button class="chip" data-q="SELECT alias FROM operatives WHERE crew_id IN (SELECT id FROM crews WHERE base = 'Austin');">subquery</button>
+    </div>
+    <div class="sql-out" id="sqlOut"></div>
+  </div>
+  <p class="muted" style="font-family:var(--mono);font-size:.78rem;margin-top:14px">Supports SELECT · WHERE · JOIN · GROUP BY · ORDER BY · LIMIT · subqueries · COUNT/AVG/SUM/MIN/MAX · LIKE · IN · EXPLAIN. Cross-links: <a class="xlink" href="calculator.html">base converter</a> · <a class="xlink" href="bits.html">how bits work</a>.</p>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/sql-engine.js"></script>
+<script>
+/* ---- dataset ---- */
+const DB = {
+  operatives: [
+    {id:1, alias:'gh0st',    country:'CH', crew_id:1,    threat:8, joined:2019},
+    {id:2, alias:'nullptr',  country:'DE', crew_id:1,    threat:6, joined:2020},
+    {id:3, alias:'m4ndrake', country:'US', crew_id:2,    threat:9, joined:2018},
+    {id:4, alias:'sable',    country:'SE', crew_id:3,    threat:5, joined:2021},
+    {id:5, alias:'vex',      country:'US', crew_id:2,    threat:7, joined:2022},
+    {id:6, alias:'kobold',   country:'DE', crew_id:null, threat:4, joined:2023},
+    {id:7, alias:'raze',     country:'CH', crew_id:3,    threat:7, joined:2020},
+    {id:8, alias:'cipher',   country:'UK', crew_id:1,    threat:8, joined:2019},
+    {id:9, alias:'wraith',   country:'US', crew_id:2,    threat:6, joined:2023},
+    {id:10,alias:'mara',     country:'SE', crew_id:3,    threat:9, joined:2017}
+  ],
+  crews: [
+    {id:1, name:'BlackVault',   base:'Zürich',    founded:2016},
+    {id:2, name:'NullDivision', base:'Austin',    founded:2014},
+    {id:3, name:'PhantomNet',   base:'Stockholm', founded:2018}
+  ],
+  tools: [
+    {id:1, operative_id:1, name:'Flipper Zero'},
+    {id:2, operative_id:1, name:'Proxmark3'},
+    {id:3, operative_id:3, name:'O.MG Cable'},
+    {id:4, operative_id:5, name:'WiFi Pineapple'},
+    {id:5, operative_id:8, name:'Hak5 Rubber Ducky'}
+  ]
+};
+
+/* ---- level tabs ---- */
+document.getElementById('lvlSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-l]'); if (!b) return;
+  document.querySelectorAll('#lvlSeg button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.lvl').forEach(l => l.classList.toggle('show', l.dataset.lvl === b.dataset.l));
+});
+
+/* ---- beginner interactive table ---- */
+(function(){
+  const tb = document.querySelector('#introTbl tbody');
+  tb.innerHTML = DB.operatives.slice(0,5).map(o =>
+    `<tr><td data-c="id" class="pk">${o.id}</td><td data-c="alias">${o.alias}</td><td data-c="country">${o.country}</td><td data-c="threat">${o.threat}</td></tr>`).join('');
+  const co = document.getElementById('introCallout');
+  const msg = {
+    id:'The id column is the PRIMARY KEY — unique per row, used to reference a record.',
+    alias:'alias is a text COLUMN — every value is the same type of data.',
+    country:'country is a COLUMN holding a 2-letter country code per record.',
+    threat:'threat is an integer COLUMN — a numeric rating from 1 to 9.'
+  };
+  document.getElementById('introTbl').addEventListener('click', e => {
+    const cell = e.target.closest('[data-c]'); const row = e.target.closest('tbody tr');
+    document.querySelectorAll('#introTbl tr').forEach(r => r.classList.remove('hl'));
+    document.querySelectorAll('#introTbl td').forEach(t => t.classList.remove('hlcol'));
+    if (e.target.closest('thead') && cell) {
+      const c = cell.dataset.c;
+      document.querySelectorAll(`#introTbl td[data-c="${c}"]`).forEach(t => t.classList.add('hlcol'));
+      co.textContent = msg[c];
+    } else if (row && cell) {
+      row.classList.add('hl');
+      const o = DB.operatives[[...tb.children].indexOf(row)];
+      co.textContent = `This ROW is one record: operative #${o.id} “${o.alias}” from ${o.country}, threat ${o.threat}.`;
+    }
+  });
+})();
+
+/* ---- intermediate schema concepts ---- */
+(function(){
+  const explain = {
+    join: { ents:['operatives','crews'], t:'A JOIN follows operatives.crew_id → crews.id to merge each operative with their crew. Try the “JOIN crews” example in the sandbox.' },
+    index:{ ents:['operatives'], t:'An INDEX on a column (e.g. crew_id) is a sorted lookup structure, turning a full scan into a fast seek — at the cost of extra storage and slower writes.' },
+    norm: { ents:['operatives','crews'], t:'Normalization splits data so each fact lives once. 1NF: atomic values. 2NF: no partial-key dependencies. 3NF: no field depends on a non-key field. Crew names live in crews, not repeated on every operative.' },
+    nosql:{ ents:['tools'], t:'Relational (SQL) = strict tables + JOINs. NoSQL (document) = flexible JSON-like blobs, no fixed schema. Graph = nodes + edges, ideal for “who knows whom” traversal.' }
+  };
+  const co = document.getElementById('cExplain');
+  function set(k){
+    document.querySelectorAll('#cBtns .cbtn').forEach(b => b.classList.toggle('active', b.dataset.k === k));
+    document.querySelectorAll('#schema .ent').forEach(e => e.classList.toggle('lit', explain[k].ents.includes(e.dataset.e)));
+    co.textContent = explain[k].t;
+  }
+  document.getElementById('cBtns').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) set(b.dataset.k); });
+  set('join');
+})();
+
+/* ---- SQL sandbox ---- */
+(function(){
+  const input = document.getElementById('sqlInput');
+  const out = document.getElementById('sqlOut');
+  function render(sql){
+    let res;
+    try { res = NBSQL.run(sql, DB); }
+    catch (err) { out.innerHTML = `<div class="sql-msg err">✗ ${err.message}</div>`; return; }
+    if (res.explain) { out.innerHTML = `<div class="sql-msg ok">QUERY PLAN</div><pre style="margin-top:8px;color:var(--muted)">${res.explain}</pre>`; return; }
+    if (!res.rows.length) { out.innerHTML = `<div class="sql-msg ok">✓ 0 rows</div>`; }
+    else {
+      out.innerHTML = `<table><thead><tr>${res.cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${
+        res.rows.map(r=>`<tr>${res.cols.map(c=>`<td>${r[c]===null||r[c]===undefined?'<span style="color:var(--faint)">NULL</span>':r[c]}</td>`).join('')}</tr>`).join('')
+      }</tbody></table><div class="sql-msg ok" style="margin-top:10px">✓ ${res.rows.length} row${res.rows.length>1?'s':''}</div>`;
+    }
+    // achievements
+    if (window.NB) {
+      NB.unlock('sql-select');
+      if (/\bjoin\b/i.test(sql)) NB.unlock('sql-join');
+      if (/\(\s*select\b/i.test(sql)) NB.unlock('sql-subquery');
+    }
+  }
+  document.getElementById('sqlRun').addEventListener('click', () => render(input.value));
+  input.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') render(input.value); });
+  document.querySelectorAll('.chip[data-q]').forEach(c => c.addEventListener('click', () => { input.value = c.dataset.q; render(input.value); }));
+  render(input.value);
+})();
+</script>
+</body>
+</html>

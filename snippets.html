@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snippet Vault — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 44px 16px; }
+.acct-chip { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .72rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 13px; }
+.acct-chip b { color: var(--accent); }
+.acct-chip:hover { border-color: var(--accent); }
+
+.sapp { display: grid; grid-template-columns: 300px 1fr; gap: 14px; padding-bottom: 70px; min-height: 66vh; }
+.s-pane { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); overflow: hidden; display: flex; flex-direction: column; }
+
+.s-listbar { padding: 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.mkbtn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; padding: 11px; border-radius: 10px; border: 1px solid var(--accent); color: var(--accent-ink); background: var(--grad); cursor: pointer; box-shadow: var(--glow-sm); }
+.s-search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line-2); border-radius: 9px; padding: 8px 11px; background: rgba(0,0,0,.3); }
+.s-search input { flex: 1; background: none; border: none; outline: none; color: var(--ink); font-family: var(--mono); font-size: .8rem; }
+.s-search .ico { width: 14px; height: 14px; color: var(--faint); }
+.s-langs { display: flex; flex-wrap: wrap; gap: 5px; }
+.s-lang { font-family: var(--mono); font-size: .64rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 3px 9px; background: none; cursor: pointer; }
+.s-lang.on, .s-lang:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.s-cards { overflow-y: auto; flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.s-card { border: 1px solid var(--line-2); border-radius: 11px; padding: 12px 13px; cursor: pointer; transition: .13s; background: rgba(255,255,255,.015); }
+.s-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.s-card.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.s-card h4 { font-size: .93rem; display: flex; align-items: center; gap: 7px; }
+.s-card h4 .fav { color: var(--accent); }
+.s-card .meta { display: flex; gap: 8px; align-items: center; margin-top: 7px; font-family: var(--mono); font-size: .62rem; color: var(--faint); flex-wrap: wrap; }
+.s-card .lang { color: var(--accent); border: 1px solid color-mix(in srgb,var(--accent) 35%,transparent); border-radius: 5px; padding: 1px 6px; }
+.s-empty { color: var(--faint); font-family: var(--mono); font-size: .74rem; text-align: center; padding: 30px 10px; }
+.s-foot { padding: 10px 12px; border-top: 1px solid var(--line); display: flex; gap: 6px; }
+.s-foot button, .s-foot label { flex: 1; font-family: var(--mono); font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--line-2); background: none; color: var(--faint); cursor: pointer; text-align: center; }
+.s-foot button:hover, .s-foot label:hover { color: var(--accent); border-color: var(--accent); }
+
+.s-view { min-width: 0; }
+.s-vbar { display: flex; align-items: center; gap: 6px; padding: 11px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.s-vbar .tb { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line-2); background: none; color: var(--muted); cursor: pointer; }
+.s-vbar .tb:hover { color: var(--accent); border-color: var(--accent); }
+.s-vbar .tb.warn:hover { color: #ff8da3; border-color: rgba(255,141,163,.5); }
+.s-vbar .tb .ico { width: 14px; height: 14px; }
+.s-vbar .grow { flex: 1; }
+.s-vbar .copied { color: #4dffa6; font-family: var(--mono); font-size: .68rem; opacity: 0; transition: .2s; }
+.s-vbar .copied.show { opacity: 1; }
+.s-head { padding: 16px 18px 0; }
+.s-head input.t { width: 100%; background: none; border: none; outline: none; color: var(--ink); font-family: var(--display); font-weight: 700; font-size: 1.4rem; }
+.s-head .row2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.s-head select { background: rgba(0,0,0,.3); color: var(--accent); border: 1px solid var(--line-2); border-radius: 7px; font-family: var(--mono); font-size: .7rem; padding: 5px 8px; outline: none; }
+.s-tagrow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.s-tagrow .t { font-family: var(--mono); font-size: .66rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 2px 9px; display: inline-flex; gap: 6px; align-items: center; }
+.s-tagrow .t button { background: none; border: none; color: inherit; cursor: pointer; padding: 0; }
+.s-tagrow input { background: none; border: none; outline: none; color: var(--muted); font-family: var(--mono); font-size: .68rem; min-width: 80px; }
+.s-desc { padding: 10px 18px 0; }
+.s-desc input { width: 100%; background: rgba(0,0,0,.25); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 11px; color: var(--muted); font-size: .84rem; outline: none; }
+.s-desc input:focus { border-color: var(--accent); }
+.s-code { flex: 1; margin: 12px 18px 18px; border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; position: relative; }
+.s-code .gutter { position: absolute; inset: 0; padding: 14px 0; font-family: var(--mono); font-size: .82rem; line-height: 1.6; color: var(--faint); text-align: right; width: 42px; border-right: 1px solid var(--line-2); pointer-events: none; overflow: hidden; opacity: .6; }
+.s-code textarea, .s-code pre { margin: 0; padding: 14px 16px 14px 54px; font-family: var(--mono); font-size: .82rem; line-height: 1.6; tab-size: 2; }
+.s-code textarea { flex: 1; background: rgba(0,0,0,.4); border: none; outline: none; resize: none; color: var(--ink); white-space: pre; overflow: auto; }
+.s-code pre { flex: 1; background: rgba(0,0,0,.4); overflow: auto; color: var(--ink); white-space: pre; }
+.s-code.editing pre { display: none; } .s-code:not(.editing) textarea { display: none; }
+.tok-key { color: #ff7ac6; } .tok-str { color: #9ae66e; } .tok-num { color: #ffcf4d; } .tok-com { color: var(--faint); font-style: italic; } .tok-fn { color: #66d9ff; }
+.s-blank { display: grid; place-items: center; flex: 1; color: var(--faint); font-family: var(--mono); font-size: .78rem; text-align: center; line-height: 2; }
+
+@media (max-width: 900px){ .sapp { grid-template-columns: 1fr; } .s-pane { min-height: 0; } .s-cards { max-height: 300px; } .s-view { min-height: 62vh; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ SNIPPETS ]</span><span class="tag">// save · tag · search code</span><span style="margin-left:auto"><a class="acct-chip" href="account.html" id="acctChip"><svg class="ico ico-sm" style="width:13px;height:13px"><use href="#i-user"/></svg> <span>guest</span></a></span></div>
+  <h1 class="display">Snippet vault.</h1>
+  <p class="lead" style="margin-top:14px">Save, tag and search reusable code across languages, with syntax highlighting and one-click copy. Built into the site — saved to your account on this device.</p>
+</section>
+
+<section class="wrap reveal">
+  <div class="sapp">
+
+    <div class="s-pane">
+      <div class="s-listbar">
+        <button class="mkbtn" id="newSnip"><svg class="ico ico-sm"><use href="#i-plus"/></svg> New snippet</button>
+        <div class="s-search"><svg class="ico"><use href="#i-search"/></svg><input id="q" placeholder="Search code, titles, tags…" spellcheck="false"></div>
+        <div class="s-langs" id="langFilter"></div>
+      </div>
+      <div class="s-cards" id="cards"></div>
+      <div class="s-foot">
+        <button id="expAll" title="Download all snippets as JSON">Export</button>
+        <label for="impFile" title="Import from JSON">Import<input type="file" id="impFile" accept=".json" hidden></label>
+      </div>
+    </div>
+
+    <div class="s-pane s-view" id="view"></div>
+
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+'use strict';
+const KEY = 'nb_snippets_v1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+const now = () => Date.now();
+const fmtDate = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const LANGS = ['javascript','typescript','python','bash','html','css','sql','json','java','c','go','rust','php','powershell','yaml','other'];
+
+/* account chip */
+try { const p = JSON.parse(localStorage.getItem('nb_profile')) || {}; if (p.handle || p.name) $('#acctChip span').innerHTML = 'signed in — <b>@' + esc(p.handle || p.name) + '</b>'; } catch(e){}
+
+/* seed */
+function seed(){
+  return { snippets: [
+    { id: uid(), title: 'Debounce', lang: 'javascript', tags: ['utility','performance'], fav: true, desc: 'Delay a function until calls stop coming in.', created: now(), updated: now(),
+      code: 'function debounce(fn, ms = 300) {\n  let t;\n  return (...args) => {\n    clearTimeout(t);\n    t = setTimeout(() => fn(...args), ms);\n  };\n}' },
+    { id: uid(), title: 'Flatten a list', lang: 'python', tags: ['list'], fav: false, desc: 'One-liner to flatten a nested list.', created: now(), updated: now(),
+      code: 'flat = [x for row in matrix for x in row]' },
+    { id: uid(), title: 'Kill process on port', lang: 'bash', tags: ['networking','ops'], fav: false, desc: 'Find and kill whatever is holding a port.', created: now(), updated: now(),
+      code: '# find the PID on a port and stop it\nlsof -ti :8099 | xargs kill -9' }
+  ]};
+}
+function load(){ try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && Array.isArray(d.snippets)) return d; } catch(e){} return seed(); }
+let DB = load();
+const persist = () => localStorage.setItem(KEY, JSON.stringify(DB));
+
+const S = { q: '', lang: null, sel: DB.snippets[0] ? DB.snippets[0].id : null, editing: false };
+const snip = id => DB.snippets.find(s => s.id === id);
+
+/* ---------- syntax highlighter: single-pass tokeniser over RAW code, escaping
+   each token as it is emitted (XSS-safe, no placeholder corruption) ---------- */
+const KW = {
+  javascript: 'const let var function return if else for while do switch case break continue new class extends super this typeof instanceof in of try catch finally throw await async yield import export from default null undefined true false',
+  typescript: 'const let var function return if else for while switch case break continue new class extends super this typeof instanceof try catch finally throw await async import export from default interface type enum implements public private readonly null undefined true false string number boolean any void',
+  python: 'def return if elif else for while in is not and or import from as class try except finally raise with lambda yield global nonlocal pass break continue None True False self async await',
+  bash: 'if then else elif fi for while do done case esac function in return export local echo cd ls sudo kill xargs grep awk sed cat',
+  sql: 'SELECT FROM WHERE INSERT INTO VALUES UPDATE SET DELETE CREATE TABLE DROP ALTER JOIN LEFT RIGHT INNER OUTER ON GROUP BY ORDER HAVING LIMIT AS AND OR NOT NULL DISTINCT COUNT',
+  java: 'public private protected class interface extends implements static final void int long double float boolean char String new return if else for while switch case break continue try catch finally throw throws import package this null true false',
+  c: 'int char float double void long short unsigned signed struct enum union return if else for while switch case break continue sizeof static const typedef include define NULL',
+  go: 'func package import var const type struct interface map chan go defer return if else for range switch case break continue nil true false string int error',
+  rust: 'fn let mut const struct enum impl trait pub use mod match if else for while loop return in as ref move self Self None Some Ok Err true false',
+  php: 'function return if else elseif for foreach while do switch case break continue class public private protected static new echo print null true false use namespace',
+  powershell: 'function param if else elseif for foreach while do switch return break continue try catch finally throw true false'
+};
+function highlight(code, lang){
+  const kws = new Set((KW[lang] || '').split(' ').filter(Boolean));
+  const hash = (lang === 'python' || lang === 'bash' || lang === 'yaml' || lang === 'powershell');
+  const commentRe = hash ? '(#[^\\n]*)' : '(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)';
+  const re = new RegExp(
+    commentRe + '|' +
+    '("(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|`(?:\\\\.|[^`\\\\])*`)' + '|' +
+    '(\\b\\d+(?:\\.\\d+)?\\b)' + '|' +
+    '([A-Za-z_$][\\w$]*)' + '|' +
+    '([\\s\\S])', 'g');
+  let out = '', m;
+  while ((m = re.exec(code)) !== null){
+    if (m.index === re.lastIndex) re.lastIndex++;      /* zero-length guard */
+    if (m[1]) out += '<span class="tok-com">' + esc(m[1]) + '</span>';
+    else if (m[2]) out += '<span class="tok-str">' + esc(m[2]) + '</span>';
+    else if (m[3]) out += '<span class="tok-num">' + esc(m[3]) + '</span>';
+    else if (m[4]){
+      if (kws.has(m[4])) out += '<span class="tok-key">' + esc(m[4]) + '</span>';
+      else if (code[re.lastIndex] === '(') out += '<span class="tok-fn">' + esc(m[4]) + '</span>';
+      else out += esc(m[4]);
+    }
+    else out += esc(m[0]);
+  }
+  return out;
+}
+
+/* ---------- filtering ---------- */
+function visible(){
+  let s = DB.snippets.slice();
+  if (S.lang) s = s.filter(x => x.lang === S.lang);
+  if (S.q){ const q = S.q.toLowerCase(); s = s.filter(x => (x.title + ' ' + x.code + ' ' + x.desc + ' ' + x.tags.join(' ') + ' ' + x.lang).toLowerCase().includes(q)); }
+  s.sort((a, b) => b.updated - a.updated);
+  s.sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
+  return s;
+}
+
+/* ---------- renders ---------- */
+function renderLangs(){
+  const used = [...new Set(DB.snippets.map(s => s.lang))];
+  $('#langFilter').innerHTML = used.sort().map(l => '<button class="s-lang' + (S.lang === l ? ' on' : '') + '" data-lang="' + l + '">' + l + '</button>').join('');
+}
+function renderList(){
+  const s = visible();
+  $('#cards').innerHTML = s.length ? s.map(x =>
+    '<div class="s-card' + (x.id === S.sel ? ' on' : '') + '" data-open="' + x.id + '"><h4>' + (x.fav ? '<svg class="ico ico-sm fav" style="width:13px;height:13px"><use href="#i-bolt"/></svg>' : '') + esc(x.title || 'Untitled') + '</h4>' + (x.desc ? '<p style="color:var(--faint);font-size:.78rem;margin-top:4px">' + esc(x.desc) + '</p>' : '') + '<div class="meta"><span class="lang">' + esc(x.lang) + '</span>' + x.tags.slice(0, 3).map(t => '<span>#' + esc(t) + '</span>').join('') + '</div></div>'
+  ).join('') : '<div class="s-empty">// nothing here — add a snippet or clear filters</div>';
+}
+function renderView(){
+  const x = snip(S.sel), host = $('#view');
+  if (!x){ host.innerHTML = '<div class="s-blank">// no snippet selected<br>hit New snippet to start your vault</div>'; return; }
+  const lines = x.code.split('\n').length;
+  const gutter = Array.from({ length: Math.max(lines, 1) }, (_, i) => i + 1).join('\n');
+  host.innerHTML =
+    '<div class="s-vbar">' +
+      '<button class="tb" id="copyBtn"><svg class="ico"><use href="#i-download"/></svg> Copy</button>' +
+      '<button class="tb" id="editBtn"><svg class="ico"><use href="#i-wrench"/></svg> <span id="editLbl">' + (S.editing ? 'Done' : 'Edit') + '</span></button>' +
+      '<button class="tb" id="favBtn" style="' + (x.fav ? 'color:var(--accent);border-color:var(--accent)' : '') + '"><svg class="ico"><use href="#i-bolt"/></svg> ' + (x.fav ? 'Pinned' : 'Pin') + '</button>' +
+      '<button class="tb" id="dlBtn"><svg class="ico"><use href="#i-download"/></svg> File</button>' +
+      '<span class="grow"></span><span class="copied" id="copied">&#10003; copied</span>' +
+      '<button class="tb warn" id="delBtn"><svg class="ico"><use href="#i-ban"/></svg></button>' +
+    '</div>' +
+    '<div class="s-head"><input class="t" id="tIn" value="' + esc(x.title) + '" placeholder="Untitled"' + (S.editing ? '' : ' readonly') + ' spellcheck="false">' +
+      '<div class="row2"><select id="langSel"' + (S.editing ? '' : ' disabled') + '>' + LANGS.map(l => '<option' + (l === x.lang ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' +
+        '<div class="s-tagrow" id="tagRow">' + x.tags.map(t => '<span class="t">#' + esc(t) + (S.editing ? '<button data-untag="' + esc(t) + '">&#215;</button>' : '') + '</span>').join('') + (S.editing ? '<input id="tagIn" placeholder="+ tag &#9166;">' : '') + '</div>' +
+        '<span style="margin-left:auto;font-family:var(--mono);font-size:.62rem;color:var(--faint)">' + fmtDate(x.updated) + '</span>' +
+      '</div></div>' +
+    '<div class="s-desc"><input id="dIn" value="' + esc(x.desc) + '" placeholder="Short description…"' + (S.editing ? '' : ' readonly') + '></div>' +
+    '<div class="s-code' + (S.editing ? ' editing' : '') + '"><div class="gutter">' + gutter + '</div>' +
+      '<textarea id="cIn" spellcheck="false">' + esc(x.code) + '</textarea>' +
+      '<pre><code>' + highlight(x.code, x.lang) + '</code></pre>' +
+    '</div>';
+  wireView(x);
+}
+function renderAll(){ renderLangs(); renderList(); renderView(); }
+
+/* ---------- view wiring ---------- */
+function wireView(x){
+  const save = () => { x.updated = now(); persist(); renderList(); };
+  $('#copyBtn').addEventListener('click', () => {
+    const done = () => { const c = $('#copied'); c.classList.add('show'); setTimeout(() => c.classList.remove('show'), 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(x.code).then(done, done);
+    else { const ta = $('#cIn'); ta.select(); document.execCommand('copy'); done(); }
+  });
+  $('#editBtn').addEventListener('click', () => { S.editing = !S.editing; renderView(); });
+  $('#favBtn').addEventListener('click', () => { x.fav = !x.fav; save(); renderView(); });
+  $('#delBtn').addEventListener('click', () => {
+    if (!confirm('Delete "' + (x.title || 'Untitled') + '"?')) return;
+    DB.snippets = DB.snippets.filter(s => s.id !== x.id);
+    const vis = visible(); S.sel = vis[0] ? vis[0].id : (DB.snippets[0] ? DB.snippets[0].id : null);
+    persist(); renderAll();
+  });
+  $('#dlBtn').addEventListener('click', () => {
+    const ext = { javascript: 'js', typescript: 'ts', python: 'py', bash: 'sh', html: 'html', css: 'css', sql: 'sql', json: 'json', java: 'java', c: 'c', go: 'go', rust: 'rs', php: 'php', powershell: 'ps1', yaml: 'yml', other: 'txt' }[x.lang] || 'txt';
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([x.code], { type: 'text/plain' }));
+    a.download = (x.title || 'snippet').replace(/[^\w\- ]+/g, '').trim().replace(/ +/g, '-').toLowerCase() + '.' + ext;
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+  if (S.editing){
+    const tIn = $('#tIn'), cIn = $('#cIn'), dIn = $('#dIn'), langSel = $('#langSel');
+    let deb = null; const touch = () => { clearTimeout(deb); deb = setTimeout(save, 300); };
+    tIn.addEventListener('input', () => { x.title = tIn.value; touch(); });
+    dIn.addEventListener('input', () => { x.desc = dIn.value; touch(); });
+    langSel.addEventListener('change', () => { x.lang = langSel.value; save(); renderView(); });
+    cIn.addEventListener('input', () => { x.code = cIn.value; touch(); });
+    cIn.addEventListener('keydown', e => { if (e.key === 'Tab'){ e.preventDefault(); const s = cIn.selectionStart; cIn.setRangeText('  ', s, cIn.selectionEnd, 'end'); x.code = cIn.value; touch(); } });
+    const tagIn = $('#tagIn');
+    if (tagIn) tagIn.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return; e.preventDefault();
+      const t = e.target.value.trim().replace(/^#/, '').toLowerCase().replace(/\s+/g, '-');
+      if (t && !x.tags.includes(t)){ x.tags.push(t); save(); renderView(); }
+    });
+    document.querySelectorAll('[data-untag]').forEach(b => b.addEventListener('click', () => { x.tags = x.tags.filter(t => t !== b.dataset.untag); save(); renderView(); }));
+  }
+}
+
+/* ---------- global wiring ---------- */
+$('#newSnip').addEventListener('click', () => {
+  const s = { id: uid(), title: '', lang: S.lang || 'javascript', tags: [], fav: false, desc: '', created: now(), updated: now(), code: '' };
+  DB.snippets.unshift(s); S.sel = s.id; S.editing = true; persist(); renderAll();
+  const t = $('#tIn'); if (t) t.focus();
+});
+$('#cards').addEventListener('click', e => { const c = e.target.closest('[data-open]'); if (c){ S.sel = c.dataset.open; S.editing = false; renderList(); renderView(); } });
+$('#langFilter').addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (!b) return; S.lang = S.lang === b.dataset.lang ? null : b.dataset.lang; renderLangs(); renderList(); });
+$('#q').addEventListener('input', e => { S.q = e.target.value; renderList(); });
+
+$('#expAll').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }));
+  a.download = 'nullbyte-snippets.json'; a.click(); URL.revokeObjectURL(a.href);
+});
+$('#impFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result); if (!d || !Array.isArray(d.snippets)) throw 0;
+      const have = new Set(DB.snippets.map(s => s.id));
+      d.snippets.forEach(s => { if (!have.has(s.id)) DB.snippets.push(s); });
+      persist(); renderAll(); alert('Imported. You now have ' + DB.snippets.length + ' snippets.');
+    } catch(err){ alert('That file is not a valid snippets export.'); }
+  };
+  r.readAsText(f); e.target.value = '';
+});
+
+renderAll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threat Map — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+.tm-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.tm-stat { flex: 1; min-width: 150px; padding: 16px 20px; }
+.tm-stat .k { font-family: var(--mono); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.tm-stat .v { font-family: var(--display); font-weight: 800; font-size: 1.7rem; line-height: 1.1; margin-top: 6px; color: var(--cyan); text-shadow: 0 0 22px rgba(var(--glow), .5); }
+.tm-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: stretch; }
+.tm-map { position: relative; padding: 0; overflow: hidden; min-height: 540px; }
+#map { position: absolute; inset: 0; background: #06060c; border-radius: var(--r-pane); }
+.leaflet-tile-pane { filter: brightness(.82) contrast(1.05) hue-rotate(-8deg) saturate(.6); }
+.leaflet-container { background: #06060c; font-family: var(--mono); }
+.leaflet-control-attribution { background: rgba(6,6,12,.7) !important; color: var(--faint) !important; font-size: 9px; }
+.leaflet-control-attribution a { color: var(--muted) !important; }
+.leaflet-control-zoom a { background: rgba(12,12,18,.9) !important; color: var(--ink) !important; border-color: var(--gline) !important; }
+.leaflet-control-zoom a:hover { color: var(--cyan) !important; }
+.tm-city-dot { display:block; width:8px; height:8px; border-radius:50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); position: relative; }
+.tm-city-dot::after { content:''; position:absolute; inset:-3px; border-radius:50%; border:1px solid var(--cyan); animation: tmpulse 3s ease-out infinite; }
+@keyframes tmpulse { 0%{ transform:scale(1); opacity:.7 } 100%{ transform:scale(3.2); opacity:0 } }
+.tm-arc { filter: drop-shadow(0 0 3px currentColor); }
+.feed { padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.feed h3 { font-family: var(--mono); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); padding: 20px 22px 12px; display: flex; align-items: center; gap: 10px; }
+.feed h3 .live { margin-left: auto; font-family: var(--mono); font-size: .56rem; letter-spacing: .1em; color: #ff5f68; display: inline-flex; align-items: center; gap: 6px; }
+.feed h3 .live i { width: 6px; height: 6px; border-radius: 50%; background: #ff5f68; box-shadow: 0 0 8px #ff5f68; animation: pulse 1.2s infinite; }
+.feed #feed { padding: 0 22px; flex: 1; }
+.feed-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.05); font-size: .8rem; }
+.feed-row .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.feed-row .ty { font-family: var(--mono); font-size: .72rem; font-weight: 600; }
+.feed-row .co { margin-left: auto; font-family: var(--mono); font-size: .68rem; color: var(--faint); }
+.tm-note { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; color: var(--faint); padding: 14px 22px; border-top: 1px solid rgba(255,255,255,.05); }
+@media (max-width:1020px){ .tm-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span>
+    <a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html" class="active">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a>
+  </nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html" class="active">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<main class="wrap">
+  <div class="page-head rv" style="padding-bottom:26px">
+    <span class="kick"><i class="pip"></i>Threat Map · Real world map</span>
+    <h1>The world, <em>under fire.</em></h1>
+    <p>Attacks arc across a real, pannable world map (OpenStreetMap / CARTO dark tiles). The traffic is simulated — but the geography is real.</p>
+  </div>
+
+  <div class="tm-stats">
+    <div class="pane tm-stat rv d1"><div class="k">Simulated attacks today</div><div class="v" id="atkCount">1,247,832</div></div>
+    <div class="pane tm-stat rv d1"><div class="k">Active sources</div><div class="v" id="srcCount">16</div></div>
+    <div class="pane tm-stat rv d2"><div class="k">Status</div><div class="v">Live</div></div>
+  </div>
+  <div class="tm-grid">
+    <div class="pane tm-map rv d2"><div id="map"></div></div>
+    <div class="pane feed rv d3">
+      <h3><svg class="ico" viewBox="0 0 24 24" style="color:var(--cyan)"><path d="M4 6h16M4 12h16M4 18h16"/></svg> Live feed <span class="live"><i></i>SIM</span></h3>
+      <div id="feed"></div>
+      <div class="tm-note">// attacks simulated · map is real</div>
+    </div>
+  </div>
+</main>
+
+<footer class="wrap"><div class="foot-pill rv d4"><span>NULLBYTE · THREAT MAP</span><span>SIMULATED TRAFFIC · REAL GEOGRAPHY</span></div></footer>
+
+<script src="assets/shared.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// real cities with real lat/lng
+const CITIES = [
+  {n:'New York',c:'US',ll:[40.71,-74.01]},{n:'Los Angeles',c:'US',ll:[34.05,-118.24]},{n:'Toronto',c:'CA',ll:[43.65,-79.38]},
+  {n:'London',c:'GB',ll:[51.51,-0.13]},{n:'Berlin',c:'DE',ll:[52.52,13.40]},{n:'Moscow',c:'RU',ll:[55.75,37.62]},
+  {n:'Beijing',c:'CN',ll:[39.90,116.40]},{n:'Tokyo',c:'JP',ll:[35.68,139.69]},{n:'Seoul',c:'KR',ll:[37.57,126.98]},
+  {n:'Sydney',c:'AU',ll:[-33.87,151.21]},{n:'São Paulo',c:'BR',ll:[-23.55,-46.63]},{n:'Mumbai',c:'IN',ll:[19.08,72.88]},
+  {n:'Dubai',c:'AE',ll:[25.20,55.27]},{n:'Singapore',c:'SG',ll:[1.35,103.82]},{n:'Cairo',c:'EG',ll:[30.04,31.24]},{n:'Lagos',c:'NG',ll:[6.52,3.38]}
+];
+const TYPES = [['DDoS','#ff5f68'],['Phishing','#f59e0b'],['Malware','#fb6a5d'],['Brute Force','#2ee4ff'],['Port Scan','#22d3ee']];
+const feed = document.getElementById('feed');
+
+// ---- real Leaflet map ----
+const map = L.map('map', { zoomControl: true, attributionControl: true, scrollWheelZoom: false, worldCopyJump: true, minZoom: 1, maxZoom: 6 }).setView([28, 8], 2);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap contributors © CARTO', subdomains: 'abcd', maxZoom: 6
+}).addTo(map);
+
+const cityIcon = L.divIcon({ className: 'tm-city-icon', html: '<span class="tm-city-dot"></span>', iconSize: [8, 8], iconAnchor: [4, 4] });
+CITIES.forEach(c => L.marker(c.ll, { icon: cityIcon, interactive: false, keyboard: false }).addTo(map));
+
+function arcPoints(a, b, n){
+  const A = a, B = b, mid = [(A[0]+B[0])/2, (A[1]+B[1])/2];
+  const dLat = B[0]-A[0], dLng = B[1]-A[1], dist = Math.hypot(dLat, dLng) || 1;
+  const off = dist * 0.22;
+  const ctrl = [mid[0] + (-dLng/dist)*off + Math.abs(dLat)*0.12, mid[1] + (dLat/dist)*off];
+  const pts = [];
+  for (let i = 0; i <= n; i++){ const t = i/n, u = 1-t;
+    pts.push([u*u*A[0] + 2*u*t*ctrl[0] + t*t*B[0], u*u*A[1] + 2*u*t*ctrl[1] + t*t*B[1]]);
+  }
+  return pts;
+}
+
+function attack(){
+  const a = CITIES[Math.floor(Math.random()*CITIES.length)];
+  let b = a; while (b === a) b = CITIES[Math.floor(Math.random()*CITIES.length)];
+  const t = TYPES[Math.floor(Math.random()*TYPES.length)];
+  const pts = arcPoints(a.ll, b.ll, 26);
+  const line = L.polyline(pts, { color: t[1], weight: 1.6, opacity: 0, className: 'tm-arc', interactive: false }).addTo(map);
+  const dot = L.circleMarker(pts[0], { radius: 3.2, color: '#fff', weight: 1, fillColor: t[1], fillOpacity: 1, interactive: false }).addTo(map);
+  let i = 0; const steps = pts.length, dur = 1100;
+  const grow = setInterval(() => {
+    i++;
+    line.setLatLngs(pts.slice(0, i + 1));
+    line.setStyle({ opacity: 0.9 });
+    if (i < steps) dot.setLatLng(pts[i]);
+    if (i >= steps){
+      clearInterval(grow);
+      map.removeLayer(dot);
+      const ring = L.circleMarker(b.ll, { radius: 3, color: t[1], weight: 1.5, fill: false, interactive: false }).addTo(map);
+      let r = 3; const rip = setInterval(() => { r += 1.4; ring.setRadius(r); ring.setStyle({ opacity: Math.max(0, 1 - r/18) }); if (r > 18){ clearInterval(rip); map.removeLayer(ring); } }, 40);
+      let op = 0.9; const fade = setInterval(() => { op -= 0.07; if (op <= 0){ clearInterval(fade); map.removeLayer(line); } else line.setStyle({ opacity: op }); }, 90);
+    }
+  }, dur / steps);
+
+  const row = document.createElement('div');
+  row.className = 'feed-row';
+  row.innerHTML = `<span class="dot" style="background:${t[1]}"></span><span class="ty" style="color:${t[1]}">${t[0]}</span><span style="color:var(--muted)">${a.c} → ${b.c}</span><span class="co">${b.n}</span>`;
+  feed.prepend(row);
+  while (feed.children.length > 8) feed.lastChild.remove();
+}
+setInterval(attack, 750 + Math.random()*600);
+attack(); attack();
+
+let count = 1247832;
+const cEl = document.getElementById('atkCount');
+setInterval(() => { count += Math.floor(Math.random()*40)+5; cEl.textContent = count.toLocaleString('en-US'); }, 800);
+</script>
+</body>
+</html>

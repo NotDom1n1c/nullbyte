@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quill — DuckyScript Compiler</title>
+<style>
+  :root{
+    --ink:#0d1210;
+    --panel:#131a17;
+    --panel-2:#0f1512;
+    --line:#243128;
+    --text:#dce8de;
+    --text-dim:#7f978a;
+    --amber:#e8b74d;
+    --amber-dim:#8a6a2c;
+    --green:#5fbf82;
+    --red:#e2685a;
+    --mono: 'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --serif: 'Source Serif 4', Georgia, serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--ink);color:var(--text);font-family:var(--mono);}
+  body{display:flex;flex-direction:column;min-height:100vh;}
+
+  /* header */
+  header{
+    padding:20px 28px 16px;
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .feather{color:var(--amber);font-size:20px;}
+  .brand h1{
+    font-family:var(--serif);
+    font-weight:600;font-style:italic;
+    font-size:26px;margin:0;letter-spacing:0.2px;
+  }
+  .brand .sub{color:var(--text-dim);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;}
+  .status{font-size:11px;color:var(--text-dim);letter-spacing:0.04em;}
+  .status b{color:var(--green);font-weight:600;}
+  .status.err b{color:var(--red);}
+
+  main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);}
+  @media (max-width:900px){ main{grid-template-columns:1fr;} }
+
+  section.pane{background:var(--panel);display:flex;flex-direction:column;min-height:0;}
+  .pane-head{
+    padding:10px 16px;border-bottom:1px solid var(--line);
+    font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .pane-head .tag{color:var(--amber-dim);}
+
+  /* editor */
+  .editor-wrap{flex:1;display:flex;overflow:hidden;min-height:320px;}
+  .gutter{
+    width:44px;padding:14px 0;text-align:right;color:#3d4a41;font-size:13px;line-height:1.6;
+    background:var(--panel-2);user-select:none;border-right:1px solid var(--line);
+  }
+  .gutter div{padding-right:10px;}
+  textarea{
+    flex:1;background:transparent;color:var(--text);border:none;outline:none;resize:none;
+    padding:14px 16px;font-family:var(--mono);font-size:13.5px;line-height:1.6;tab-size:4;
+  }
+  textarea::placeholder{color:#41503f;}
+
+  /* preview / right column */
+  .right-col{display:flex;flex-direction:column;}
+  .preview{flex:1;padding:16px 20px;overflow:auto;font-size:13.5px;line-height:1.9;min-height:180px;}
+  .preview .empty{color:var(--text-dim);font-style:italic;}
+  .k{display:inline-block;background:#1c2621;border:1px solid #2c3a32;border-radius:4px;padding:1px 6px;margin:1px 2px;font-size:12px;color:var(--amber);}
+  .txt{color:var(--text);}
+  .dl{color:var(--text-dim);font-size:12px;}
+  .err-line{color:var(--red);}
+  .rem{color:#5a6d5f;font-style:italic;}
+
+  .log{
+    border-top:1px solid var(--line);padding:10px 16px;font-size:12px;max-height:150px;overflow:auto;
+    background:var(--panel-2);
+  }
+  .log .ok{color:var(--green);}
+  .log .warn{color:var(--amber);}
+  .log .bad{color:var(--red);}
+  .log div{padding:2px 0;}
+
+  footer{
+    padding:14px 28px;border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  }
+  .buttons{display:flex;gap:10px;flex-wrap:wrap;}
+  button{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:0.03em;
+    padding:10px 18px;border-radius:3px;border:1px solid var(--line);
+    background:var(--panel-2);color:var(--text);cursor:pointer;transition:all .15s ease;
+  }
+  button:hover{border-color:var(--amber-dim);color:var(--amber);}
+  button.primary{background:var(--amber);color:#2a1c05;border-color:var(--amber);font-weight:600;}
+  button.primary:hover{background:#f2c766;color:#2a1c05;}
+  .note{font-size:11px;color:var(--text-dim);max-width:520px;line-height:1.5;}
+  .note b{color:var(--text);}
+
+  a.silent{color:inherit;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="feather">✒︎</span>
+    <h1>Quill</h1>
+    <span class="sub">DuckyScript → inject.bin</span>
+  </div>
+  <div class="status" id="status">idle</div>
+</header>
+
+<main>
+  <section class="pane">
+    <div class="pane-head"><span>Script <span class="tag">payload.txt</span></span><span id="lineCount">5 lines</span></div>
+    <div class="editor-wrap">
+      <div class="gutter" id="gutter"></div>
+      <textarea id="editor" spellcheck="false"></textarea>
+    </div>
+  </section>
+
+  <section class="pane right-col">
+    <div class="pane-head"><span>Keystroke preview</span><span id="charCount"></span></div>
+    <div class="preview" id="preview"><div class="empty">Nothing typed yet.</div></div>
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="note">
+    Compiles classic DuckyScript (REM, DELAY, STRING, and the standard key/combo set) into a raw HID
+    modifier+keycode stream — the same report format the original Rubber Ducky firmware reads.
+    <b>Always test on your own hardware first</b>; if your Ducky runs firmware expecting a different
+    encoder version, re-encode the exported <b>payload.txt</b> with Hak5 Payload Studio instead.
+  </div>
+  <div class="buttons">
+    <button id="btnTxt">Download payload.txt</button>
+    <button id="btnBin" class="primary">Compile → inject.bin</button>
+  </div>
+</footer>
+
+<script>
+/* ---------------------------------------------------------------
+   HID usage table (USB HID Usage Tables, keyboard/keypad page)
+--------------------------------------------------------------- */
+const MOD = { CTRL:0x01, SHIFT:0x02, ALT:0x04, GUI:0x08 };
+
+const BASE_KEYS = {
+  A:4,B:5,C:6,D:7,E:8,F:9,G:10,H:11,I:12,J:13,K:14,L:15,M:16,N:17,O:18,P:19,
+  Q:20,R:21,S:22,T:23,U:24,V:25,W:26,X:27,Y:28,Z:29,
+  '1':30,'2':31,'3':32,'4':33,'5':34,'6':35,'7':36,'8':37,'9':38,'0':39,
+  ENTER:40, ESCAPE:41, ESC:41, BACKSPACE:42, TAB:43, SPACE:44,
+  '-':45, '=':46, '[':47, ']':48, '\\':49, ';':51, "'":52, '`':53, ',':54, '.':55, '/':56,
+  CAPSLOCK:57,
+  F1:58,F2:59,F3:60,F4:61,F5:62,F6:63,F7:64,F8:65,F9:66,F10:67,F11:68,F12:69,
+  PRINTSCREEN:70, SCROLLLOCK:71, PAUSE:72, BREAK:72, INSERT:73, HOME:74,
+  PAGEUP:75, DELETE:76, END:77, PAGEDOWN:78,
+  RIGHTARROW:79, RIGHT:79, LEFTARROW:80, LEFT:80, DOWNARROW:81, DOWN:81, UPARROW:82, UP:82,
+  NUMLOCK:83, MENU:101, APP:101, APPLICATION:101,
+  DEL:76, INS:73, PGUP:75, PGDN:78, CAPS:57, PRTSC:70, PRTSCR:70
+};
+
+// characters that require SHIFT on a US layout, mapped to base key
+const SHIFT_CHARS = {
+  '!':'1','@':'2','#':'3','$':'4','%':'5','^':'6','&':'7','*':'8','(':'9',')':'0',
+  '_':'-','+':'=','{':'[','}':']','|':'\\',':':';','"':"'",'~':'`','<':',','>':'.','?':'/'
+};
+
+const MOD_WORDS = { CTRL:'CTRL', CONTROL:'CTRL', ALT:'ALT', SHIFT:'SHIFT',
+                     GUI:'GUI', WINDOWS:'GUI', COMMAND:'GUI', CMD:'GUI' };
+
+function keycodeFor(tok){
+  const t = tok.toUpperCase();
+  if (BASE_KEYS[t] !== undefined) return BASE_KEYS[t];
+  if (t.length===1 && BASE_KEYS[t] !== undefined) return BASE_KEYS[t];
+  return null;
+}
+
+/* ---------------------------------------------------------------
+   Parser: DuckyScript -> list of "reports"
+   report = { mod:number, key:number, holdMs?:number } | {delay:ms}
+--------------------------------------------------------------- */
+function charToReport(ch){
+  if (ch === '\n') return { mod:0, key: BASE_KEYS.ENTER };
+  if (ch === '\t') return { mod:0, key: BASE_KEYS.TAB };
+  if (ch === ' ')  return { mod:0, key: BASE_KEYS.SPACE };
+  const upper = ch.toUpperCase();
+  if (/[A-Z]/.test(ch)){
+    return { mod: (ch===upper? MOD.SHIFT:0), key: BASE_KEYS[upper] };
+  }
+  if (/[0-9]/.test(ch)) return { mod:0, key: BASE_KEYS[ch] };
+  if (BASE_KEYS[ch] !== undefined) return { mod:0, key: BASE_KEYS[ch] };
+  if (SHIFT_CHARS[ch] !== undefined) return { mod: MOD.SHIFT, key: BASE_KEYS[SHIFT_CHARS[ch]] };
+  return null; // unsupported char
+}
+
+function parseScript(src){
+  const lines = src.split(/\r?\n/);
+  const events = [];      // for preview + compile
+  const problems = [];
+  let defaultDelay = 0;
+
+  lines.forEach((raw, idx) => {
+    const lineNo = idx+1;
+    const line = raw.trim();
+    if (line === '') return;
+
+    if (/^REM\b/i.test(line)){
+      events.push({type:'rem', text: line.replace(/^REM\s?/i,'')});
+      return;
+    }
+
+    const parts = line.split(/\s+/);
+    const cmd = parts[0].toUpperCase();
+
+    if (cmd === 'DELAY'){
+      const ms = parseInt(parts[1],10);
+      if (isNaN(ms)){ problems.push({lineNo, msg:`DELAY missing a number: "${line}"`}); return; }
+      events.push({type:'delay', ms});
+      return;
+    }
+
+    if (cmd === 'DEFAULT_DELAY' || cmd === 'DEFAULTDELAY'){
+      const ms = parseInt(parts[1],10);
+      if (!isNaN(ms)) defaultDelay = ms;
+      events.push({type:'rem', text:`(default delay set to ${ms}ms)`});
+      return;
+    }
+
+    if (cmd === 'STRING' || cmd === 'STRINGLN' || cmd === 'STRING_LN'){
+      let text = line.slice(parts[0].length+1);
+      if (cmd !== 'STRING') text += '\n';
+      const bad = [];
+      const reports = [];
+      for (const ch of text){
+        const r = charToReport(ch);
+        if (!r){ bad.push(ch); continue; }
+        reports.push(r);
+      }
+      if (bad.length) problems.push({lineNo, msg:`Unsupported character(s) in STRING: ${[...new Set(bad)].join(' ')}`});
+      events.push({type:'string', text, reports});
+      if (defaultDelay) events.push({type:'delay', ms:defaultDelay, implicit:true});
+      return;
+    }
+
+    if (cmd === 'REPEAT'){
+      events.push({type:'rem', text:`(repeat previous line ${parts[1]||1}x — not expanded in preview)`});
+      return;
+    }
+
+    // modifier combos: GUI r / CTRL ALT DEL / CTRL-SHIFT ESC / ALT F4 / SHIFT TAB ...
+    let mod = 0;
+    let rest = parts.slice();
+    let consumed = false;
+    while (rest.length){
+      const w = rest[0].toUpperCase().replace(/-/g,' ').split(' ')[0];
+      // handle hyphenated combos like CTRL-ALT
+      const hyphenParts = rest[0].toUpperCase().split('-');
+      let matchedAny = false;
+      for (const hp of hyphenParts){
+        if (MOD_WORDS[hp]){ mod |= MOD[MOD_WORDS[hp]]; matchedAny = true; }
+      }
+      if (matchedAny){ rest.shift(); consumed = true; continue; }
+      break;
+    }
+
+    if (consumed || rest.length){
+      // remaining tokens should resolve to a single key (join for multi-word like PAGE UP variants not needed)
+      const keyTok = rest.join(' ');
+      let key = null;
+      if (rest.length === 1){
+        key = keycodeFor(rest[0]);
+      } else if (rest.length === 0){
+        key = null; // pure modifier tap, e.g. "GUI" alone (rare)
+      }
+      if (rest.length && key === null){
+        problems.push({lineNo, msg:`Unrecognized key "${keyTok}" on line: "${line}"`});
+        return;
+      }
+      if (mod || key !== null){
+        events.push({type:'combo', label:line, mod, key});
+        if (defaultDelay) events.push({type:'delay', ms:defaultDelay, implicit:true});
+        return;
+      }
+    }
+
+    // bare single special key line, e.g. "ENTER" / "TAB" / "F5"
+    const key = keycodeFor(cmd);
+    if (key !== null){
+      events.push({type:'combo', label:line, mod:0, key});
+      if (defaultDelay) events.push({type:'delay', ms:defaultDelay, implicit:true});
+      return;
+    }
+
+    problems.push({lineNo, msg:`Unrecognized command: "${line}"`});
+  });
+
+  return { events, problems };
+}
+
+/* ---------------------------------------------------------------
+   Compile events -> binary
+   classic 2-byte HID report stream: [modifier, keycode], each
+   keypress followed by a [0,0] release. DELAY is realized as a
+   run of [0,0] filler reports scaled to elapsed time.
+--------------------------------------------------------------- */
+const MS_PER_FILLER = 8; // approx one low-speed HID polling tick
+
+function compile(events){
+  const bytes = [];
+  const push = (m,k) => { bytes.push(m & 0xFF, k & 0xFF); };
+
+  events.forEach(ev => {
+    if (ev.type === 'rem') return;
+    if (ev.type === 'delay'){
+      const ticks = Math.max(1, Math.round(ev.ms / MS_PER_FILLER));
+      for (let i=0;i<ticks;i++) push(0,0);
+      return;
+    }
+    if (ev.type === 'string'){
+      ev.reports.forEach(r => { push(r.mod, r.key); push(0,0); });
+      return;
+    }
+    if (ev.type === 'combo'){
+      push(ev.mod, ev.key || 0);
+      push(0,0);
+      return;
+    }
+  });
+
+  return new Uint8Array(bytes);
+}
+
+/* ---------------------------------------------------------------
+   UI wiring
+--------------------------------------------------------------- */
+const editor = document.getElementById('editor');
+const gutter = document.getElementById('gutter');
+const preview = document.getElementById('preview');
+const logEl = document.getElementById('log');
+const statusEl = document.getElementById('status');
+const lineCountEl = document.getElementById('lineCount');
+const charCountEl = document.getElementById('charCount');
+
+const SAMPLE = `REM Title: Example
+REM Author: Hak5
+REM Description: Hello World!
+DELAY 3000
+STRING Hello World!`;
+
+editor.value = SAMPLE;
+
+function renderGutter(){
+  const n = editor.value.split('\n').length;
+  gutter.innerHTML = Array.from({length:n}, (_,i)=>`<div>${i+1}</div>`).join('');
+  lineCountEl.textContent = `${n} line${n===1?'':'s'}`;
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let lastEvents = [];
+
+function renderPreview(){
+  const src = editor.value;
+  const { events, problems } = parseScript(src);
+  lastEvents = events;
+
+  if (events.length === 0){
+    preview.innerHTML = '<div class="empty">Nothing typed yet.</div>';
+  } else {
+    let html = '';
+    let charTotal = 0;
+    events.forEach(ev => {
+      if (ev.type === 'rem'){
+        html += `<div class="rem">// ${escapeHtml(ev.text)}</div>`;
+      } else if (ev.type === 'delay' && !ev.implicit){
+        html += `<div class="dl">⏱ wait ${ev.ms}ms</div>`;
+      } else if (ev.type === 'string'){
+        charTotal += ev.text.length;
+        html += `<span class="txt">${escapeHtml(ev.text)}</span>`;
+      } else if (ev.type === 'combo'){
+        html += `<span class="k">${escapeHtml(ev.label)}</span>`;
+      }
+    });
+    preview.innerHTML = html;
+    charCountEl.textContent = charTotal ? `${charTotal} chars typed` : '';
+  }
+
+  logEl.innerHTML = '';
+  if (problems.length === 0){
+    logEl.innerHTML = `<div class="ok">✓ no issues found</div>`;
+    statusEl.innerHTML = `<b>ready</b> — ${events.length} instruction${events.length===1?'':'s'} parsed`;
+    statusEl.className = 'status';
+  } else {
+    problems.forEach(p => {
+      logEl.innerHTML += `<div class="bad">line ${p.lineNo}: ${escapeHtml(p.msg)}</div>`;
+    });
+    statusEl.innerHTML = `<b>${problems.length} issue${problems.length===1?'':'s'}</b> — fix before compiling`;
+    statusEl.className = 'status err';
+  }
+}
+
+function downloadBlob(data, filename, mime){
+  const blob = new Blob([data], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+editor.addEventListener('input', () => { renderGutter(); renderPreview(); });
+editor.addEventListener('scroll', () => { gutter.scrollTop = editor.scrollTop; });
+
+document.getElementById('btnTxt').addEventListener('click', () => {
+  downloadBlob(editor.value, 'payload.txt', 'text/plain');
+});
+
+document.getElementById('btnBin').addEventListener('click', () => {
+  const { events, problems } = parseScript(editor.value);
+  if (problems.length){
+    renderPreview();
+    return;
+  }
+  const bin = compile(events);
+  downloadBlob(bin, 'inject.bin', 'application/octet-stream');
+  statusEl.innerHTML = `<b>compiled</b> — ${bin.length} bytes written to inject.bin`;
+});
+
+renderGutter();
+renderPreview();
+</script>
+</body>
+</html>

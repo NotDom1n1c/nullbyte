@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infosec News — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.src-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 24px 0 8px; }
+.src { font-family: var(--mono); font-size: .76rem; padding: 9px 15px; border: 1px solid var(--line-2); border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer; }
+.src.active { border-color: var(--violet); color: #fff; background: rgba(124,92,255,.16); }
+.status { font-family: var(--mono); font-size: .76rem; color: var(--faint); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; }
+.status .dot.live { background: #22c55e; } .status .dot.off { background: #ef4444; }
+
+.feed { display: grid; gap: 14px; }
+.item { display: block; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); padding: 18px 20px; transition: transform .16s, border-color .16s, box-shadow .16s; }
+.item:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: 0 14px 36px -18px var(--violet); }
+.item .src-tag { font-family: var(--mono); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--violet); }
+.item h3 { font-size: 1.12rem; margin: 6px 0; line-height: 1.35; color: #fff; }
+.item p { color: var(--muted); font-size: .88rem; line-height: 1.5; }
+.item .meta { font-family: var(--mono); font-size: .72rem; color: var(--faint); margin-top: 10px; display: flex; gap: 12px; align-items: center; }
+.item .go { color: var(--violet); }
+.skel { height: 96px; border-radius: 14px; background: linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.07), rgba(255,255,255,.03)); background-size: 200% 100%; animation: sh 1.3s infinite; }
+@keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.note { font-family: var(--mono); font-size: .78rem; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; background: rgba(245,158,11,.06); display: none; }
+.note.show { display: block; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ NEWS ]</span><span class="tag">// infosec feed</span></div>
+  <h1 class="display">Infosec news.</h1>
+  <p class="lead" style="margin-top:14px">The latest from the security world, pulled live. Pick a source and tap a story to read it in full.</p>
+
+  <div class="src-bar" id="srcBar"></div>
+  <div class="status" id="status"><span class="dot"></span><span id="statusTxt">Loading…</span></div>
+</section>
+
+<section class="wrap" style="padding-bottom:80px">
+  <div class="note" id="note"></div>
+  <div class="feed" id="feed"></div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const SOURCES = [
+  { id:'thn', name:'The Hacker News', url:'https://feeds.feedburner.com/TheHackersNews' },
+  { id:'bleep', name:'BleepingComputer', url:'https://www.bleepingcomputer.com/feed/' },
+  { id:'krebs', name:'Krebs on Security', url:'https://krebsonsecurity.com/feed/' }
+];
+const PROXIES = [
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u)
+];
+const FALLBACK = [
+  { src:'sample', title:'ClickFix campaigns surge as fake CAPTCHAs push infostealers', desc:'Attackers increasingly trick users into pasting PowerShell from fake "verify you are human" prompts.', date:'Sample headline', link:'clickfix.html' },
+  { src:'sample', title:'Why unsalted password hashes keep falling to rainbow tables', desc:'A reminder that MD5/SHA-1 without a salt offers almost no protection for common passwords.', date:'Sample headline', link:'hashcrack.html' },
+  { src:'sample', title:'EXIF geotags still leaking locations from "anonymous" photos', desc:'Investigators pull GPS coordinates straight out of image metadata.', date:'Sample headline', link:'metadata.html' },
+  { src:'sample', title:'Phishing kits adopt cleaner UX to beat user suspicion', desc:'Modern lures mimic real login flows pixel-for-pixel.', date:'Sample headline', link:'phishing.html' },
+  { src:'sample', title:'Sub-GHz replay attacks: what fixed-code remotes still get wrong', desc:'Rolling codes help, but plenty of devices remain replayable.', date:'Sample headline', link:'abilities.html' }
+];
+
+const feed = document.getElementById('feed'), statusTxt = document.getElementById('statusTxt'), dot = document.querySelector('#status .dot'), note = document.getElementById('note');
+let active = 'thn';
+
+document.getElementById('srcBar').innerHTML = SOURCES.map(s => `<button class="src ${s.id===active?'active':''}" data-id="${s.id}">${s.name}</button>`).join('');
+document.getElementById('srcBar').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) { active = b.dataset.id; document.querySelectorAll('.src').forEach(x=>x.classList.toggle('active',x.dataset.id===active)); load(); } });
+
+function esc(s){ const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+function strip(html){ const d = document.createElement('div'); d.innerHTML = html||''; return (d.textContent||'').trim(); }
+function skeletons(){ feed.innerHTML = Array(5).fill('<div class="skel"></div>').join(''); }
+
+function renderItems(items, srcName){
+  feed.innerHTML = items.slice(0,18).map(it => `
+    <a class="item" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">
+      <div class="src-tag">${esc(it.src||srcName)}</div>
+      <h3>${esc(it.title)}</h3>
+      ${it.desc?`<p>${esc(it.desc.slice(0,180))}${it.desc.length>180?'…':''}</p>`:''}
+      <div class="meta"><span>${esc(it.date||'')}</span><span class="go">read →</span></div>
+    </a>`).join('');
+}
+
+async function tryFetch(url){
+  for (const p of PROXIES){
+    try {
+      const r = await fetch(p(url), { cache:'no-store' });
+      if (!r.ok) continue;
+      const txt = await r.text();
+      if (txt && txt.includes('<')) return txt;
+    } catch(e){}
+  }
+  return null;
+}
+function parseRSS(xmlText, srcName){
+  const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+  const nodes = [...doc.querySelectorAll('item, entry')];
+  return nodes.map(n => {
+    const get = t => (n.querySelector(t)?.textContent || '').trim();
+    let link = get('link'); const la = n.querySelector('link'); if (!link && la) link = la.getAttribute('href') || '';
+    return { src:srcName, title: strip(get('title')), desc: strip(get('description') || get('summary') || get('content')), date: get('pubDate') || get('updated') || get('published'), link };
+  }).filter(i => i.title && i.link);
+}
+
+async function load(){
+  const src = SOURCES.find(s => s.id === active);
+  skeletons(); note.classList.remove('show'); dot.className = 'dot'; statusTxt.textContent = 'Fetching ' + src.name + '…';
+  const xml = await tryFetch(src.url);
+  if (xml){
+    const items = parseRSS(xml, src.name);
+    if (items.length){ renderItems(items, src.name); dot.className = 'dot live'; statusTxt.textContent = 'Live · ' + src.name + ' · ' + items.length + ' stories'; return; }
+  }
+  // fallback
+  dot.className = 'dot off';
+  statusTxt.textContent = 'Live feed unavailable (offline or blocked) — showing samples';
+  note.classList.add('show');
+  note.innerHTML = 'The live RSS feed could not be reached — this happens offline, behind strict CORS, or when opened via <b>file://</b>. Below are sample stories that link to related pages on this site. Host the site over http(s) for the live feed.';
+  renderItems(FALLBACK, 'sample');
+}
+load();
+</script>
+</body>
+</html>

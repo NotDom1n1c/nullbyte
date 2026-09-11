@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typing Test — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 56px 18px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.tt-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 9px; overflow: hidden; }
+.seg button { font-family: var(--mono); font-size: .76rem; padding: 9px 15px; border: none; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button.active { background: var(--grad); color: #fff; font-weight: 700; }
+.tt-stats { display: flex; gap: 26px; margin-left: auto; font-family: var(--mono); }
+.tt-stats .s b { display: block; font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1; color: var(--violet); }
+.tt-stats .s span { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+
+.tt-box { position: relative; border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 30px 32px; outline: none; cursor: text; }
+.tt-words { font-family: var(--mono); font-size: 1.5rem; line-height: 2.1; letter-spacing: .01em; color: var(--faint); height: 9.45rem; overflow: hidden; user-select: none; }
+.tt-lines { will-change: transform; transition: transform .12s ease; }
+.tt-words .word { display: inline-block; margin-right: .55em; position: relative; }
+.tt-words .l.correct { color: var(--ink); }
+.tt-words .l.wrong { color: var(--pink); }
+.tt-words .l.extra { color: #b4525e; opacity: .8; }
+.tt-words .word.active .l.caret::before { content: ""; position: absolute; left: -1px; top: .15em; width: 2px; height: 1.3em; background: var(--violet); animation: blink 1s steps(2) infinite; }
+.tt-words .word.active { color: var(--muted); }
+@keyframes blink { 50% { opacity: 0; } }
+.tt-hint { font-family: var(--mono); font-size: .76rem; color: var(--faint); margin-top: 16px; display: flex; gap: 16px; align-items: center; }
+.tt-hidden { position: absolute; opacity: 0; pointer-events: none; left: -9999px; }
+.tt-restart { font-family: var(--mono); font-size: .74rem; color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 14px; cursor: pointer; }
+.tt-restart:hover { border-color: var(--violet); color: var(--violet); }
+.tt-blur .tt-words { filter: blur(5px); opacity: .5; }
+.tt-focusmsg { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-family: var(--mono); color: var(--muted); }
+.tt-blur .tt-focusmsg { display: flex; }
+
+/* results */
+.tt-results { display: none; border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012)); backdrop-filter: blur(16px); padding: 34px; margin-top: 18px; }
+.tt-results.show { display: block; animation: rise .4s ease; }
+.tt-results .big { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-end; }
+.tt-results .hero { font-family: var(--display); font-weight: 700; }
+.tt-results .hero b { display: block; font-size: 4rem; line-height: 1; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tt-results .hero span { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.tt-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 24px; }
+.tt-grid > div { background: rgba(10,10,16,.5); padding: 16px 18px; }
+.tt-grid .k { font-family: var(--mono); font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.tt-grid .v { margin-top: 5px; font-family: var(--display); font-weight: 700; font-size: 1.4rem; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ TYPE ]</span><span class="tag">// typing speed test</span></div>
+  <h1 class="display">Typing test.</h1>
+  <p class="lead" style="margin-top:14px">Measure your words-per-minute and accuracy. Just start typing — the timer begins on your first keystroke.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:70px">
+  <div class="tt-bar">
+    <div class="seg" id="ttMode">
+      <button data-t="15">15s</button>
+      <button data-t="30" class="active">30s</button>
+      <button data-t="60">60s</button>
+      <button data-t="120">120s</button>
+    </div>
+    <div class="tt-stats">
+      <div class="s"><b id="ttTime">30</b><span>seconds</span></div>
+      <div class="s"><b id="ttWpm">0</b><span>wpm</span></div>
+      <div class="s"><b id="ttAcc">100%</b><span>accuracy</span></div>
+    </div>
+  </div>
+
+  <div class="tt-box tt-blur" id="ttBox" tabindex="0">
+    <div class="tt-focusmsg">click here or press any key to focus</div>
+    <div class="tt-words" id="ttWords"><div class="tt-lines" id="ttLines"></div></div>
+    <input class="tt-hidden" id="ttInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  </div>
+  <div class="tt-hint">
+    <span>Esc / Tab → restart · Space → next word</span>
+    <button class="tt-restart" id="ttRestart" style="margin-left:auto"><svg class="ico ico-sm" style="vertical-align:-3px"><use href="#i-refresh"/></svg> Restart</button>
+  </div>
+
+  <div class="tt-results" id="ttResults">
+    <div class="big">
+      <div class="hero"><b id="rWpm">0</b><span>wpm</span></div>
+      <div class="hero" style="font-size:1.4rem"><b id="rAcc" style="font-size:2.4rem;-webkit-text-fill-color:var(--ink)">100%</b><span>accuracy</span></div>
+    </div>
+    <div class="tt-grid">
+      <div><div class="k">Raw WPM</div><div class="v" id="rRaw">0</div></div>
+      <div><div class="k">Chars / min</div><div class="v" id="rCpm">0</div></div>
+      <div><div class="k">Correct</div><div class="v" id="rCorrect">0</div></div>
+      <div><div class="k">Errors</div><div class="v" id="rErr" style="color:var(--pink)">0</div></div>
+      <div><div class="k">Time</div><div class="v" id="rTime">0s</div></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:22px" id="ttAgain"><svg class="ico"><use href="#i-refresh"/></svg> Try again</button>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const POOL = "the of and a to in is you that it he was for on are as with his they at be this have from or one had by word but not what all were we when your can said there use an each which she do how their if will up other about out many then them these so some her would make like him into time has look two more write go see number no way could people my than first been call who its now find long down day did get come made may part over new sound take only little work know place year live me back give most very after thing our just name good man think say great where help through much before line right too mean old any same tell follow came want show also around form three small set put end does another well large must big even such because turn here why ask went men read need land different home us move try kind hand picture again change off play spell air away animal house point page letter mother answer found study still learn should world high every near add food between own below country plant last school father keep tree never start city earth eye light thought head under story saw left dont few while along might close something seem next hard open example begin life always those both paper together got group often run important until children side feet car mile night walk white sea began grow took river four carry state once book hear stop without second later miss idea enough eat face watch far indian really almost let above girl sometimes mountain cut young talk soon list song being leave family".split(/\s+/);
+
+const wordsEl = document.getElementById('ttWords');
+const linesEl = document.getElementById('ttLines');
+const input = document.getElementById('ttInput');
+const box = document.getElementById('ttBox');
+let words = [], typed = [], wIdx = 0, duration = 30, timeLeft = 30, started = false, timer = null, liveTimer = null, done = false;
+
+function pick(n) { const a = []; for (let i = 0; i < n; i++) a.push(POOL[Math.floor(Math.random()*POOL.length)]); return a; }
+function setup() {
+  clearInterval(timer); clearInterval(liveTimer);
+  words = pick(180); typed = ['']; wIdx = 0; started = false; done = false; timeLeft = duration;
+  document.getElementById('ttResults').classList.remove('show');
+  document.getElementById('ttTime').textContent = duration;
+  document.getElementById('ttWpm').textContent = '0';
+  document.getElementById('ttAcc').textContent = '100%';
+  render(); box.classList.add('tt-blur'); input.value = '';
+}
+function render() {
+  linesEl.innerHTML = words.map((w, i) => {
+    const t = typed[i] || '';
+    let inner = '';
+    const len = Math.max(w.length, t.length);
+    for (let j = 0; j < len; j++) {
+      const exp = w[j], got = t[j];
+      let cls = 'l';
+      if (got == null) cls += '';
+      else if (j >= w.length) cls += ' extra';
+      else if (got === exp) cls += ' correct';
+      else cls += ' wrong';
+      if (i === wIdx && j === t.length) cls += ' caret';
+      inner += `<span class="${cls}">${exp != null ? exp : got}</span>`;
+    }
+    if (i === wIdx && t.length >= w.length) inner += '<span class="l caret"></span>';
+    return `<span class="word ${i === wIdx ? 'active' : ''}">${inner}</span>`;
+  }).join('');
+  scrollLines();
+}
+function scrollLines() {
+  const active = linesEl.querySelector('.word.active');
+  if (!active) { linesEl.style.transform = 'translateY(0)'; return; }
+  const lh = active.offsetHeight || 50;          // one line box
+  const off = Math.max(0, active.offsetTop - lh); // keep one completed line above
+  linesEl.style.transform = `translateY(${-off}px)`;
+}
+function stats() {
+  let correct = 0, typedTotal = 0;
+  for (let i = 0; i <= wIdx; i++) {
+    const w = words[i] || '', t = typed[i] || '';
+    typedTotal += t.length;
+    for (let j = 0; j < t.length; j++) if (t[j] === w[j]) correct++;
+    if (i < wIdx) { correct++; typedTotal++; } // the space
+  }
+  const elapsed = (duration - timeLeft) || (started ? 0.001 : 0);
+  const mins = Math.max(elapsed, 1) / 60;
+  const wpm = Math.round((correct / 5) / mins);
+  const raw = Math.round((typedTotal / 5) / mins);
+  const acc = typedTotal ? Math.round(correct / typedTotal * 100) : 100;
+  return { correct, typedTotal, wpm, raw, acc, errors: typedTotal - correct };
+}
+function tickLive() {
+  const s = stats();
+  document.getElementById('ttWpm').textContent = s.wpm || 0;
+  document.getElementById('ttAcc').textContent = (s.acc || 100) + '%';
+}
+function start() {
+  started = true; box.classList.remove('tt-blur');
+  timer = setInterval(() => {
+    timeLeft--; document.getElementById('ttTime').textContent = timeLeft;
+    if (timeLeft <= 0) finish();
+  }, 1000);
+  liveTimer = setInterval(tickLive, 250);
+}
+function finish() {
+  done = true; clearInterval(timer); clearInterval(liveTimer);
+  const s = stats();
+  document.getElementById('rWpm').textContent = s.wpm;
+  document.getElementById('rAcc').textContent = s.acc + '%';
+  document.getElementById('rRaw').textContent = s.raw;
+  document.getElementById('rCpm').textContent = s.correct ? Math.round(s.correct / (duration/60)) : 0;
+  document.getElementById('rCorrect').textContent = s.correct;
+  document.getElementById('rErr').textContent = s.errors;
+  document.getElementById('rTime').textContent = duration + 's';
+  document.getElementById('ttResults').classList.add('show');
+  box.classList.add('tt-blur');
+}
+
+document.getElementById('ttMode').addEventListener('click', e => {
+  const b = e.target.closest('[data-t]'); if (!b) return;
+  document.querySelectorAll('#ttMode button').forEach(x => x.classList.toggle('active', x === b));
+  duration = +b.dataset.t; setup();
+});
+box.addEventListener('click', () => input.focus());
+input.addEventListener('focus', () => { if (!done) box.classList.remove('tt-blur'); });
+input.addEventListener('blur', () => { if (!started || done) box.classList.add('tt-blur'); });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' || (e.key === 'Tab')) { e.preventDefault(); setup(); input.focus(); return; }
+  if (done) return;
+  if (e.target !== input) { input.focus(); }
+  if (e.key === ' ') {
+    e.preventDefault();
+    if ((typed[wIdx] || '').length === 0) return;
+    if (!started) start();
+    wIdx++; typed[wIdx] = '';
+    if (wIdx > words.length - 40) { words = words.concat(pick(60)); }
+    render(); return;
+  }
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    typed[wIdx] = (typed[wIdx] || '').slice(0, -1); render(); return;
+  }
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (!started) start();
+    typed[wIdx] = (typed[wIdx] || '') + e.key; render();
+  }
+});
+document.getElementById('ttRestart').addEventListener('click', () => { setup(); input.focus(); });
+document.getElementById('ttAgain').addEventListener('click', () => { setup(); input.focus(); });
+setup();
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSINT — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 16px; padding-bottom: 20px; }
+.hub-card { display: flex; flex-direction: column; min-height: 194px; }
+.hub-card .ic { margin-bottom: 16px; }
+.hub-card .tag { font-family: var(--mono); font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.hub-card h3 { font-family: var(--display); font-weight: 700; font-size: 1.14rem; margin: 8px 0 6px; }
+.hub-card p { color: var(--muted); font-size: .9rem; font-weight: 300; flex: 1; }
+.hub-card .go { margin-top: 14px; font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--cyan); display: inline-flex; gap: 6px; align-items: center; transition: transform .18s; }
+.hub-card:hover .go { transform: translateX(3px); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span>
+    <a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a>
+  </nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+<main class="wrap">
+  <div class="page-head rv">
+    <span class="kick"><i class="pip"></i>OSINT · Recon suite</span>
+    <h1>Recon <em>suite.</em></h1>
+    <p>Open-source intelligence — resolve targets, build cover identities and pull secrets out of files. Pick a tool to get started.</p>
+  </div>
+  <div class="hub-grid">
+    <a class="pane hub-card rv" href="osint.html">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+      <span class="tag">O-01</span><h3>OSINT Console</h3>
+      <p>The 26-module recon dashboard — resolve &amp; map targets: GitHub, IP, DNS, Whois, certificates, ports &amp; more.</p>
+      <span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="pane hub-card rv" href="sockpuppet.html">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span>
+      <span class="tag">O-02</span><h3>Sock Puppet Builder</h3>
+      <p>Generate a believable cover persona plus an OPSEC checklist for safe research.</p>
+      <span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="pane hub-card rv" href="metadata.html">
+      <span class="ic"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M3 17l5-4 3 2 4-4 6 6"/></svg></span>
+      <span class="tag">O-03</span><h3>Metadata Viewer</h3>
+      <p>Drag in a photo and read its EXIF &amp; GPS — fully local, nothing leaves your browser.</p>
+      <span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+  </div>
+</main>
+<footer class="wrap"><div class="foot-pill rv"><span>NULLBYTE · OSINT</span><span>100% CLIENT-SIDE · NO SIGN-UP</span></div></footer>
+<script src="assets/shared.js"></script>
+</body>
+</html>

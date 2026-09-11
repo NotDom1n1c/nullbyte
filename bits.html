@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bits — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.bits-hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+#bitRain { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .28; }
+.bits-hero .wrap { position: relative; z-index: 2; padding-block: 60px 46px; }
+.bits-logo { font-family: var(--mono); font-weight: 700; display: flex; gap: 22px; flex-wrap: wrap; }
+.bits-logo .ch { display: flex; flex-direction: column; align-items: center; }
+.bits-logo .glyph { font-family: var(--display); font-size: clamp(3rem,11vw,6.5rem); line-height: .9; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bits-logo .bin { font-size: clamp(.5rem,1.4vw,.78rem); letter-spacing: .18em; color: var(--violet); margin-top: 8px; height: 1em; }
+.bits-hero p.lead { margin-top: 22px; }
+
+.sec { padding-block: 46px; border-bottom: 1px solid var(--line); }
+.sec .shead { margin-bottom: 18px; }
+.panel { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); backdrop-filter: blur(12px); padding: 24px; }
+.panel h3 { font-size: 1.18rem; margin-bottom: 6px; } .panel p { color: var(--muted); font-size: .94rem; line-height: 1.6; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 18px; }
+.xlink { color: var(--violet); }
+
+/* bit-flip widget */
+.bitrow { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 18px; }
+.bit { width: 54px; height: 64px; border: 1px solid var(--line-2); border-radius: 10px; background: rgba(255,255,255,.02); font-family: var(--mono); font-size: 1.6rem; font-weight: 700; color: var(--faint); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; transition: .15s; }
+.bit.on { color: #fff; background: var(--grad); border-color: transparent; box-shadow: 0 8px 22px -10px var(--violet); }
+.bit .pv { position: absolute; bottom: 4px; font-size: .54rem; color: var(--faint); letter-spacing: .05em; }
+.bit.on .pv { color: rgba(255,255,255,.8); }
+.readout { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.readout > div { background: rgba(10,10,16,.5); padding: 14px 16px; }
+.readout .k { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.readout .v { margin-top: 5px; font-family: var(--mono); font-weight: 700; font-size: 1.25rem; }
+.swatch { width: 100%; height: 38px; border-radius: 6px; margin-top: 6px; border: 1px solid var(--line); }
+
+/* gates */
+.gate-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
+.gbtn { font-family: var(--mono); font-size: .76rem; padding: 8px 15px; border: 1px solid var(--line-2); border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+.gbtn.active { border-color: var(--violet); color: #fff; background: rgba(124,92,255,.16); }
+.gate-grid { font-family: var(--mono); font-size: 1.05rem; }
+.gate-grid .lbl { display: inline-block; width: 42px; color: var(--faint); font-size: .8rem; }
+.gate-grid .b { display: inline-flex; width: 30px; height: 30px; margin: 2px; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--line); }
+.gate-grid .b.one { color: #fff; background: rgba(124,92,255,.22); border-color: var(--violet); }
+.gate-grid .res .b.one { background: var(--grad); border-color: transparent; }
+.editable { cursor: pointer; }
+
+/* rgb mixer */
+.rgb-mix { display: flex; gap: 22px; flex-wrap: wrap; align-items: center; }
+.rgb-mix .ctrls { flex: 1 1 280px; }
+.rgb-mix label { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: .8rem; margin: 8px 0; }
+.rgb-mix label b { width: 14px; } .rgb-mix input[type=range] { flex: 1; accent-color: var(--violet); }
+.rgb-mix .out { width: 130px; height: 130px; border-radius: 14px; border: 1px solid var(--line-2); }
+.rgb-mix .hex { font-family: var(--mono); font-size: .8rem; color: var(--muted); margin-top: 8px; text-align: center; }
+
+/* flags */
+.flagtbl { font-family: var(--mono); font-size: .82rem; width: 100%; border-collapse: collapse; }
+.flagtbl td, .flagtbl th { border: 1px solid var(--line); padding: 8px 12px; text-align: center; }
+.flagtbl th { color: var(--violet); }
+.flagtbl .on { color: #5cc8ff; } .flagtbl .off { color: var(--faint); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="bits-hero reveal">
+  <canvas id="bitRain"></canvas>
+  <div class="wrap">
+    <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ BITS ]</span><span class="tag">// binary, bytes &amp; logic</span></div>
+    <div class="bits-logo" id="bitsLogo"></div>
+    <p class="lead">Everything a computer touches is bits — on or off, 1 or 0. Watch text, color and numbers fall out of raw binary, then flip the bits yourself.</p>
+  </div>
+</section>
+
+<!-- BIT FLIP -->
+<section class="sec"><div class="wrap">
+  <div class="shead"><span class="idx">[ 01 ]</span><span class="tag">// bit → nibble → byte → word</span></div>
+  <div class="panel">
+    <h3>The bit-flip lab</h3>
+    <p>A <b>bit</b> is one binary digit. Eight bits make a <b>byte</b> (4 bits = a <b>nibble</b>, 16/32/64 bits = a <b>word</b>). Each position is worth a power of two. Click any bit to toggle it and watch every interpretation update live.</p>
+    <div class="bitrow" id="bitFlip"></div>
+    <div class="readout">
+      <div><div class="k">Binary</div><div class="v" id="rBin">00000000</div></div>
+      <div><div class="k">Decimal</div><div class="v" id="rDec">0</div></div>
+      <div><div class="k">Hex</div><div class="v" id="rHex">0x00</div></div>
+      <div><div class="k">ASCII</div><div class="v" id="rAsc">·</div></div>
+      <div><div class="k">As grayscale</div><div class="swatch" id="rSw"></div></div>
+    </div>
+    <p style="font-family:var(--mono);font-size:.78rem;margin-top:12px">Same base math powers the <a class="xlink" href="calculator.html">base converter</a>.</p>
+  </div>
+</div></section>
+
+<!-- LOGIC GATES -->
+<section class="sec"><div class="wrap">
+  <div class="shead"><span class="idx">[ 02 ]</span><span class="tag">// boolean logic</span></div>
+  <div class="panel">
+    <h3>Bitwise operations</h3>
+    <p>Logic gates combine bits position by position. Click the bits in <b>A</b> and <b>B</b> to edit them, then pick an operation. <b>NOT</b> only uses A.</p>
+    <div class="gate-bar" id="gateBar">
+      <button class="gbtn active" data-op="AND">AND</button>
+      <button class="gbtn" data-op="OR">OR</button>
+      <button class="gbtn" data-op="XOR">XOR</button>
+      <button class="gbtn" data-op="NOT">NOT</button>
+    </div>
+    <div class="gate-grid" id="gateGrid"></div>
+  </div>
+</div></section>
+
+<!-- BITS BECOME -->
+<section class="sec"><div class="wrap">
+  <div class="shead"><span class="idx">[ 03 ]</span><span class="tag">// how bits become things</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Text</h3>
+      <p>Each character maps to a number via <b>ASCII / UTF-8</b>. <b>A</b> = 65 = <span class="xlink">01000001</span>. UTF-8 extends this to every language using 1–4 bytes. Type a character:</p>
+      <input id="txtIn" maxlength="1" value="A" style="width:64px;text-align:center;font-family:var(--mono);font-size:1.4rem;background:#0b0a12;color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:8px">
+      <div style="font-family:var(--mono);margin-top:10px;color:var(--muted)" id="txtOut"></div>
+    </div>
+    <div class="panel">
+      <h3>Images</h3>
+      <p>A pixel is three bytes — <b>R</b>, <b>G</b>, <b>B</b> — each 0–255. Mixed, they make any of 16.7M colors. Drag to mix one pixel:</p>
+      <div class="rgb-mix" style="margin-top:10px">
+        <div class="ctrls">
+          <label><b style="color:#ff5e5e">R</b><input type="range" id="cr" min="0" max="255" value="124"><span id="vr">124</span></label>
+          <label><b style="color:#5eff8f">G</b><input type="range" id="cg" min="0" max="255" value="92"><span id="vg">92</span></label>
+          <label><b style="color:#5e9dff">B</b><input type="range" id="cb" min="0" max="255" value="255"><span id="vb">255</span></label>
+        </div>
+        <div><div class="out" id="rgbOut"></div><div class="hex" id="rgbHex"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Sound</h3>
+      <p>Audio is a wave measured thousands of times a second. <b>Sample depth</b> = how many bits per measurement: 8-bit = 256 loudness steps (gritty), 16-bit = 65,536 steps (CD quality), 24-bit = studio. More bits = finer the staircase that approximates the smooth wave.</p>
+    </div>
+    <div class="panel">
+      <h3>Numbers</h3>
+      <p>Plain <b>unsigned</b> bytes count 0–255. <b>Signed</b> bytes use two's-complement so the top bit means negative (−128…127). Floating point splits bits into sign, exponent and mantissa.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ENDIAN / FLAGS / MASKS -->
+<section class="sec"><div class="wrap">
+  <div class="shead"><span class="idx">[ 04 ]</span><span class="tag">// flags, masks &amp; endianness</span></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Bit flags &amp; bitmasks</h3>
+      <p>One byte can pack 8 yes/no switches. Unix file permissions do exactly this — click a permission to toggle its bit and watch the octal value (like <span class="xlink">chmod 755</span>) change.</p>
+      <table class="flagtbl" id="flagTbl" style="margin-top:10px"></table>
+      <p style="font-family:var(--mono);margin-top:10px">chmod value: <b id="chmodVal" style="color:#5cc8ff">000</b></p>
+    </div>
+    <div class="panel">
+      <h3>Endianness</h3>
+      <p>When a value spans several bytes, <b>which byte comes first?</b> <b>Big-endian</b> stores the most-significant byte first (like we write numbers); <b>little-endian</b> (x86) stores the least-significant first. The number <span class="xlink">0x12345678</span> in memory:</p>
+      <p style="font-family:var(--mono);margin-top:10px;color:var(--muted)">Big-endian:&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink)">12 34 56 78</span><br>Little-endian: <span style="color:var(--ink)">78 56 34 12</span></p>
+      <p style="margin-top:10px">Mixing them up is a classic bug when parsing network packets or binary files. See raw bytes in the <a class="xlink" href="crypto.html">crypto tools</a>.</p>
+    </div>
+  </div>
+</div></section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+/* ---- bit rain ---- */
+(function(){
+  const cv = document.getElementById('bitRain'), ctx = cv.getContext('2d');
+  let cols, drops, W, H, font = 16;
+  function size(){ W = cv.width = cv.offsetWidth; H = cv.height = cv.offsetHeight; cols = Math.floor(W / font); drops = Array(cols).fill(0).map(()=>Math.random()*-50); }
+  size(); window.addEventListener('resize', size);
+  function draw(){
+    ctx.fillStyle = 'rgba(8,7,14,0.18)'; ctx.fillRect(0,0,W,H);
+    ctx.font = font+'px monospace';
+    for (let i=0;i<cols;i++){
+      const ch = Math.random() > .5 ? '1' : '0';
+      const y = drops[i]*font;
+      ctx.fillStyle = Math.random() > .96 ? '#5cc8ff' : 'rgba(124,92,255,0.85)';
+      ctx.fillText(ch, i*font, y);
+      if (y > H && Math.random() > .975) drops[i] = 0; else drops[i] += 0.5;
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ---- BITS logo built from binary ---- */
+(function(){
+  const word = 'BITS', host = document.getElementById('bitsLogo');
+  host.innerHTML = [...word].map(c => `<div class="ch"><span class="glyph" style="opacity:0">${c}</span><span class="bin" data-c="${c.charCodeAt(0)}"></span></div>`).join('');
+  const chs = [...host.querySelectorAll('.ch')];
+  chs.forEach((ch, idx) => {
+    const code = +ch.querySelector('.bin').dataset.c;
+    const target = code.toString(2).padStart(8,'0');
+    const bin = ch.querySelector('.bin'), glyph = ch.querySelector('.glyph');
+    let step = 0; const total = 16;
+    const iv = setInterval(() => {
+      step++;
+      if (step < total) bin.textContent = Array.from(target, () => Math.random()>.5?'1':'0').join('');
+      else { bin.textContent = target; glyph.style.transition = 'opacity .4s'; glyph.style.opacity = 1; clearInterval(iv); }
+    }, 60 + idx*10);
+  });
+})();
+
+/* ---- bit flip widget ---- */
+const used = new Set();
+function scholar(){ if (used.size >= 3 && window.NB) NB.unlock('bit-scholar'); }
+(function(){
+  let val = 0;
+  const host = document.getElementById('bitFlip');
+  host.innerHTML = [7,6,5,4,3,2,1,0].map(p => `<div class="bit" data-p="${p}">0<span class="pv">${1<<p}</span></div>`).join('');
+  function upd(){
+    [...host.children].forEach(el => { const p = +el.dataset.p; const on = (val>>p)&1; el.classList.toggle('on', !!on); el.firstChild.textContent = on; });
+    document.getElementById('rBin').textContent = val.toString(2).padStart(8,'0');
+    document.getElementById('rDec').textContent = val;
+    document.getElementById('rHex').textContent = '0x' + val.toString(16).toUpperCase().padStart(2,'0');
+    document.getElementById('rAsc').textContent = (val >= 32 && val < 127) ? String.fromCharCode(val) : '·';
+    document.getElementById('rSw').style.background = `rgb(${val},${val},${val})`;
+  }
+  host.addEventListener('click', e => { const b = e.target.closest('.bit'); if (!b) return; val ^= (1 << +b.dataset.p); upd(); if (window.NB) NB.unlock('bit-flipper'); used.add('flip'); scholar(); });
+  upd();
+})();
+
+/* ---- logic gates ---- */
+(function(){
+  let A = 0b10110010, B = 0b01101011, op = 'AND';
+  const grid = document.getElementById('gateGrid');
+  const bits = v => [7,6,5,4,3,2,1,0].map(p => (v>>p)&1);
+  function calc(){ if (op==='AND') return A&B; if (op==='OR') return A|B; if (op==='XOR') return A^B; return (~A)&0xFF; }
+  function row(label, v, cls, editable){
+    return `<div style="margin:3px 0"><span class="lbl">${label}</span>${bits(v).map((b,i)=>`<span class="b ${b?'one':''} ${editable?'editable':''}" data-row="${editable}" data-p="${7-i}">${b}</span>`).join('')}</div>`;
+  }
+  function render(){
+    const r = calc();
+    grid.innerHTML = row('A', A, '', 'A') + (op!=='NOT' ? row('B', B, '', 'B') : '') +
+      `<div style="border-top:1px solid var(--line);margin:8px 0;padding-top:6px" class="res">${row(op, r, 'res', '')}</div>`;
+    grid.querySelectorAll('.editable').forEach(el => el.addEventListener('click', () => {
+      const which = el.dataset.row, p = +el.dataset.p;
+      if (which==='A') A ^= (1<<p); else B ^= (1<<p);
+      used.add('gate'); scholar(); render();
+    }));
+  }
+  document.getElementById('gateBar').addEventListener('click', e => {
+    const b = e.target.closest('[data-op]'); if (!b) return; op = b.dataset.op;
+    document.querySelectorAll('#gateBar .gbtn').forEach(x => x.classList.toggle('active', x===b));
+    used.add('gate'); scholar(); render();
+  });
+  render();
+})();
+
+/* ---- text ---- */
+(function(){
+  const inp = document.getElementById('txtIn'), out = document.getElementById('txtOut');
+  function upd(){ const c = (inp.value||'A').charCodeAt(0); out.innerHTML = `<span class="xlink">${c.toString(2).padStart(8,'0')}</span> = ${c} = 0x${c.toString(16).toUpperCase()}`; used.add('encode'); scholar(); }
+  inp.addEventListener('input', upd); upd();
+})();
+
+/* ---- rgb ---- */
+(function(){
+  const r = document.getElementById('cr'), g = document.getElementById('cg'), b = document.getElementById('cb');
+  const out = document.getElementById('rgbOut'), hex = document.getElementById('rgbHex');
+  function h(n){ return (+n).toString(16).padStart(2,'0').toUpperCase(); }
+  function upd(){ out.style.background = `rgb(${r.value},${g.value},${b.value})`; hex.textContent = `#${h(r.value)}${h(g.value)}${h(b.value)}`;
+    document.getElementById('vr').textContent=r.value; document.getElementById('vg').textContent=g.value; document.getElementById('vb').textContent=b.value; }
+  [r,g,b].forEach(s => s.addEventListener('input', upd)); upd();
+})();
+
+/* ---- file permission flags ---- */
+(function(){
+  const perms = [['Owner','r',256],['','w',128],['','x',64],['Group','r',32],['','w',16],['','x',8],['Other','r',4],['','w',2],['','x',1]];
+  let mask = 0b111101101; // 755
+  const tbl = document.getElementById('flagTbl');
+  function render(){
+    tbl.innerHTML = '<tr>' + perms.map(p=>`<th>${p[1]}</th>`).join('') + '</tr><tr>' +
+      perms.map(p=>`<td class="${mask&p[2]?'on':'off'}" data-v="${p[2]}" style="cursor:pointer">${mask&p[2]?p[1]:'-'}</td>`).join('') + '</tr>';
+    const o = (mask>>6)&7, g = (mask>>3)&7, ot = mask&7;
+    document.getElementById('chmodVal').textContent = `${o}${g}${ot}`;
+    tbl.querySelectorAll('[data-v]').forEach(td => td.addEventListener('click', () => { mask ^= +td.dataset.v; used.add('gate'); scholar(); render(); }));
+  }
+  render();
+})();
+</script>
+</body>
+</html>

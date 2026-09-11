@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 24px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.tl { position: relative; max-width: 760px; padding-left: 36px; padding-bottom: 70px; }
+.tl::before { content: ""; position: absolute; left: 9px; top: 8px; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--violet), transparent); }
+.tl-entry { position: relative; margin-bottom: 26px; }
+.tl-entry::before { content: ""; position: absolute; left: -32px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 12px var(--violet); border: 3px solid var(--bg); }
+.tl-card { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 22px 24px; }
+.tl-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: .72rem; color: var(--faint); }
+.tl-ver { color: var(--violet); border: 1px solid var(--line-2); border-radius: 999px; padding: 3px 10px; }
+.tl-card h3 { font-size: 1.2rem; margin: 12px 0 8px; }
+.tl-card p { color: var(--muted); font-size: .92rem; }
+.tags { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
+.tg { font-family: var(--mono); font-size: .6rem; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid; }
+.tg.new { color: #5ce0a0; border-color: rgba(92,224,160,.4); }
+.tg.fix { color: #f59e0b; border-color: rgba(245,158,11,.4); }
+.tg.red { color: #ec4899; border-color: rgba(236,72,153,.4); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ DEVLOG ]</span><span class="tag">// build history</span></div>
+  <h1 class="display">Changelog.</h1>
+  <p class="lead" style="margin-top:20px">How this site has grown — what was built and when. <span class="muted">(Dates are placeholders, easy to edit.)</span></p>
+</section>
+
+<section class="wrap"><div class="tl" id="tl"></div></section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const LOG = [
+  { d:'June 22, 2026', v:'v1.6', t:'Tools, cheatsheets &amp; global search', p:'Payload Builder, Frequency Reference, crypto/encoder tools, CTF cheatsheet, threat map and a site-wide search (Ctrl/Cmd+K).', tags:[['new','New Feature']] },
+  { d:'June 22, 2026', v:'v1.5', t:'Learn section', p:'Compare tool, labs/quizzes, networking cheatsheet with a subnet calculator, Linux reference, privacy checklist, phishing gallery and an achievements system.', tags:[['new','New Feature']] },
+  { d:'June 21, 2026', v:'v1.4', t:'Tool pages &amp; OSINT modules', p:'Every tool now has its own detail page with real content; OSINT modules are clickable and the Run button builds a subject graph.', tags:[['new','New Feature'],['fix','Bugfix']] },
+  { d:'June 20, 2026', v:'v1.3', t:'PowerShell console', p:'A NULLBYTE OSINT console as a PowerShell script, plus a download page with a terminal preview.', tags:[['new','New Feature']] },
+  { d:'June 19, 2026', v:'v1.2', t:'Colour redesign', p:'Every feature got its own accent colour, stronger backgrounds and glass panels — less "vibecoded".', tags:[['red','Redesign']] },
+  { d:'June 18, 2026', v:'v1.1', t:'New logo &amp; aurora theme', p:'Custom ghost logo, new fonts (Clash Display / General Sans), operator-deck hero and subject graph.', tags:[['red','Redesign']] },
+  { d:'June 17, 2026', v:'v1.0', t:'First version', p:'Foundation: Home, Tools, Glossary, OSINT dashboard and Shop with animated checkout.', tags:[] }
+];
+document.getElementById('tl').innerHTML = LOG.map(e => `
+  <div class="tl-entry"><div class="tl-card">
+    <div class="tl-meta"><span>${e.d}</span><span class="tl-ver">${e.v}</span></div>
+    <h3>${e.t}</h3><p>${e.p}</p>
+    ${e.tags.length ? '<div class="tags">' + e.tags.map(t => `<span class="tg ${t[0]}">${t[1]}</span>`).join('') + '</div>' : ''}
+  </div></div>`).join('');
+</script>
+</body>
+</html>

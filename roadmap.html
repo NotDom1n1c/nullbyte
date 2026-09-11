@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmap — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 24px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.path { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 26px 28px; margin-bottom: 18px; }
+.path-h { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+.path-h .ic { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: var(--mc); box-shadow: 0 8px 24px -10px var(--mc); flex: none; }
+.path-h h3 { font-size: 1.4rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; }
+.path-h .pct { margin-left: auto; font-family: var(--mono); font-size: .76rem; color: var(--mc); }
+.track { display: flex; gap: 0; flex-wrap: wrap; }
+.step { flex: 1; min-width: 150px; position: relative; padding: 0 6px; text-align: center; }
+.step::after { content: ""; position: absolute; top: 21px; left: 50%; right: -50%; height: 2px; background: var(--line-2); z-index: 0; }
+.step:last-child::after { display: none; }
+.node { position: relative; z-index: 1; width: 44px; height: 44px; margin: 0 auto 12px; border-radius: 50%; border: 2px solid var(--line-2); background: var(--bg-2); display: grid; place-items: center; font-family: var(--mono); font-weight: 700; color: var(--muted); cursor: pointer; transition: .2s; }
+.step.done .node { background: var(--mc); border-color: transparent; color: #fff; box-shadow: 0 0 16px var(--mc); }
+.step.done::after { background: var(--mc); }
+.step .nm { font-weight: 600; font-size: .95rem; }
+.step .nm a { color: inherit; }
+.step .nm a:hover { color: var(--mc); }
+.step .why { color: var(--muted); font-size: .8rem; margin-top: 5px; }
+@media (max-width:760px){ .track { flex-direction: column; gap: 14px; } .step { text-align: left; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: center; } .node { margin: 0; } .step::after { left: 21px; top: 44px; right: auto; width: 2px; height: 14px; } .step .nm,.step .why { grid-column: 2; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ PATH ]</span><span class="tag">// learning roadmap</span></div>
+  <h1 class="display">Roadmap.</h1>
+  <p class="lead" style="margin-top:20px">Recommended orders from beginner to pro. Steps with an achievement tick themselves off — click the rest yourself.</p>
+</section>
+
+<section class="wrap" id="paths" style="padding-bottom:70px"></section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+const PATHS = [
+  { name:'The Beginner', ic:'i-book', c:'#3b82f6', steps:[
+    {id:'gloss', nm:'Glossary', href:'glossary.html', ach:'glossary-novice', why:'Learn the terms first.'},
+    {id:'abil', nm:'Abilities', href:'abilities.html', why:'What devices can do.'},
+    {id:'tools', nm:'Tools', href:'tools.html', ach:'toolkit-explorer', why:'The devices in detail.'},
+    {id:'cmp', nm:'Compare', href:'compare.html', ach:'compare-pro', why:'Compare devices side by side.'},
+    {id:'labs', nm:'Labs', href:'labs.html', ach:'quiz-rookie', why:'Test your knowledge.'}
+  ]},
+  { name:'The Hardware Nerd', ic:'i-cpu', c:'#f5a524', steps:[
+    {id:'cmp2', nm:'Compare', href:'compare.html', ach:'compare-pro', why:'Find the right device.'},
+    {id:'tools2', nm:'Tools', href:'tools.html', ach:'toolkit-explorer', why:'Hardware in detail.'},
+    {id:'abil2', nm:'Abilities', href:'abilities.html', why:'Understand RFID/Sub-GHz.'},
+    {id:'freq', nm:'Frequencies', href:'frequencies.html', why:'Know the radio bands.'},
+    {id:'labs2', nm:'Labs', href:'labs.html', ach:'quiz-rookie', why:'Solve tool challenges.'}
+  ]},
+  { name:'The Blue Teamer', ic:'i-shield', c:'#22d3ee', steps:[
+    {id:'priv', nm:'Privacy', href:'privacy.html', ach:'privacy-aware', why:'Protect yourself.'},
+    {id:'phish', nm:'Phishing', href:'phishing.html', ach:'phish-spotter', why:'Recognise attacks.'},
+    {id:'net', nm:'Network', href:'network.html', ach:'subnet-solver', why:'Understand networks.'},
+    {id:'lnx', nm:'Linux', href:'linux.html', why:'The command line.'},
+    {id:'ctf', nm:'CTF', href:'ctf.html', why:'Apply it all.'}
+  ]}
+];
+const RKEY = 'nb_roadmap';
+const manual = () => { try { return new Set(JSON.parse(localStorage.getItem(RKEY)) || []); } catch (e) { return new Set(); } };
+const saveManual = s => localStorage.setItem(RKEY, JSON.stringify([...s]));
+const ach = (window.NB ? NB.get().ach : {});
+
+function done(step, m) { return (step.ach && ach[step.ach]) || m.has(step.id); }
+function render() {
+  const m = manual();
+  document.getElementById('paths').innerHTML = PATHS.map(p => {
+    const d = p.steps.filter(s => done(s, m)).length;
+    return `<div class="path" style="--mc:${p.c}">
+      <div class="path-h"><span class="ic"><svg class="ico ico-lg"><use href="#${p.ic}"/></svg></span><h3>${p.name}</h3><span class="pct">${d}/${p.steps.length}</span></div>
+      <div class="track">${p.steps.map((s, i) => `<div class="step ${done(s, m) ? 'done' : ''}" data-id="${s.id}">
+        <div class="node">${done(s, m) ? '✔' : (i + 1)}</div>
+        <div class="nm"><a href="${s.href}">${s.nm}</a></div><div class="why">${s.why}</div></div>`).join('')}</div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.node').forEach(n => n.addEventListener('click', () => {
+    const id = n.closest('.step').dataset.id, m2 = manual();
+    if (m2.has(id)) m2.delete(id); else m2.add(id);
+    saveManual(m2); render();
+  }));
+}
+render();
+</script>
+</body>
+</html>

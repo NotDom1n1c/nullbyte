@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Challenge — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.dc-top { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; margin-top: 18px; font-family: var(--mono); }
+.dc-top .s b { display: block; font-family: var(--display); font-weight: 700; font-size: 1.9rem; line-height: 1; color: var(--violet); }
+.dc-top .s span { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.puzzle { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.012)); padding: 30px; margin-top: 22px; }
+.cat { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--violet); border: 1px solid var(--line-2); padding: 6px 12px; border-radius: 999px; }
+.q-text { font-family: var(--display); font-size: 1.5rem; font-weight: 600; margin: 16px 0; line-height: 1.3; }
+.payload { font-family: var(--mono); font-size: 1.15rem; background: #07070b; border: 1px solid var(--line-2); border-left: 3px solid var(--violet); border-radius: 10px; padding: 16px 18px; color: #cfe3ff; word-break: break-word; margin: 14px 0; }
+.ans-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+#ans { flex: 1; min-width: 220px; background: #07070b; border: 1px solid var(--line-2); border-radius: 10px; color: var(--ink); font-family: var(--mono); font-size: 1rem; padding: 13px 16px; outline: none; }
+#ans:focus { border-color: var(--violet); }
+.fb { font-family: var(--mono); font-size: .9rem; margin-top: 14px; min-height: 1.3em; }
+.fb.ok { color: #4ade80; } .fb.no { color: #ff8da3; }
+.hintbox { margin-top: 14px; font-family: var(--mono); font-size: .84rem; color: var(--muted); }
+.hint-reveal { color: var(--violet); cursor: pointer; }
+.solved-panel { display: none; margin-top: 16px; padding: 18px; border-radius: 12px; background: rgba(34,197,94,.1); border: 1px solid #22c55e; }
+.solved-panel.show { display: block; }
+.solved-panel b { color: #7CFFB2; }
+.reset { font-family: var(--mono); font-size: .8rem; color: var(--faint); margin-top: 18px; }
+.archive { margin-top: 26px; } .archive h3 { font-size: 1.05rem; margin-bottom: 10px; }
+.streakdots { display: flex; gap: 5px; flex-wrap: wrap; }
+.streakdots i { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--line-2); }
+.streakdots i.hit { background: var(--grad); border-color: transparent; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ DAILY ]</span><span class="tag">// one puzzle, every day</span></div>
+  <h1 class="display">Daily challenge.</h1>
+  <p class="lead" style="margin-top:14px">A fresh cipher, logic puzzle or recon task every day. Solve it to bank XP and keep your streak alive.</p>
+  <div class="dc-top">
+    <div class="s"><b id="stStreak">0</b><span>day streak</span></div>
+    <div class="s"><b id="stSolved">0</b><span>total solved</span></div>
+    <div class="s"><b id="stDate">—</b><span>today</span></div>
+  </div>
+
+  <div class="puzzle">
+    <span class="cat" id="cat"><svg class="ico ico-sm"><use href="#i-badge"/></svg> <span id="catName">—</span></span>
+    <div class="q-text" id="qText">—</div>
+    <div class="payload" id="payload" style="display:none"></div>
+    <div class="ans-row">
+      <input id="ans" placeholder="your answer" spellcheck="false" autocomplete="off">
+      <button class="btn btn-primary" id="submit"><svg class="ico"><use href="#i-check"/></svg> Submit</button>
+    </div>
+    <div class="fb" id="fb"></div>
+    <div class="hintbox"><span class="hint-reveal" id="hintBtn">Need a hint?</span><span id="hintText"></span></div>
+    <div class="solved-panel" id="solvedPanel"></div>
+    <div class="reset" id="reset"></div>
+  </div>
+
+  <div class="archive">
+    <h3>Your week</h3>
+    <div class="streakdots" id="week"></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const POOL = [
+  { cat:'Cipher · ROT13', q:'Decode this ROT13 message:', payload:'Uryyb, ntrag.', a:['hello, agent','hello agent'], hint:'Each letter is shifted 13 places. ROT13 is its own inverse.', ex:'ROT13 maps A↔N, B↔O… Applying it again returns the original.' },
+  { cat:'Cipher · Base64', q:'What does this Base64 decode to?', payload:'bnVsbGJ5dGU=', a:['nullbyte'], hint:'Base64 encodes 3 bytes into 4 printable characters. The "=" is padding.', ex:'atob("bnVsbGJ5dGU=") = "nullbyte".' },
+  { cat:'Binary', q:'Convert this binary to ASCII text:', payload:'01001000 01101001', a:['hi'], hint:'Each 8-bit group is one character. 01001000 = 72.', ex:'72=H, 105=i → "Hi".' },
+  { cat:'Hex', q:'Decode these hex bytes to text:', payload:'48 41 43 4B', a:['hack'], hint:'Each pair is one byte. 0x48 = 72 = "H".', ex:'48 41 43 4B → H A C K.' },
+  { cat:'Recon', q:'Which TCP port does HTTPS use by default?', payload:'', a:['443'], hint:'HTTP is 80; the secure version adds TLS.', ex:'HTTPS = HTTP over TLS on port 443.' },
+  { cat:'Logic', q:'I have keys but no locks, space but no room, and you can enter but not go in. What am I?', payload:'', a:['keyboard','a keyboard'], hint:'You are using one right now.', ex:'A keyboard — keys, a space bar, and an Enter key.' },
+  { cat:'Cipher · Caesar', q:'Caesar shift +3 — decode:', payload:'FdhvduFlskhu', a:['caesarcipher','caesar cipher'], hint:'Shift every letter back by 3: F→C, d→a…', ex:'FdhvduFlskhu shifted −3 = CaesarCipher.' },
+  { cat:'Morse', q:'Decode this Morse code:', payload:'-. ..- .-.. .-..', a:['null'], hint:'-. = N, ..- = U, .-.. = L', ex:'-. ..- .-.. .-.. → N U L L.' },
+  { cat:'Networking', q:'How many usable host addresses are in a /24 subnet?', payload:'', a:['254'], hint:'32 − 24 = 8 host bits → 256 addresses, minus network & broadcast.', ex:'2^8 − 2 = 254 usable hosts.' },
+  { cat:'Cipher · Atbash', q:'Atbash decode (A↔Z, B↔Y…):', payload:'Szxp', a:['hack'], hint:'Mirror the alphabet: S↔H, z↔a, x↔c, p↔k.', ex:'Szxp under Atbash = Hack.' },
+  { cat:'Logic', q:'How many bits are in a nibble?', payload:'', a:['4','four'], hint:'A nibble is half a byte.', ex:'A byte is 8 bits, so a nibble is 4.' },
+  { cat:'Recon', q:'What does the "S" in HTTPS stand for?', payload:'', a:['secure'], hint:'It rides on TLS.', ex:'HTTPS = HyperText Transfer Protocol Secure.' },
+  { cat:'Hex → Dec', q:'What is 0xFF in decimal?', payload:'', a:['255'], hint:'F = 15. Two hex digits = one byte.', ex:'0xFF = 15×16 + 15 = 255 — the max value of one byte.' },
+  { cat:'Cipher · Base64', q:'Decode:', payload:'aGFjayB0aGUgcGxhbmV0', a:['hack the planet'], hint:'Classic movie quote once decoded.', ex:'"aGFjayB0aGUgcGxhbmV0" → "hack the planet".' }
+];
+
+const KEY = 'nb_daily';
+const today = new Date();
+function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dayIndex(d){ const start = new Date(d.getFullYear(),0,0); return Math.floor((d - start)/86400000); }
+const todayStr = ymd(today);
+const puzzle = POOL[dayIndex(today) % POOL.length];
+
+function loadState(){ try { return JSON.parse(localStorage.getItem(KEY)) || { solved:{}, streak:0, last:null, total:0 }; } catch(e){ return { solved:{}, streak:0, last:null, total:0 }; } }
+function saveState(s){ try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){} }
+let state = loadState();
+
+document.getElementById('catName').textContent = puzzle.cat;
+document.getElementById('qText').textContent = puzzle.q;
+if (puzzle.payload) { const p = document.getElementById('payload'); p.style.display = ''; p.textContent = puzzle.payload; }
+document.getElementById('stDate').textContent = today.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+
+function refreshStats(){
+  document.getElementById('stStreak').textContent = state.streak || 0;
+  document.getElementById('stSolved').textContent = state.total || 0;
+  // week dots (last 7 days)
+  const wk = document.getElementById('week'); wk.innerHTML = '';
+  for (let i=6;i>=0;i--){ const d = new Date(today); d.setDate(d.getDate()-i); const hit = state.solved[ymd(d)]; const el = document.createElement('i'); if (hit) el.classList.add('hit'); el.title = ymd(d); wk.appendChild(el); }
+}
+function norm(s){ return s.toLowerCase().trim().replace(/\s+/g,' '); }
+
+function markSolved(){
+  document.getElementById('solvedPanel').classList.add('show');
+  document.getElementById('solvedPanel').innerHTML = `<b>✓ Solved!</b> ${puzzle.ex}`;
+  document.getElementById('ans').disabled = true; document.getElementById('submit').disabled = true;
+}
+
+function alreadySolvedToday(){ return !!state.solved[todayStr]; }
+
+document.getElementById('submit').addEventListener('click', submit);
+document.getElementById('ans').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+function submit(){
+  const fb = document.getElementById('fb');
+  const val = norm(document.getElementById('ans').value);
+  if (!val) return;
+  if (puzzle.a.some(a => norm(a) === val)) {
+    fb.className = 'fb ok'; fb.textContent = '✓ Correct!';
+    if (!alreadySolvedToday()) {
+      const y = new Date(today); y.setDate(y.getDate()-1);
+      state.streak = (state.last === ymd(y)) ? (state.streak||0)+1 : 1;
+      state.solved[todayStr] = puzzle.cat; state.last = todayStr; state.total = (state.total||0)+1;
+      saveState(state); if (window.NB) NB.unlock('daily-solver');
+    }
+    markSolved(); refreshStats();
+  } else { fb.className = 'fb no'; fb.textContent = '✗ Not quite — try again or take the hint.'; }
+}
+document.getElementById('hintBtn').addEventListener('click', () => { document.getElementById('hintText').textContent = ' ' + puzzle.hint; document.getElementById('hintBtn').style.display = 'none'; });
+
+if (alreadySolvedToday()) { document.getElementById('ans').value = ''; markSolved(); }
+refreshStats();
+
+// countdown to reset
+function countdown(){
+  const t = new Date(today); t.setHours(24,0,0,0);
+  const diff = t - new Date(); if (diff < 0) return;
+  const h = Math.floor(diff/3600000), m = Math.floor(diff%3600000/60000), s = Math.floor(diff%60000/1000);
+  document.getElementById('reset').textContent = `Next challenge in ${h}h ${m}m ${s}s`;
+}
+countdown(); setInterval(countdown, 1000);
+</script>
+</body>
+</html>

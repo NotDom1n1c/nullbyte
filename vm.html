@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Machines — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.toc { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.toc a { font-family: var(--mono); font-size: .72rem; padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 8px; color: var(--muted); }
+.toc a:hover { border-color: var(--violet); color: var(--ink); }
+
+.sec { padding-block: 40px; border-top: 1px solid var(--line); }
+.sec:first-of-type { border-top: none; }
+.sec .shead { margin-bottom: 18px; }
+.panel { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); padding: 24px; }
+.lead-p { color: var(--ink); font-size: 1.05rem; line-height: 1.7; max-width: 70ch; }
+.body-p { color: var(--muted); font-size: .96rem; line-height: 1.72; max-width: 72ch; margin-top: 12px; }
+.body-p b { color: var(--ink); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(290px,1fr)); gap: 18px; }
+.xlink { color: var(--violet); }
+.callout { border-left: 3px solid var(--violet); background: rgba(124,92,255,.06); padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 16px; font-size: .92rem; color: var(--muted); }
+.callout.warn { border-color: #f59e0b; background: rgba(245,158,11,.07); }
+.callout.warn b, .callout b { color: var(--ink); }
+ul.tick { list-style: none; padding: 0; margin: 12px 0 0; }
+ul.tick li { position: relative; padding: 6px 0 6px 26px; color: var(--muted); font-size: .94rem; line-height: 1.5; }
+ul.tick li::before { content: ""; position: absolute; left: 2px; top: 12px; width: 8px; height: 8px; border-radius: 2px; background: var(--violet); }
+table.t { width: 100%; border-collapse: collapse; font-size: .86rem; margin-top: 8px; }
+table.t th, table.t td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+table.t th { color: var(--violet); font-family: var(--mono); font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; }
+table.t td { color: var(--muted); } table.t td b { color: var(--ink); }
+
+/* hypervisor stack */
+.hv-toggle { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
+.hv-toggle button { font-family: var(--mono); font-size: .78rem; padding: 9px 16px; border: none; background: transparent; color: var(--muted); cursor: pointer; }
+.hv-toggle button.active { background: var(--grad); color: #fff; font-weight: 700; }
+.stack { max-width: 460px; }
+.layer { border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 16px; margin: 7px 0; font-family: var(--mono); font-size: .84rem; text-align: center; transition: .25s; }
+.layer small { display: block; font-size: .68rem; color: var(--faint); margin-top: 3px; }
+.layer.hw { background: rgba(255,255,255,.03); }
+.layer.host { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.4); color: #ffd9a0; }
+.layer.hv { background: rgba(124,92,255,.14); border-color: var(--violet); color: #d9ccff; }
+.layer.guests { display: flex; gap: 8px; padding: 8px; border: none; }
+.layer.guests .g { flex: 1; border: 1px solid #22c55e; background: rgba(34,197,94,.1); border-radius: 8px; padding: 10px 6px; font-size: .72rem; color: #b9ffd6; }
+.layer.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; margin: 0; opacity: 0; overflow: hidden; border-width: 0; }
+
+/* network diagram */
+.net-modes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.nmbtn { font-family: var(--mono); font-size: .74rem; padding: 8px 13px; border: 1px solid var(--line-2); border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+.nmbtn.active { border-color: var(--violet); color: #fff; background: rgba(124,92,255,.16); }
+.net-svg { width: 100%; max-width: 640px; }
+.net-svg .node { fill: rgba(255,255,255,.04); stroke: var(--line-2); }
+.net-svg .lbl { fill: var(--muted); font-family: var(--mono); font-size: 12px; }
+.net-svg .edge { stroke: #22c55e; stroke-width: 2.5; opacity: 0; transition: opacity .3s; }
+.net-svg .edge.on { opacity: 1; }
+.net-svg .edge.muted { stroke: var(--line-2); }
+.net-desc { font-size: .94rem; color: var(--muted); line-height: 1.65; margin-top: 14px; min-height: 3em; }
+.net-desc b { color: var(--ink); }
+
+/* VM LAB MANAGER */
+.lab { border: 1px solid var(--line-2); border-radius: 16px; overflow: hidden; }
+.lab-top { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,.03); border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .76rem; color: var(--muted); flex-wrap: wrap; }
+.lab-top .pill { margin-left: auto; display: flex; gap: 16px; }
+.lab-top .pill b { color: #4ade80; }
+.vmgrid { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 14px; padding: 16px; }
+.vm { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: rgba(10,10,16,.4); position: relative; }
+.vm .role { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.vm h4 { font-size: 1.02rem; margin: 4px 0 2px; display: flex; align-items: center; gap: 8px; }
+.vm .led { width: 9px; height: 9px; border-radius: 50%; background: #555; flex: none; transition: .3s; }
+.vm.running .led { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+.vm.booting .led { background: #f59e0b; animation: blink 1s steps(2) infinite; }
+.vm.suspended .led { background: #3b82f6; }
+@keyframes blink { 50% { opacity: .3; } }
+.vm .spec { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin: 6px 0 12px; }
+.vm .gauges { display: grid; gap: 6px; margin-bottom: 12px; }
+.vm .gauge { font-family: var(--mono); font-size: .64rem; color: var(--faint); }
+.vm .gauge .bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.06); overflow: hidden; margin-top: 3px; }
+.vm .gauge .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#22d3ee,#22c55e); transition: width .4s; }
+.vm .boot { height: 6px; border-radius: 3px; background: rgba(255,255,255,.06); overflow: hidden; margin-bottom: 12px; display: none; }
+.vm.booting .boot { display: block; }
+.vm .boot i { display: block; height: 100%; width: 0; background: #f59e0b; }
+.vm .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.vm .btns button { font-family: var(--mono); font-size: .68rem; padding: 6px 9px; border: 1px solid var(--line-2); border-radius: 7px; background: rgba(255,255,255,.03); color: var(--ink); cursor: pointer; }
+.vm .btns button:hover:not(:disabled) { border-color: var(--violet); }
+.vm .btns button:disabled { opacity: .35; cursor: not-allowed; }
+.vm .snaptag { position: absolute; top: 14px; right: 14px; font-family: var(--mono); font-size: .6rem; color: #5cc8ff; opacity: 0; }
+.vm.hassnap .snaptag { opacity: 1; }
+.statebadge { font-family: var(--mono); font-size: .62rem; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 5px; }
+.statebadge.off { background: rgba(255,255,255,.06); color: var(--faint); }
+.statebadge.running { background: rgba(34,197,94,.16); color: #7CFFB2; }
+.statebadge.booting { background: rgba(245,158,11,.16); color: #ffd9a0; }
+.statebadge.suspended { background: rgba(59,130,246,.16); color: #9fc6ff; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ VM ]</span><span class="tag">// virtualization &amp; lab building</span></div>
+  <h1 class="display">Virtual machines.</h1>
+  <p class="lead" style="margin-top:14px">A virtual machine is a whole computer running as software inside your real one — its own OS, disk, RAM and network, fully sandboxed. It is the single most important tool in a hacker's kit: a place to break things, detonate malware, and rebuild in seconds. This is the deep dive.</p>
+  <div class="toc">
+    <a href="#what">What &amp; why</a><a href="#stack">The stack</a><a href="#hypervisors">Hypervisors</a><a href="#software">Best software</a><a href="#resources">Resources</a><a href="#snapshots">Snapshots</a><a href="#network">Networking</a><a href="#security">For hackers</a><a href="#lab">Build a lab</a><a href="#manager">Lab manager</a><a href="#risks">Risks</a>
+  </div>
+</section>
+
+<!-- WHAT -->
+<section class="wrap sec" id="what">
+  <div class="shead"><span class="idx">[ 01 ]</span><span class="tag">// what is a virtual machine</span></div>
+  <p class="lead-p">Your physical computer — the <b>host</b> — has real hardware: a CPU, RAM, a disk, a network card. <b>Virtualization</b> is a thin layer of software called a <b>hypervisor</b> that slices those real resources into isolated virtual ones, and hands each slice to a <b>guest</b> operating system that believes it is running on its own dedicated machine.</p>
+  <p class="body-p">The guest can't tell the difference. It boots a real OS (Linux, Windows, BSD), installs software, gets an IP address, and crashes or gets infected — all without ever touching your host. When you close the VM, that entire computer collapses back into a single file on your disk. Spin it up again and it's exactly where you left it.</p>
+  <div class="grid2" style="margin-top:18px">
+    <div class="panel"><h3 style="font-size:1.05rem;margin-bottom:6px">Host</h3><p class="body-p" style="margin:0">The real, physical machine and the software running directly on it. The host owns the hardware and runs the hypervisor.</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem;margin-bottom:6px">Guest</h3><p class="body-p" style="margin:0">The virtual computer running <i>inside</i> the host. Each guest has its own virtual CPU, RAM, disk and NIC, and its own independent OS.</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem;margin-bottom:6px">Hypervisor</h3><p class="body-p" style="margin:0">The referee. It allocates real hardware to guests, keeps them isolated from each other, and intercepts privileged instructions.</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem;margin-bottom:6px">Virtual disk</h3><p class="body-p" style="margin:0">A single file (<span class="xlink">.vdi</span>, <span class="xlink">.vmdk</span>, <span class="xlink">.vhdx</span>, <span class="xlink">.qcow2</span>) that <i>is</i> the guest's entire hard drive. Copy it = clone the machine.</p></div>
+  </div>
+  <div class="callout"><b>Why bother?</b> Isolation. A VM is a blast radius of exactly zero for your real data. Test a sketchy tool, open a suspicious file, run ransomware on purpose — then throw the VM away. It's also reproducible: the same VM file behaves identically on any machine.</div>
+</section>
+
+<!-- STACK -->
+<section class="wrap sec" id="stack">
+  <div class="shead"><span class="idx">[ 02 ]</span><span class="tag">// the virtualization stack</span></div>
+  <p class="body-p" style="margin-top:0">Everything sits in layers. The big question is <b>where the hypervisor lives</b> — directly on the metal, or as an app on top of a normal OS. Toggle to see both:</p>
+  <div class="hv-toggle" id="hvToggle">
+    <button data-t="2" class="active">Type 2 · hosted</button>
+    <button data-t="1">Type 1 · bare-metal</button>
+  </div>
+  <div class="stack" id="stack">
+    <div class="layer guests"><span class="g">Guest VM<br>Kali</span><span class="g">Guest VM<br>Windows</span><span class="g">Guest VM<br>pfSense</span></div>
+    <div class="layer hv">Hypervisor <small>allocates &amp; isolates</small></div>
+    <div class="layer host" id="hostLayer">Host OS <small>Windows / macOS / Linux</small></div>
+    <div class="layer hw">Physical hardware <small>CPU · RAM · disk · NIC</small></div>
+  </div>
+  <p class="net-desc" id="hvDesc"></p>
+</section>
+
+<!-- HYPERVISORS -->
+<section class="wrap sec" id="hypervisors">
+  <div class="shead"><span class="idx">[ 03 ]</span><span class="tag">// type 1 vs type 2</span></div>
+  <table class="t">
+    <tr><th></th><th>Type 1 — bare-metal</th><th>Type 2 — hosted</th></tr>
+    <tr><td><b>Runs on</b></td><td>Directly on hardware, no OS beneath it</td><td>As an application inside a normal OS</td></tr>
+    <tr><td><b>Speed</b></td><td>Near-native, minimal overhead</td><td>Slightly slower (goes through the host OS)</td></tr>
+    <tr><td><b>Use case</b></td><td>Servers, data centers, always-on labs</td><td>Your laptop, learning, quick desktop VMs</td></tr>
+    <tr><td><b>Examples</b></td><td>VMware ESXi, Microsoft Hyper-V, Proxmox, Xen, KVM</td><td>VirtualBox, VMware Workstation/Player, Parallels, UTM</td></tr>
+  </table>
+  <p class="body-p">For learning, you'll almost always start with a <b>Type 2</b> hypervisor like VirtualBox — it installs like any app and you're running Kali in ten minutes. When you graduate to an always-on home lab on a spare box, a <b>Type 1</b> like Proxmox gives you a web dashboard, better performance and clean snapshots.</p>
+</section>
+
+<!-- BEST SOFTWARE -->
+<section class="wrap sec" id="software">
+  <div class="shead"><span class="idx">[ 03b ]</span><span class="tag">// which VM software should you actually use</span></div>
+  <p class="body-p" style="margin-top:0">There's no single "best" — it depends on your host OS and goal. These are the ones worth your time:</p>
+  <table class="t">
+    <tr><th>Software</th><th>Type</th><th>Best for</th><th>Cost</th></tr>
+    <tr><td><b>VirtualBox</b></td><td>2</td><td>Beginners on any host OS — the default starting point</td><td>Free, open-source</td></tr>
+    <tr><td><b>VMware Workstation Pro</b></td><td>2</td><td>Polished, fast Windows/Linux desktop VMs</td><td>Free for personal use</td></tr>
+    <tr><td><b>Hyper-V</b></td><td>1</td><td>Already built into Windows 10/11 <b>Pro</b> — nothing to install</td><td>Free with Win Pro</td></tr>
+    <tr><td><b>Proxmox VE</b></td><td>1</td><td>An always-on home-lab server with a web dashboard</td><td>Free</td></tr>
+    <tr><td><b>KVM / QEMU</b></td><td>1</td><td>Native, scriptable virtualization on Linux</td><td>Free</td></tr>
+    <tr><td><b>UTM</b></td><td>2</td><td>Apple-Silicon (M-series) Macs — a QEMU front-end</td><td>Free</td></tr>
+  </table>
+  <div class="callout"><b>Our pick:</b> start with <b>VirtualBox</b> — free, runs everywhere, massive community and tutorials. On <b>Windows Pro</b>, <b>Hyper-V</b> is already there. For a dedicated always-on lab box, move to <b>Proxmox</b>. On an M-series Mac, use <b>UTM</b>. For the <i>guest</i> OSes: <b>Kali Linux</b> as your attacker, <b>Metasploitable 2</b> / <b>DVWA</b> as targets.</div>
+</section>
+
+<!-- RESOURCES -->
+<section class="wrap sec" id="resources">
+  <div class="shead"><span class="idx">[ 04 ]</span><span class="tag">// how resources get virtualized</span></div>
+  <div class="grid2">
+    <div class="panel"><h3 style="font-size:1.05rem">CPU</h3><p class="body-p" style="margin-top:6px">Modern CPUs have hardware virtualization (<b>Intel VT-x</b>, <b>AMD-V</b>) that lets guest code run almost natively. You assign a guest <b>vCPUs</b> (virtual cores); the hypervisor schedules them onto real cores. <span class="warnword">If your VMs won't boot 64-bit OSes, virtualization is usually disabled in the BIOS.</span></p></div>
+    <div class="panel"><h3 style="font-size:1.05rem">RAM</h3><p class="body-p" style="margin-top:6px">Each guest gets a fixed slice of RAM that's carved out of the host while it runs. Over-allocating (giving VMs more RAM than you physically have) leads to swapping and crawling performance. Techniques like <b>ballooning</b> let the hypervisor reclaim idle guest memory.</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem">Disk</h3><p class="body-p" style="margin-top:6px">The guest's drive is a file on the host. <b>Dynamically-allocated</b> disks grow as data is written (a 50 GB disk might only use 8 GB on disk); <b>fixed</b> disks reserve all space upfront for speed. Formats: VDI (VirtualBox), VMDK (VMware), VHDX (Hyper-V), QCOW2 (QEMU/KVM).</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem">Network &amp; devices</h3><p class="body-p" style="margin-top:6px">A virtual NIC connects the guest to a <b>virtual switch</b>. USB, GPU, sound and clipboard can be passed through too. <b>Guest additions / tools</b> are drivers you install in the guest for smooth resizing, shared folders and copy-paste.</p></div>
+  </div>
+</section>
+
+<!-- SNAPSHOTS -->
+<section class="wrap sec" id="snapshots">
+  <div class="shead"><span class="idx">[ 05 ]</span><span class="tag">// snapshots, clones &amp; the magic undo button</span></div>
+  <p class="lead-p">A <b>snapshot</b> freezes the exact state of a VM — disk, RAM, settings — at a moment in time. Keep working; if anything breaks, <b>revert</b> and you're instantly back as if it never happened. This is the superpower that makes VMs the perfect place to experiment.</p>
+  <ul class="tick">
+    <li><b>Snapshot before anything risky</b> — installing malware, a kernel update, a config you don't trust.</li>
+    <li><b>Copy-on-write:</b> after a snapshot, new writes go to a separate delta file, so the original state is preserved cheaply.</li>
+    <li><b>Clones</b> duplicate a whole VM. A <b>linked clone</b> shares the base disk (fast, small); a <b>full clone</b> is independent.</li>
+    <li><b>Golden image:</b> set up a clean Kali once, snapshot it, and revert to that pristine state for every new engagement.</li>
+  </ul>
+  <div class="callout warn"><b>Don't hoard snapshots.</b> Long chains of snapshots slow a VM down and can corrupt if mismanaged. Snapshot, do your thing, then either commit or revert — don't keep 30 of them forever.</div>
+</section>
+
+<!-- NETWORK -->
+<section class="wrap sec" id="network">
+  <div class="shead"><span class="idx">[ 06 ]</span><span class="tag">// networking modes</span></div>
+  <p class="body-p" style="margin-top:0">How a VM talks to the world is a setting you choose per machine — and getting it right is <b>critical</b> for safe labs. Pick a mode:</p>
+  <div class="net-modes" id="netModes">
+    <button class="nmbtn active" data-m="nat">NAT</button>
+    <button class="nmbtn" data-m="bridged">Bridged</button>
+    <button class="nmbtn" data-m="hostonly">Host-only</button>
+    <button class="nmbtn" data-m="internal">Internal</button>
+  </div>
+  <svg class="net-svg" id="netSvg" viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- nodes -->
+    <g id="nInternet"><rect class="node" x="270" y="14" width="100" height="40" rx="9"/><text class="lbl" x="320" y="39" text-anchor="middle">Internet</text></g>
+    <g id="nHost"><rect class="node" x="40" y="120" width="120" height="44" rx="9"/><text class="lbl" x="100" y="147" text-anchor="middle">Host PC</text></g>
+    <g id="nSwitch"><rect class="node" x="270" y="120" width="100" height="44" rx="9"/><text class="lbl" x="320" y="147" text-anchor="middle">vSwitch</text></g>
+    <g><rect class="node" x="470" y="80" width="130" height="40" rx="9"/><text class="lbl" x="535" y="105" text-anchor="middle">VM · Kali</text></g>
+    <g><rect class="node" x="470" y="170" width="130" height="40" rx="9"/><text class="lbl" x="535" y="195" text-anchor="middle">VM · Target</text></g>
+    <!-- edges -->
+    <line class="edge" id="eVmSwitch1" x1="470" y1="100" x2="370" y2="138"/>
+    <line class="edge" id="eVmSwitch2" x1="470" y1="190" x2="370" y2="146"/>
+    <line class="edge" id="eVmVm" x1="470" y1="100" x2="470" y2="190"/>
+    <line class="edge" id="eSwitchHost" x1="270" y1="142" x2="160" y2="142"/>
+    <line class="edge" id="eHostNet" x1="100" y1="120" x2="300" y2="54"/>
+    <line class="edge" id="eSwitchNet" x1="320" y1="120" x2="320" y2="54"/>
+    <line class="edge" id="eVmNet" x1="535" y1="80" x2="360" y2="50"/>
+  </svg>
+  <p class="net-desc" id="netDesc"></p>
+</section>
+
+<!-- SECURITY -->
+<section class="wrap sec" id="security">
+  <div class="shead"><span class="idx">[ 07 ]</span><span class="tag">// why hackers live in VMs</span></div>
+  <div class="grid2">
+    <div class="panel"><h3 style="font-size:1.05rem">Malware detonation</h3><p class="body-p" style="margin-top:6px">Run real malware on purpose in an isolated VM, watch what it does (files, registry, network), then revert. The host never gets touched. Use an <b>Internal</b> or <b>Host-only</b> network so it can't phone home or spread.</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem">Sandboxing the unknown</h3><p class="body-p" style="margin-top:6px">Opening a suspicious attachment, testing a cracked tool, visiting a sketchy site — do it in a throwaway VM. Worst case, you delete the VM.</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem">Isolated practice labs</h3><p class="body-p" style="margin-top:6px">Attacking machines you don't own is illegal. A VM lab gives you <i>your own</i> vulnerable targets to legally practice exploitation, pivoting and privilege escalation.</p></div>
+    <div class="panel"><h3 style="font-size:1.05rem">Clean, reproducible state</h3><p class="body-p" style="margin-top:6px">Every engagement starts from an identical snapshot. No leftover tools, no contaminated evidence, no "it worked on my machine."</p></div>
+  </div>
+  <div class="callout">Pair this with the <a class="xlink" href="clickfix.html">ClickFix demo</a> and <a class="xlink" href="hashcrack.html">hash cracker</a> — the kind of things you'd only ever run inside a VM.</div>
+</section>
+
+<!-- LAB -->
+<section class="wrap sec" id="lab">
+  <div class="shead"><span class="idx">[ 08 ]</span><span class="tag">// build your first hacking lab</span></div>
+  <p class="lead-p">A classic starter lab is one <b>attacker</b> and one or more <b>victims</b> on a private network with no route to the internet or your real LAN. Here's the blueprint:</p>
+  <ul class="tick">
+    <li><b>Hypervisor:</b> install VirtualBox (free) or VMware Workstation Player.</li>
+    <li><b>Attacker:</b> Kali Linux or ParrotOS — comes loaded with the tooling.</li>
+    <li><b>Targets:</b> Metasploitable 2/3, DVWA, OWASP Juice Shop, or VulnHub boxes — intentionally vulnerable on purpose.</li>
+    <li><b>Network:</b> put every VM on the same <b>Host-only</b> or <b>Internal</b> network so the lab is sealed off.</li>
+    <li><b>Snapshot</b> each VM in its clean state before you start, so you can reset after you wreck them.</li>
+  </ul>
+  <div class="callout warn"><b>Golden rule:</b> never point real attacks at machines or networks you don't own and have written permission to test. Keep the lab isolated — that's what the network mode is for.</div>
+</section>
+
+<!-- LAB MANAGER -->
+<section class="wrap sec" id="manager">
+  <div class="shead"><span class="idx">[ 09 ]</span><span class="tag">// interactive lab manager — try it</span></div>
+  <p class="body-p" style="margin-top:0">A simulated VM console. <b>Boot</b> the machines, watch CPU/RAM come alive, take a <b>snapshot</b>, then <b>revert</b>. This mirrors exactly what a real hypervisor dashboard does (it's a layout simulation — nothing actually runs).</p>
+  <div class="lab" style="margin-top:16px">
+    <div class="lab-top">
+      <span class="dot" style="width:9px;height:9px;border-radius:50%;background:#22d3ee;display:inline-block"></span> nullbyte-lab · host-only net 10.10.10.0/24
+      <span class="pill"><span>running <b id="runCount">0</b>/4</span><span>RAM <b id="ramUse">0</b> GB</span></span>
+    </div>
+    <div class="vmgrid" id="vmGrid"></div>
+  </div>
+  <p class="body-p" id="labHint" style="margin-top:12px;font-family:var(--mono);font-size:.78rem;color:var(--faint)">Tip: boot a VM, then Snapshot → change nothing → Revert to feel the safety net.</p>
+</section>
+
+<!-- RISKS -->
+<section class="wrap sec" id="risks">
+  <div class="shead"><span class="idx">[ 10 ]</span><span class="tag">// limits, risks &amp; gotchas</span></div>
+  <ul class="tick">
+    <li><b>VM escape:</b> rare but real bugs let code break out of a guest into the host. Keep your hypervisor patched; never assume a VM is a perfect prison.</li>
+    <li><b>VM-aware malware:</b> sophisticated samples detect they're in a VM (checking drivers, MAC prefixes, timing) and go dormant to dodge analysis. Analysts harden their VMs to hide the tells.</li>
+    <li><b>Performance overhead:</b> VMs share your real CPU/RAM/disk. Running several at once needs decent hardware (16 GB+ RAM helps a lot).</li>
+    <li><b>Nested virtualization</b> (a VM inside a VM) works but is slow and needs explicit support.</li>
+    <li><b>Snapshots aren't backups:</b> if the disk file is lost or corrupted, the snapshots go with it. Back up the VM files separately.</li>
+  </ul>
+  <div class="grid2" style="margin-top:18px">
+    <div class="panel"><h3 style="font-size:1.05rem">Key terms</h3><ul class="tick" style="margin-top:8px"><li><b>Hypervisor</b> — the virtualization layer.</li><li><b>Guest additions / VMware Tools</b> — in-guest drivers.</li><li><b>vCPU</b> — a virtual core assigned to a guest.</li><li><b>Passthrough</b> — giving a guest direct access to real hardware (e.g. a GPU).</li></ul></div>
+    <div class="panel"><h3 style="font-size:1.05rem">Go deeper</h3><ul class="tick" style="margin-top:8px"><li>Containers (Docker) vs VMs — lighter, share the host kernel.</li><li>Proxmox / ESXi for an always-on home lab.</li><li>QEMU/KVM for scriptable Linux virtualization.</li><li>Cloud VMs — the same idea, rented by the hour.</li></ul></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+/* ---- hypervisor stack toggle ---- */
+(function(){
+  const host = document.getElementById('hostLayer'), desc = document.getElementById('hvDesc');
+  const txt = {
+    '2':'<b>Type 2 (hosted):</b> the hypervisor is an ordinary app on top of your normal OS. Easiest to start with — this is VirtualBox or VMware Workstation on your laptop.',
+    '1':'<b>Type 1 (bare-metal):</b> the hypervisor replaces the host OS and talks straight to the hardware. Faster and used for servers — this is ESXi, Hyper-V or Proxmox.'
+  };
+  function set(t){
+    document.querySelectorAll('#hvToggle button').forEach(b=>b.classList.toggle('active', b.dataset.t===t));
+    host.classList.toggle('collapsed', t==='1');
+    desc.innerHTML = txt[t];
+  }
+  document.getElementById('hvToggle').addEventListener('click', e=>{ const b=e.target.closest('[data-t]'); if(b) set(b.dataset.t); });
+  set('2');
+})();
+
+/* ---- network modes ---- */
+(function(){
+  const desc = document.getElementById('netDesc');
+  const E = id => document.getElementById(id);
+  const all = ['eVmSwitch1','eVmSwitch2','eVmVm','eSwitchHost','eHostNet','eSwitchNet','eVmNet'];
+  const modes = {
+    nat:      { on:['eVmSwitch1','eVmSwitch2','eSwitchHost','eHostNet'], t:'<b>NAT:</b> VMs sit behind the host and share its IP via address translation. They can reach the internet, but nothing on your LAN can reach them. Safe default for everyday VMs that just need to download updates.' },
+    bridged:  { on:['eVmNet','eVmSwitch1','eVmSwitch2'], t:'<b>Bridged:</b> each VM gets its own IP on your real physical network and appears as a separate device on the LAN — reachable by other machines. Use when a VM must act like a real server on your network.' },
+    hostonly: { on:['eVmSwitch1','eVmSwitch2','eSwitchHost','eVmVm'], t:'<b>Host-only:</b> a private network shared by the host and its VMs, with <b>no internet</b>. The host can talk to the VMs and they can talk to each other — ideal for a controlled lab you can still manage from the host.' },
+    internal: { on:['eVmVm','eVmSwitch1','eVmSwitch2'], t:'<b>Internal:</b> the VMs can only talk to <b>each other</b> — not the host, not the LAN, not the internet. The most isolated option, used for detonating malware that must never escape.' }
+  };
+  function set(m){
+    document.querySelectorAll('#netModes .nmbtn').forEach(b=>b.classList.toggle('active', b.dataset.m===m));
+    const on = modes[m].on;
+    all.forEach(id=>{ const el=E(id); el.classList.toggle('on', on.includes(id)); el.classList.toggle('muted', false); });
+    desc.innerHTML = modes[m].t;
+  }
+  document.getElementById('netModes').addEventListener('click', e=>{ const b=e.target.closest('[data-m]'); if(b) set(b.dataset.m); });
+  set('nat');
+})();
+
+/* ---- VM LAB MANAGER ---- */
+(function(){
+  const VMS = [
+    { id:'kali', name:'Kali Linux', role:'Attacker', ram:4, cpu:2 },
+    { id:'meta', name:'Metasploitable 2', role:'Vulnerable target', ram:1, cpu:1 },
+    { id:'win',  name:'Windows 10', role:'Victim workstation', ram:4, cpu:2 },
+    { id:'pf',   name:'pfSense', role:'Firewall / router', ram:1, cpu:1 }
+  ];
+  const grid = document.getElementById('vmGrid');
+  const st = {}; VMS.forEach(v => st[v.id] = { power:'off', snap:false, cpu:0, ram:0 });
+  let snapped = false, reverted = false;
+
+  grid.innerHTML = VMS.map(v => `
+    <div class="vm" id="vm-${v.id}" data-id="${v.id}">
+      <span class="snaptag">● snapshot</span>
+      <div class="role">${v.role}</div>
+      <h4><span class="led"></span>${v.name}</h4>
+      <div class="spec">${v.cpu} vCPU · ${v.ram} GB RAM &nbsp;<span class="statebadge off" id="badge-${v.id}">off</span></div>
+      <div class="boot"><i id="boot-${v.id}"></i></div>
+      <div class="gauges">
+        <div class="gauge">CPU<div class="bar"><i id="cpu-${v.id}"></i></div></div>
+        <div class="gauge">RAM<div class="bar"><i id="ram-${v.id}"></i></div></div>
+      </div>
+      <div class="btns">
+        <button data-act="power" data-id="${v.id}">Start</button>
+        <button data-act="suspend" data-id="${v.id}" disabled>Suspend</button>
+        <button data-act="snap" data-id="${v.id}" disabled>Snapshot</button>
+        <button data-act="revert" data-id="${v.id}" disabled>Revert</button>
+      </div>
+    </div>`).join('');
+
+  function badge(id){ const s=st[id]; const b=document.getElementById('badge-'+id); b.className='statebadge '+(s.power); b.textContent=s.power; }
+  function refreshCard(id){
+    const v = VMS.find(x=>x.id===id), s = st[id], card = document.getElementById('vm-'+id);
+    card.className = 'vm ' + s.power + (s.snap?' hassnap':'');
+    badge(id);
+    const power = card.querySelector('[data-act=power]'), susp = card.querySelector('[data-act=suspend]'),
+          snap = card.querySelector('[data-act=snap]'), rev = card.querySelector('[data-act=revert]');
+    power.textContent = (s.power==='off') ? 'Start' : (s.power==='suspended' ? 'Resume' : 'Power off');
+    power.disabled = s.power==='booting';
+    susp.disabled = s.power!=='running';
+    snap.disabled = !(s.power==='running');
+    rev.disabled = !s.snap;
+    document.getElementById('cpu-'+id).style.width = s.cpu+'%';
+    document.getElementById('ram-'+id).style.width = s.ram+'%';
+  }
+  function totals(){
+    let run=0, ram=0;
+    VMS.forEach(v=>{ if(st[v.id].power==='running'){ run++; ram+=v.ram; } });
+    document.getElementById('runCount').textContent = run;
+    document.getElementById('ramUse').textContent = ram;
+  }
+  function boot(id){
+    const s = st[id]; s.power='booting'; refreshCard(id);
+    const bar = document.getElementById('boot-'+id); let p=0;
+    const iv = setInterval(()=>{ p+=8+Math.random()*14; bar.style.width=Math.min(100,p)+'%';
+      if(p>=100){ clearInterval(iv); s.power='running'; refreshCard(id); totals(); if(window.NB) NB.unlock('vm-operator'); }
+    }, 120);
+  }
+  grid.addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-act]'); if(!btn) return;
+    const id = btn.dataset.id, act = btn.dataset.act, s = st[id];
+    if(act==='power'){ if(s.power==='off'||s.power==='suspended') boot(id); else { s.power='off'; s.cpu=s.ram=0; refreshCard(id); totals(); } }
+    if(act==='suspend' && s.power==='running'){ s.power='suspended'; refreshCard(id); totals(); }
+    if(act==='snap' && s.power==='running'){ s.snap=true; snapped=true; refreshCard(id); toast(id+': snapshot saved'); maybeAch(); }
+    if(act==='revert' && s.snap){ s.power='running'; reverted=true; refreshCard(id); toast(id+': reverted to snapshot'); maybeAch(); }
+  });
+  function maybeAch(){ if(snapped && reverted && window.NB) NB.unlock('vm-snapshot'); }
+  function toast(msg){
+    const t=document.createElement('div'); t.textContent=msg;
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0d0c14;border:1px solid var(--violet);color:#fff;font-family:var(--mono);font-size:.8rem;padding:10px 16px;border-radius:10px;z-index:9999;box-shadow:0 10px 30px -10px rgba(0,0,0,.7)';
+    document.body.appendChild(t); setTimeout(()=>t.remove(),1800);
+  }
+  // live resource fluctuation for running VMs
+  setInterval(()=>{
+    VMS.forEach(v=>{ const s=st[v.id]; if(s.power==='running'){
+      s.cpu = Math.max(4, Math.min(96, s.cpu + (Math.random()*30-15)));
+      s.ram = Math.max(20, Math.min(92, (s.ram||40) + (Math.random()*14-7)));
+      document.getElementById('cpu-'+v.id).style.width = s.cpu+'%';
+      document.getElementById('ram-'+v.id).style.width = s.ram+'%';
+    }});
+  }, 900);
+  VMS.forEach(v=>refreshCard(v.id)); totals();
+})();
+</script>
+</body>
+</html>

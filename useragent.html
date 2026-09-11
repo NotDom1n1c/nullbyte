@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User-Agent Parser — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 56px 18px; }
+.ua-ta { width: 100%; min-height: 90px; resize: vertical; background: rgba(0,0,0,.32); border: 1px solid var(--line-2); border-radius: 12px; color: var(--ink); font-family: var(--mono); font-size: .82rem; padding: 13px 15px; outline: none; line-height: 1.6; }
+.ua-ta:focus { border-color: var(--accent); }
+.ua-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.ua-ex { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.ua-ex button, .ua-chip { font-family: var(--mono); font-size: .7rem; padding: 6px 11px; border-radius: 7px; border: 1px solid var(--line-2); background: transparent; color: var(--muted); cursor: pointer; transition: .15s; }
+.ua-ex button:hover { border-color: var(--accent); color: var(--accent); }
+.ua-summary { display: flex; align-items: center; gap: 16px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 20px; margin: 22px 0 16px; }
+.ua-summary .ic { width: 52px; height: 52px; border-radius: 13px; background: rgba(34,224,255,.10); border: 1px solid rgba(34,224,255,.28); display: grid; place-items: center; color: var(--accent); flex: none; }
+.ua-summary .ic .ico { width: 26px; height: 26px; }
+.ua-summary .big { font-family: var(--display); font-weight: 700; font-size: 1.35rem; }
+.ua-summary .sub { color: var(--muted); font-family: var(--mono); font-size: .8rem; margin-top: 3px; }
+.ua-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(230px,1fr)); gap: 14px; padding-bottom: 20px; }
+.ua-card { border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 16px 18px; }
+.ua-card h3 { font-family: var(--mono); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-bottom: 12px; }
+.ua-kv { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: .86rem; }
+.ua-kv:last-child { border-bottom: none; }
+.ua-kv span { color: var(--muted); font-family: var(--mono); font-size: .74rem; }
+.ua-kv b { color: var(--ink); text-align: right; }
+.ua-raw { border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 16px 18px; margin-bottom: 70px; }
+.ua-raw code { font-family: var(--mono); font-size: .78rem; color: var(--muted); word-break: break-all; line-height: 1.7; }
+.ua-empty { border: 1px dashed var(--line-2); border-radius: 14px; padding: 42px; text-align: center; color: var(--muted); font-family: var(--mono); font-size: .85rem; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ USER-AGENT ]</span><span class="tag">// client fingerprint</span></div>
+  <h1 class="display">User-agent parser.</h1>
+  <p class="lead" style="margin-top:14px">Break a User-Agent string into browser, engine, OS &amp; device — the same fingerprint every website reads about you. Parses locally, live as you type.</p>
+</section>
+
+<section class="wrap">
+  <textarea class="ua-ta" id="inp" placeholder="Paste a User-Agent string…"></textarea>
+  <div class="ua-row">
+    <button class="btn btn-ghost" id="mine"><svg class="ico ico-sm"><use href="#i-user"/></svg> Use my browser's UA</button>
+  </div>
+  <div class="ua-ex" id="examples"></div>
+  <div id="out"></div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+const EXAMPLES = [
+  ['Chrome (Windows)', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'],
+  ['Firefox (macOS)', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14.1; rv:120.0) Gecko/20100101 Firefox/120.0'],
+  ['Safari (iPhone)', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1'],
+  ['Edge (Windows)', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'],
+  ['Chrome (Android)', 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'],
+  ['Googlebot', 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)']
+];
+
+function parseUA(ua){
+  const r = { browser:{name:null,version:null}, engine:{name:null,version:null}, os:{name:null,version:null}, device:{type:'desktop',vendor:null,model:null}, cpu:null, bot:false };
+  const m = (re) => { const x = ua.match(re); return x ? x[1] : null; };
+
+  // Bots
+  if (/bot|crawl|spider|slurp|bing|duckduck|yandex|baidu|facebookexternalhit|embedly/i.test(ua)){
+    r.bot = true; r.device.type = 'bot';
+    r.browser.name = m(/(Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|facebookexternalhit|[A-Za-z]+bot)/i) || 'Bot';
+    r.browser.version = m(/bot\/([\d.]+)/i);
+  }
+
+  // Engine
+  if (/Gecko\/|rv:/.test(ua) && /Firefox/.test(ua)) { r.engine.name = 'Gecko'; r.engine.version = m(/rv:([\d.]+)/); }
+  else if (/AppleWebKit/.test(ua)) { r.engine.name = 'WebKit'; r.engine.version = m(/AppleWebKit\/([\d.]+)/); }
+  else if (/Trident/.test(ua)) { r.engine.name = 'Trident'; r.engine.version = m(/Trident\/([\d.]+)/); }
+
+  // Browser (order matters — most specific first)
+  if (/Edg(?:e|A|iOS)?\//.test(ua)) { r.browser.name = 'Edge'; r.browser.version = m(/Edg(?:e|A|iOS)?\/([\d.]+)/); r.engine.name = 'Blink'; }
+  else if (/OPR\/|Opera/.test(ua)) { r.browser.name = 'Opera'; r.browser.version = m(/(?:OPR|Opera)\/([\d.]+)/); r.engine.name = 'Blink'; }
+  else if (/SamsungBrowser/.test(ua)) { r.browser.name = 'Samsung Internet'; r.browser.version = m(/SamsungBrowser\/([\d.]+)/); r.engine.name = 'Blink'; }
+  else if (/Firefox\//.test(ua)) { r.browser.name = 'Firefox'; r.browser.version = m(/Firefox\/([\d.]+)/); }
+  else if (/Chrome\//.test(ua) && !r.bot) { r.browser.name = 'Chrome'; r.browser.version = m(/Chrome\/([\d.]+)/); r.engine.name = 'Blink'; }
+  else if (/Version\/[\d.]+.*Safari/.test(ua)) { r.browser.name = 'Safari'; r.browser.version = m(/Version\/([\d.]+)/); }
+  else if (/MSIE |Trident/.test(ua)) { r.browser.name = 'Internet Explorer'; r.browser.version = m(/MSIE ([\d.]+)/) || m(/rv:([\d.]+)/); }
+
+  // OS
+  if (/Windows NT/.test(ua)) { r.os.name = 'Windows'; const v = m(/Windows NT ([\d.]+)/); const map = {'10.0':'10/11','6.3':'8.1','6.2':'8','6.1':'7','6.0':'Vista','5.1':'XP'}; r.os.version = map[v] || v; }
+  else if (/iPhone|iPad|iPod/.test(ua)) { r.os.name = 'iOS'; r.os.version = (m(/OS ([\d_]+)/)||'').replace(/_/g,'.'); }
+  else if (/Mac OS X/.test(ua)) { r.os.name = 'macOS'; r.os.version = (m(/Mac OS X ([\d_]+)/)||'').replace(/_/g,'.'); }
+  else if (/Android/.test(ua)) { r.os.name = 'Android'; r.os.version = m(/Android ([\d.]+)/); }
+  else if (/CrOS/.test(ua)) { r.os.name = 'ChromeOS'; }
+  else if (/Linux/.test(ua)) { r.os.name = 'Linux'; }
+
+  // Device
+  if (/iPad|Tablet|Nexus 7|Nexus 9|Nexus 10/i.test(ua)) r.device.type = r.bot ? 'bot' : 'tablet';
+  else if (/Mobile|iPhone|iPod|Android.*Mobile|Windows Phone/i.test(ua)) r.device.type = r.bot ? 'bot' : 'mobile';
+  else if (!r.bot) r.device.type = 'desktop';
+  if (/iPhone/.test(ua)) { r.device.vendor = 'Apple'; r.device.model = 'iPhone'; }
+  else if (/iPad/.test(ua)) { r.device.vendor = 'Apple'; r.device.model = 'iPad'; }
+  else if (/Pixel (\d+)/.test(ua)) { r.device.vendor = 'Google'; r.device.model = m(/(Pixel \d+)/); }
+  else if (/SM-[A-Z0-9]+/.test(ua)) { r.device.vendor = 'Samsung'; r.device.model = m(/(SM-[A-Z0-9]+)/); }
+
+  // CPU
+  if (/x64|Win64|x86_64|WOW64/.test(ua)) r.cpu = 'x86-64 (64-bit)';
+  else if (/arm|aarch64/i.test(ua)) r.cpu = 'ARM';
+  else if (/i[36]86/.test(ua)) r.cpu = 'x86 (32-bit)';
+
+  return r;
+}
+
+const inp = document.getElementById('inp'), out = document.getElementById('out');
+const icoFor = t => t === 'mobile' ? 'i-phone' : t === 'tablet' ? 'i-monitor' : t === 'bot' ? 'i-radar' : 'i-monitor';
+const dash = v => v || '—';
+
+function render(){
+  const ua = inp.value.trim();
+  if (!ua){ out.innerHTML = '<div class="ua-empty">Paste a User-Agent, use your own, or pick an example above.</div>'; return; }
+  const d = parseUA(ua);
+  const devName = d.device.type === 'mobile' ? 'Smartphone' : d.device.type === 'tablet' ? 'Tablet' : d.device.type === 'bot' ? 'Bot / Crawler' : 'Desktop';
+  out.innerHTML = `
+    <div class="ua-summary">
+      <div class="ic"><svg class="ico"><use href="#${icoFor(d.device.type)}"/></svg></div>
+      <div>
+        <div class="big">${dash(d.browser.name)} ${d.browser.version||''}</div>
+        <div class="sub">${dash(d.os.name)} ${d.os.version||''} · ${devName}</div>
+      </div>
+    </div>
+    <div class="ua-grid">
+      <div class="ua-card"><h3>Browser</h3>
+        <div class="ua-kv"><span>Name</span><b>${dash(d.browser.name)}</b></div>
+        <div class="ua-kv"><span>Version</span><b>${dash(d.browser.version)}</b></div>
+        <div class="ua-kv"><span>Major</span><b>${dash((d.browser.version||'').split('.')[0])}</b></div>
+      </div>
+      <div class="ua-card"><h3>Rendering engine</h3>
+        <div class="ua-kv"><span>Engine</span><b>${dash(d.engine.name)}</b></div>
+        <div class="ua-kv"><span>Version</span><b>${dash(d.engine.version)}</b></div>
+      </div>
+      <div class="ua-card"><h3>Operating system</h3>
+        <div class="ua-kv"><span>Name</span><b>${dash(d.os.name)}</b></div>
+        <div class="ua-kv"><span>Version</span><b>${dash(d.os.version)}</b></div>
+      </div>
+      <div class="ua-card"><h3>Device &amp; CPU</h3>
+        <div class="ua-kv"><span>Type</span><b>${devName}</b></div>
+        <div class="ua-kv"><span>Vendor</span><b>${dash(d.device.vendor)}</b></div>
+        <div class="ua-kv"><span>Model</span><b>${dash(d.device.model)}</b></div>
+        <div class="ua-kv"><span>CPU</span><b>${dash(d.cpu)}</b></div>
+      </div>
+    </div>
+    <div class="ua-raw"><h3 style="font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:10px">Raw string</h3><code>${ua.replace(/</g,'&lt;')}</code></div>`;
+}
+
+document.getElementById('examples').innerHTML = EXAMPLES.map((e,i) => `<button data-i="${i}">${e[0]}</button>`).join('');
+document.getElementById('examples').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; inp.value = EXAMPLES[+b.dataset.i][1]; render(); });
+document.getElementById('mine').addEventListener('click', () => { inp.value = navigator.userAgent; render(); });
+inp.addEventListener('input', render);
+render();
+})();
+</script>
+</body>
+</html>

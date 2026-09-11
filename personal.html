@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 16px; padding-bottom: 20px; }
+.hub-card { display: flex; flex-direction: column; min-height: 168px; }
+.hub-card .tag { font-family: var(--mono); font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.hub-card h3 { font-family: var(--display); font-weight: 700; font-size: 1.12rem; margin: 8px 0 6px; }
+.hub-card p { color: var(--muted); font-size: .9rem; font-weight: 300; flex: 1; }
+.hub-card .go { margin-top: 14px; font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--cyan); display: inline-flex; gap: 6px; align-items: center; }
+.hub-card:hover .go { transform: translateX(3px); } .hub-card .go { transition: transform .18s; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span>
+    <a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a>
+  </nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+<main class="wrap">
+  <div class="page-head rv">
+    <span class="kick"><i class="pip"></i>Personal · Your workspace</span>
+    <h1>Your <em>workspace.</em></h1>
+    <p>Notes, habits, snippets, a calendar, timers and more — productivity tools, all saved locally in your browser.</p>
+  </div>
+  <div class="hub-grid">
+    <a class="pane hub-card rv" href="calendar.html"><span class="tag">P-01</span><h3>Calendar</h3><p>Plan days, add categorised events &amp; search.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="typing.html"><span class="tag">P-02</span><h3>Typing Test</h3><p>Words-per-minute &amp; accuracy trainer.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="reaction.html"><span class="tag">P-03</span><h3>Reaction Time</h3><p>Test your reflexes — wait for cyan, then click.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="pomodoro.html"><span class="tag">P-04</span><h3>Focus Timer</h3><p>Pomodoro sprints &amp; cooldowns for deep work.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="keybinds.html"><span class="tag">P-05</span><h3>Keybind Trainer</h3><p>Drill Vim, VS Code &amp; terminal shortcuts.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="calculator.html"><span class="tag">P-06</span><h3>Calculator</h3><p>Base converter, scientific calc, redundancy &amp; Hamming.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="flowchart.html"><span class="tag">P-07</span><h3>Flowchart Editor</h3><p>Draw diagrams, flowcharts &amp; network maps on an infinite canvas.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="notes.html"><span class="tag">P-08</span><h3>Notes</h3><p>Markdown note editor with folders, tags &amp; full-text search.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="habits.html"><span class="tag">P-09</span><h3>Habit Tracker</h3><p>Build streaks and track your daily habits over time.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="snippets.html"><span class="tag">P-10</span><h3>Snippet Vault</h3><p>Save, tag &amp; search reusable code snippets across languages.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="ember.html"><span class="tag">P-11</span><h3>Ember</h3><p>Private browser-based image editor — crop, adjust, filter &amp; export.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="gambit.html"><span class="tag">P-12</span><h3>Chess</h3><p>GAMBIT — play bots, puzzle rushes, tactics drills &amp; game review.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </div>
+</main>
+<footer class="wrap"><div class="foot-pill rv"><span>NULLBYTE · PERSONAL</span><span>SAVED LOCALLY &middot; NO SIGN-UP</span></div></footer>
+<script src="assets/shared.js"></script>
+</body>
+</html>

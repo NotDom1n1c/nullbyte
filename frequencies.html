@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frequencies — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 24px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.panel-c { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 28px; }
+.sec-t { font-family: var(--display); font-weight: 600; font-size: 1.5rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; }
+.sec-d { color: var(--muted); font-size: .92rem; margin-bottom: 22px; }
+/* dial */
+.dial { position: relative; height: 150px; margin: 40px 6px 10px; }
+.dial-line { position: absolute; left: 0; right: 0; top: 70px; height: 2px; background: linear-gradient(90deg, #3b82f6, #22d3ee, #a855f7, #f59e0b, #ec4899); border-radius: 2px; box-shadow: 0 0 14px rgba(168,85,247,.4); }
+.tick { position: absolute; top: 64px; width: 1px; height: 14px; background: var(--line-2); }
+.tick span { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: .64rem; color: var(--faint); white-space: nowrap; }
+.fmark { position: absolute; transform: translateX(-50%); cursor: default; }
+.fmark .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg); position: absolute; top: 64px; left: 50%; transform: translateX(-50%); box-shadow: 0 0 10px currentColor; }
+.fmark .lbl { position: absolute; bottom: 86px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: .66rem; white-space: nowrap; color: var(--ink); }
+.fmark:nth-child(even) .lbl { bottom: auto; top: 86px; }
+.fmark:hover .dot { transform: translateX(-50%) scale(1.4); }
+
+.search-box { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg-2); margin-bottom: 16px; max-width: 360px; }
+.search-box input { flex: 1; background: none; border: none; outline: none; color: var(--ink); font-family: var(--mono); font-size: .85rem; }
+.ftable { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.ftable th, .ftable td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.ftable th { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.ftable td.f { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
+.ftable td.u { font-weight: 600; }
+.ftable td.r { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ RF ]</span><span class="tag">// frequency reference</span></div>
+  <h1 class="display">Frequencies.</h1>
+  <p class="lead" style="margin-top:20px">The most important radio frequencies — the RF counterpart to the port table.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:24px">
+  <div class="panel-c">
+    <div class="sec-t">Frequency band</div>
+    <div class="sec-d">From kHz (left) to GHz (right) — log scale, like a radio dial.</div>
+    <div class="dial" id="dial"></div>
+  </div>
+</section>
+
+<section class="wrap" style="padding-bottom:70px">
+  <div class="panel-c">
+    <div class="sec-t">Table</div>
+    <div class="sec-d">Searchable by frequency or use.</div>
+    <label class="search-box"><svg class="ico ico-sm"><use href="#i-search"/></svg><input id="freqSearch" placeholder="Search — e.g. "433" or "NFC"…"></label>
+    <div style="overflow:auto"><table class="ftable"><thead><tr><th>Frequency</th><th>Use</th><th>Notes</th></tr></thead><tbody id="freqBody"></tbody></table></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const FREQ = [
+  { hz:38e3,   f:'38 kHz',    c:'#fb6a5d', u:'Infrared (TV remotes)',                 r:'Not "real" radio — a light signal' },
+  { hz:125e3,  f:'125 kHz',   c:'#3b82f6', u:'LF RFID (door chips, EM4100)',                    r:'Very short range, ~5 cm' },
+  { hz:13.56e6,f:'13.56 MHz', c:'#22d3ee', u:'HF NFC (Mifare, NTAG, hotel cards)',            r:'Up to ~10 cm, can be encrypted' },
+  { hz:433e6,  f:'433 MHz',   c:'#a855f7', u:'Garage doors, car keys (old), weather stations', r:'Up to ~100 m, often rolling code' },
+  { hz:868e6,  f:'868 MHz',   c:'#c084fc', u:'European IoT devices, smart home',            r:'EU standard Sub-GHz' },
+  { hz:915e6,  f:'915 MHz',   c:'#e040fb', u:'American IoT devices',                      r:'US standard Sub-GHz' },
+  { hz:2.4e9,  f:'2.4 GHz',   c:'#ec4899', u:'Wi-Fi (b/g/n), Bluetooth, drones, RC cars',    r:'Very common, often crowded' },
+  { hz:5e9,    f:'5 GHz',     c:'#f59e0b', u:'Wi-Fi (ac/ax)',                                  r:'Faster, shorter range' }
+];
+const LMIN = 4, LMAX = 10; // log10(1e4) .. log10(1e10)
+const pos = hz => (Math.log10(hz) - LMIN) / (LMAX - LMIN) * 100;
+
+const dial = document.getElementById('dial');
+let html = '<div class="dial-line"></div>';
+[['10 kHz',1e4],['100 kHz',1e5],['1 MHz',1e6],['10 MHz',1e7],['100 MHz',1e8],['1 GHz',1e9],['10 GHz',1e10]].forEach(t => {
+  html += `<div class="tick" style="left:${pos(t[1])}%"><span>${t[0]}</span></div>`;
+});
+FREQ.forEach(x => {
+  html += `<div class="fmark" style="left:${pos(x.hz)}%; color:${x.c}"><span class="lbl">${x.f}</span><span class="dot" style="background:${x.c}"></span></div>`;
+});
+dial.innerHTML = html;
+
+function renderFreq(q = '') {
+  q = q.toLowerCase().trim();
+  document.getElementById('freqBody').innerHTML = FREQ
+    .filter(x => x.f.toLowerCase().includes(q) || x.u.toLowerCase().includes(q) || x.r.toLowerCase().includes(q))
+    .map(x => `<tr><td class="f" style="color:${x.c}">${x.f}</td><td class="u">${x.u}</td><td class="r">${x.r}</td></tr>`).join('')
+    || '<tr><td colspan="3" style="text-align:center;color:var(--faint);padding:24px;font-family:var(--mono)">// no results</td></tr>';
+}
+document.getElementById('freqSearch').addEventListener('input', e => renderFreq(e.target.value));
+renderFreq();
+</script>
+</body>
+</html>

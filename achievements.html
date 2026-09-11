@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achievements — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 22px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.xp-bar-wrap { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); padding: 26px; margin-bottom: 24px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.xp-num { font-family: var(--display); font-weight: 700; font-size: 3rem; line-height: 1; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.xp-lab { font-family: var(--mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.xp-track { flex: 1; min-width: 220px; }
+.xp-track .bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.06); overflow: hidden; margin-top: 10px; }
+.xp-track .bar i { display: block; height: 100%; background: var(--grad); transition: width .5s; }
+.ach-reset { font-family: var(--mono); font-size: .72rem; color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 14px; cursor: pointer; }
+.ach-reset:hover { border-color: var(--pink); color: var(--pink); }
+.ach-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; padding-bottom: 70px; }
+.ach { border: 1px solid var(--line); border-radius: var(--r); background: rgba(255,255,255,.02); padding: 24px; display: flex; gap: 16px; align-items: flex-start; transition: .2s; }
+.ach.un { border-color: var(--violet); background: linear-gradient(180deg, rgba(168,85,247,.1), rgba(255,255,255,.01)); box-shadow: var(--glow-sm); }
+.ach .ic { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; flex: none; border: 1px solid var(--line-2); color: var(--faint); }
+.ach.un .ic { color: #fff; background: var(--grad); border-color: transparent; }
+.ach h3 { font-size: 1.05rem; }
+.ach.un h3 { color: #fff; }
+.ach:not(.un) h3 { color: var(--muted); }
+.ach p { color: var(--muted); font-size: .86rem; margin-top: 4px; }
+.ach .state { font-family: var(--mono); font-size: .64rem; text-transform: uppercase; letter-spacing: .08em; margin-top: 8px; color: var(--faint); }
+.ach.un .state { color: var(--violet); }
+@media (max-width:860px){ .ach-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ XP ]</span><span class="tag">// progress</span></div>
+  <h1 class="display">Achievements.</h1>
+  <p class="lead" style="margin-top:20px">Your progress across the site — read terms, open tools, solve challenges. Stored locally in your browser.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:10px">
+  <div class="xp-bar-wrap">
+    <div><div class="xp-num" id="xpNum">0</div><div class="xp-lab">Total XP</div></div>
+    <div class="xp-track"><div class="xp-lab" id="xpCount">0 / 0 freigeschaltet</div><div class="bar"><i id="xpFill"></i></div></div>
+    <button class="ach-reset" id="achReset">Reset progress</button>
+  </div>
+</section>
+
+<section class="wrap"><div class="ach-grid" id="achGrid"></div></section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+function render() {
+  const s = NB.get(), ids = Object.keys(NB.ACH), unlocked = ids.filter(id => s.ach[id]);
+  document.getElementById('xpNum').textContent = unlocked.length * 100;
+  document.getElementById('xpCount').textContent = unlocked.length + ' / ' + ids.length + ' unlocked';
+  document.getElementById('xpFill').style.width = (unlocked.length / ids.length * 100) + '%';
+  document.getElementById('achGrid').innerHTML = ids.map(id => {
+    const a = NB.ACH[id], on = !!s.ach[id];
+    return `<div class="ach ${on ? 'un' : ''}"><div class="ic"><svg class="ico ico-lg"><use href="#${a.icon}"/></svg></div>
+      <div><h3>${a.name}</h3><p>${a.desc}</p><div class="state">${on ? '✔ unlocked' : '· locked'}</div></div></div>`;
+  }).join('');
+}
+document.getElementById('achReset').addEventListener('click', () => { NB.reset(); render(); });
+render();
+</script>
+</body>
+</html>

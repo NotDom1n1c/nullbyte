@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Header Analyzer — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 56px 18px; }
+.eh-ta { width: 100%; min-height: 150px; resize: vertical; background: rgba(0,0,0,.32); border: 1px solid var(--line-2); border-radius: 12px; color: var(--ink); font-family: var(--mono); font-size: .78rem; padding: 14px 16px; outline: none; line-height: 1.55; }
+.eh-ta:focus { border-color: var(--accent); }
+.eh-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.eh-sec { margin-top: 22px; }
+.eh-sec > h2 { font-family: var(--mono); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 14px; }
+.eh-meta { border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 4px 18px; }
+.eh-kv { display: flex; gap: 14px; padding: 11px 0; border-bottom: 1px dashed var(--line); font-size: .88rem; }
+.eh-kv:last-child { border-bottom: none; }
+.eh-kv span { color: var(--faint); font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; min-width: 110px; flex: none; }
+.eh-kv b { color: var(--ink); font-weight: 500; word-break: break-word; }
+.eh-auth { display: flex; gap: 12px; flex-wrap: wrap; }
+.eh-badge { display: flex; align-items: center; gap: 9px; border: 1px solid var(--line-2); border-radius: 12px; padding: 12px 16px; font-family: var(--mono); font-size: .8rem; background: linear-gradient(180deg,#0c0c0e,#08080a); }
+.eh-badge .n { color: var(--faint); text-transform: uppercase; font-size: .68rem; letter-spacing: .08em; }
+.eh-badge .r { font-weight: 700; }
+.eh-badge.pass { border-color: rgba(120,255,178,.4); } .eh-badge.pass .r { color: #7CFFB2; }
+.eh-badge.fail { border-color: rgba(255,84,112,.4); } .eh-badge.fail .r { color: var(--pink); }
+.eh-badge.none .r { color: var(--faint); }
+.eh-hops { display: flex; flex-direction: column; gap: 0; padding-bottom: 70px; }
+.eh-hop { display: flex; gap: 14px; }
+.eh-hop .rail { display: flex; flex-direction: column; align-items: center; flex: none; }
+.eh-hop .node { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); background: #08080a; margin-top: 5px; }
+.eh-hop .line { width: 2px; flex: 1; background: var(--line-2); min-height: 18px; }
+.eh-hop:last-child .line { display: none; }
+.eh-hop .body { border: 1px solid var(--line); border-radius: 10px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 12px 15px; margin-bottom: 12px; flex: 1; min-width: 0; }
+.eh-hop .h { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
+.eh-hop .h b { font-size: .86rem; word-break: break-word; }
+.eh-hop .delay { font-family: var(--mono); font-size: .72rem; color: var(--accent); flex: none; }
+.eh-hop .sub { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin-top: 4px; word-break: break-word; }
+.eh-empty { border: 1px dashed var(--line-2); border-radius: 14px; padding: 42px; text-align: center; color: var(--muted); font-family: var(--mono); font-size: .85rem; }
+.eh-total { font-family: var(--mono); font-size: .8rem; color: var(--muted); margin: 10px 0 4px; }
+.eh-total b { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ EMAIL ]</span><span class="tag">// header forensics</span></div>
+  <h1 class="display">Email header analyzer.</h1>
+  <p class="lead" style="margin-top:14px">Paste raw email headers to trace the delivery path hop by hop, time each relay, and read the SPF / DKIM / DMARC verdicts — the first move in spotting a spoofed sender. Parses locally.</p>
+</section>
+
+<section class="wrap">
+  <textarea class="eh-ta" id="inp" placeholder="Paste raw headers (in Gmail: ⋮ → Show original; in Outlook: File → Properties → Internet headers)…"></textarea>
+  <div class="eh-row">
+    <button class="btn btn-primary" id="analyze"><svg class="ico ico-sm"><use href="#i-search"/></svg> Analyze</button>
+    <button class="btn btn-ghost" id="sample">Load a sample</button>
+  </div>
+  <div id="out"><div class="eh-empty" style="margin-top:22px">Paste headers and hit Analyze — or load a sample to see how it works.</div></div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+  const inp = document.getElementById('inp'), out = document.getElementById('out');
+  const esc = s => (s==null?'':''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const SAMPLE = `Delivery-date: Mon, 03 Jul 2026 09:42:17 +0200
+Return-Path: <newsletter@marketing.example.com>
+Received: from mail.relay-b.net (mail.relay-b.net [203.0.113.42])
+	by mx.recipient.org (Postfix) with ESMTPS id 4A1F2
+	for <victim@recipient.org>; Mon, 03 Jul 2026 09:42:15 +0200 (CEST)
+Received: from smtp.sender-c.com (smtp.sender-c.com [198.51.100.7])
+	by mail.relay-b.net (Postfix) with ESMTP id 9B3C1
+	for <victim@recipient.org>; Mon, 03 Jul 2026 09:42:09 +0200 (CEST)
+Received: from localhost (unknown [192.0.2.55])
+	by smtp.sender-c.com (Postfix) with ESMTPA id 1D77E
+	for <victim@recipient.org>; Mon, 03 Jul 2026 09:41:58 +0200 (CEST)
+Authentication-Results: mx.recipient.org;
+	spf=pass smtp.mailfrom=marketing.example.com;
+	dkim=pass header.d=example.com;
+	dmarc=fail (p=reject) header.from=paypal.com
+Received-SPF: pass (recipient.org: domain of marketing.example.com designates 203.0.113.42 as permitted sender)
+Message-ID: <20260703.4A1F2@marketing.example.com>
+From: "PayPal Security" <newsletter@marketing.example.com>
+To: victim@recipient.org
+Subject: Your account has been limited
+Date: Mon, 03 Jul 2026 09:41:57 +0200`;
+
+  function unfold(raw){
+    // RFC 5322 header unfolding: continuation lines start with whitespace
+    const lines = raw.replace(/\r\n/g,'\n').split('\n');
+    const headers = [];
+    for (const ln of lines){
+      if (/^\s/.test(ln) && headers.length){ headers[headers.length-1] += ' ' + ln.trim(); }
+      else if (ln.trim() === '' && headers.length) { /* end of headers */ }
+      else { headers.push(ln); }
+    }
+    return headers.map(h => { const i = h.indexOf(':'); return i < 0 ? null : { name: h.slice(0,i).trim(), value: h.slice(i+1).trim() }; }).filter(Boolean);
+  }
+  const first = (hs, name) => { const h = hs.find(x => x.name.toLowerCase() === name); return h ? h.value : ''; };
+  const all = (hs, name) => hs.filter(x => x.name.toLowerCase() === name).map(x => x.value);
+
+  function parseReceived(v){
+    // "from A by B ...; <date>"
+    const from = (v.match(/from\s+([^\s;(]+)/i) || [])[1] || '';
+    const by = (v.match(/\bby\s+([^\s;(]+)/i) || [])[1] || '';
+    const ip = (v.match(/\[([0-9a-fA-F:.]+)\]/) || [])[1] || '';
+    const withP = (v.match(/\bwith\s+([A-Z0-9]+)/i) || [])[1] || '';
+    const dateStr = v.includes(';') ? v.slice(v.lastIndexOf(';')+1).trim() : '';
+    const d = dateStr ? new Date(dateStr.replace(/\s*\([A-Z]+\)\s*$/,'')) : null;
+    return { from, by, ip, withP, date: d && !isNaN(d) ? d : null, dateStr };
+  }
+
+  function authVerdict(hs){
+    const ar = all(hs, 'authentication-results').join(' ; ');
+    const spfH = first(hs, 'received-spf');
+    const pick = re => { const m = ar.match(re); return m ? m[1].toLowerCase() : ''; };
+    let spf = pick(/spf=(\w+)/i);
+    if (!spf && spfH) spf = (spfH.match(/^(\w+)/) || [])[1] || '';
+    return {
+      spf: spf,
+      dkim: pick(/dkim=(\w+)/i),
+      dmarc: pick(/dmarc=(\w+)/i)
+    };
+  }
+
+  function fmtDur(ms){
+    if (ms < 0) return '—';
+    const s = Math.round(ms/1000);
+    if (s < 60) return s + 's';
+    const m = Math.floor(s/60), rs = s%60;
+    return m + 'm ' + rs + 's';
+  }
+
+  function analyze(){
+    const raw = inp.value.trim();
+    if (!raw){ out.innerHTML = '<div class="eh-empty" style="margin-top:22px">Nothing to analyze — paste raw headers first.</div>'; return; }
+    const hs = unfold(raw);
+    if (!hs.length){ out.innerHTML = '<div class="eh-empty" style="margin-top:22px">Couldn\'t find any headers in that text.</div>'; return; }
+
+    const from = first(hs,'from'), to = first(hs,'to'), subj = first(hs,'subject'), date = first(hs,'date');
+    const mid = first(hs,'message-id'), rpath = first(hs,'return-path');
+    const auth = authVerdict(hs);
+
+    // Received chain: header order is newest→oldest; reverse for chronological (origin→recipient)
+    const received = all(hs,'received').map(parseReceived).reverse();
+
+    // spoofing hint: From domain vs Return-Path / DMARC
+    const fromDom = (from.match(/@([\w.-]+)/) || [])[1] || '';
+    const rpDom = (rpath.match(/@([\w.-]+)/) || [])[1] || '';
+    const mismatch = fromDom && rpDom && fromDom.toLowerCase() !== rpDom.toLowerCase();
+
+    const badge = (name, r) => {
+      const rl = (r||'').toLowerCase();
+      const cls = rl === 'pass' ? 'pass' : (rl === 'fail' || rl === 'softfail' || rl==='reject') ? 'fail' : 'none';
+      return `<div class="eh-badge ${cls}"><span class="n">${name}</span><span class="r">${r ? r.toUpperCase() : 'N/A'}</span></div>`;
+    };
+
+    let hopsHTML = '';
+    let totalMs = -1;
+    if (received.length){
+      const times = received.map(r => r.date);
+      const firstT = times.find(Boolean), lastT = [...times].reverse().find(Boolean);
+      if (firstT && lastT) totalMs = lastT - firstT;
+      hopsHTML = received.map((r,i) => {
+        const prev = received[i-1];
+        let delay = '';
+        if (i>0 && r.date && prev && prev.date) delay = '+' + fmtDur(r.date - prev.date);
+        return `<div class="eh-hop"><div class="rail"><div class="node"></div><div class="line"></div></div>
+          <div class="body"><div class="h"><b>${esc(r.by || r.from || 'relay '+(i+1))}</b>${delay?`<span class="delay">${delay}</span>`:''}</div>
+          <div class="sub">${r.from?('from '+esc(r.from)):''}${r.ip?' · '+esc(r.ip):''}${r.withP?' · '+esc(r.withP):''}${r.dateStr?' · '+esc(r.dateStr):''}</div></div></div>`;
+      }).join('');
+    }
+
+    out.innerHTML = `
+      <div class="eh-sec"><h2>Message</h2>
+        <div class="eh-meta">
+          <div class="eh-kv"><span>From</span><b>${esc(from)||'—'}</b></div>
+          <div class="eh-kv"><span>To</span><b>${esc(to)||'—'}</b></div>
+          <div class="eh-kv"><span>Subject</span><b>${esc(subj)||'—'}</b></div>
+          <div class="eh-kv"><span>Date</span><b>${esc(date)||'—'}</b></div>
+          <div class="eh-kv"><span>Return-Path</span><b>${esc(rpath)||'—'}${mismatch?' <span style="color:var(--pink);font-family:var(--mono);font-size:.72rem">⚠ differs from From domain</span>':''}</b></div>
+          <div class="eh-kv"><span>Message-ID</span><b>${esc(mid)||'—'}</b></div>
+        </div>
+      </div>
+      <div class="eh-sec"><h2>Authentication</h2>
+        <div class="eh-auth">${badge('SPF',auth.spf)}${badge('DKIM',auth.dkim)}${badge('DMARC',auth.dmarc)}</div>
+        ${(auth.dmarc==='fail'||mismatch)?'<div class="eh-total" style="color:var(--pink)">⚠ Authentication or domain mismatch — treat this message as likely spoofed.</div>':''}
+      </div>
+      <div class="eh-sec"><h2>Delivery path · ${received.length} hop${received.length!==1?'s':''}</h2>
+        ${totalMs>=0?`<div class="eh-total">Total transit time: <b>${fmtDur(totalMs)}</b></div>`:''}
+        <div class="eh-hops">${hopsHTML || '<div class="eh-empty">No Received headers found.</div>'}</div>
+      </div>`;
+  }
+
+  document.getElementById('analyze').addEventListener('click', analyze);
+  document.getElementById('sample').addEventListener('click', () => { inp.value = SAMPLE; analyze(); out.scrollIntoView({behavior:'smooth',block:'nearest'}); });
+  inp.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') analyze(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 56px 16px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 5px; border: 1px solid var(--line-2); border-radius: 999px; background: rgba(0,0,0,.25); margin-bottom: 20px; }
+.tabs button { font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; padding: 9px 16px; border: none; background: transparent; color: var(--muted); border-radius: 999px; cursor: pointer; }
+.tabs button.active { background: var(--grad); color: #fff; font-weight: 700; box-shadow: var(--glow-sm); }
+.pane { display: none; }
+.pane.show { display: block; animation: rise .35s ease; }
+.panel-c { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 26px; margin-bottom: 16px; }
+.sec-t { font-family: var(--display); font-weight: 600; font-size: 1.4rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; }
+.sec-d { color: var(--muted); font-size: .9rem; margin: 4px 0 18px; }
+label.lbl { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: block; margin-bottom: 7px; }
+.in { width: 100%; padding: 13px 15px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(0,0,0,.3); color: var(--ink); font-family: var(--mono); font-size: .95rem; outline: none; }
+.in:focus { border-color: var(--violet); box-shadow: 0 0 0 3px color-mix(in srgb,var(--violet) 20%,transparent); }
+.seg2 { display: inline-flex; border: 1px solid var(--line-2); border-radius: 9px; overflow: hidden; }
+.seg2 button { font-family: var(--mono); font-size: .74rem; padding: 9px 15px; border: none; background: transparent; color: var(--muted); cursor: pointer; }
+.seg2 button.active { background: var(--grad); color: #fff; font-weight: 700; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.out-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 18px; }
+.out-grid > div { background: rgba(10,10,16,.5); padding: 15px 17px; }
+.out-grid .k { font-family: var(--mono); font-size: .64rem; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+.out-grid .v { margin-top: 5px; font-family: var(--mono); font-weight: 600; color: var(--violet); word-break: break-all; }
+.steps { font-family: var(--mono); font-size: .82rem; line-height: 1.8; background: #07070b; border: 1px solid var(--line-2); border-left: 3px solid var(--violet); border-radius: 9px; padding: 14px 16px; margin-top: 16px; white-space: pre-wrap; color: var(--muted); }
+.steps b { color: var(--ink); }
+.err { color: var(--pink); }
+/* ref table */
+.reftab { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .8rem; margin-top: 18px; }
+.reftab th, .reftab td { border: 1px solid var(--line); padding: 6px 10px; text-align: center; }
+.reftab th { color: var(--faint); font-size: .64rem; text-transform: uppercase; }
+.reftab td.hx { color: var(--violet); font-weight: 700; }
+/* calc keypad */
+.calc-disp { font-family: var(--mono); background: #07070b; border: 1px solid var(--line-2); border-radius: 12px; padding: 16px 18px; min-height: 84px; text-align: right; }
+.calc-disp .ex { color: var(--muted); font-size: .9rem; min-height: 20px; word-break: break-all; }
+.calc-disp .res { color: var(--violet); font-family: var(--display); font-weight: 700; font-size: 2rem; }
+.keys { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-top: 14px; }
+.keys button { padding: 14px 0; border: 1px solid var(--line-2); border-radius: 10px; background: rgba(255,255,255,.02); color: var(--ink); font-family: var(--mono); font-size: .95rem; cursor: pointer; transition: .12s; }
+.keys button:hover { border-color: var(--violet); color: var(--violet); }
+.keys button.fn { color: var(--violet); font-size: .8rem; }
+.keys button.op { background: color-mix(in srgb, var(--violet) 12%, transparent); }
+.keys button.eq { background: var(--grad); color: #fff; font-weight: 700; grid-column: span 2; }
+.hint { font-family: var(--mono); font-size: .74rem; color: var(--faint); margin-top: 12px; }
+.diffmark { font-family: var(--mono); white-space: pre; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ CALC ]</span><span class="tag">// number toolkit</span></div>
+  <h1 class="display">Calculator.</h1>
+  <p class="lead" style="margin-top:14px">A full number toolkit — base converter, scientific calculator, redundancy and Hamming distance. Every conversion shows its working.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:70px">
+  <div class="tabs" id="tabs">
+    <button data-p="conv" class="active">Converter</button>
+    <button data-p="calc">Calculator</button>
+    <button data-p="red">Redundancy</button>
+    <button data-p="ham">Hamming</button>
+  </div>
+
+  <!-- CONVERTER -->
+  <div class="pane show" data-pane="conv">
+    <div class="panel-c">
+      <div class="sec-t">Base converter</div>
+      <div class="sec-d">Convert between decimal, binary and hex — with the full working.</div>
+      <div class="row">
+        <div style="flex:1; min-width:200px"><label class="lbl">Value</label><input class="in" id="convIn" value="156"></div>
+        <div><label class="lbl">Input base</label><div class="seg2" id="convBase"><button data-b="10" class="active">DEC</button><button data-b="16">HEX</button><button data-b="2">BIN</button></div></div>
+        <button class="btn btn-primary" id="convBtn"><svg class="ico"><use href="#i-refresh"/></svg> Convert</button>
+      </div>
+      <div class="out-grid" id="convOut"></div>
+      <div class="steps" id="convSteps"></div>
+    </div>
+    <div class="panel-c">
+      <div class="sec-t">Hex reference</div>
+      <div class="sec-d">0–F with decimal and 4-bit binary (8 / 4 / 2 / 1).</div>
+      <div style="overflow:auto"><table class="reftab" id="refTab"></table></div>
+    </div>
+  </div>
+
+  <!-- CALCULATOR -->
+  <div class="pane" data-pane="calc">
+    <div class="panel-c">
+      <div class="sec-t">Scientific calculator</div>
+      <div class="sec-d">Supports + − × ÷, parentheses, ^ (power), sqrt, log2, log, ln, abs.</div>
+      <div class="calc-disp"><div class="ex" id="calcEx">&nbsp;</div><div class="res" id="calcRes">0</div></div>
+      <div class="keys" id="keys"></div>
+      <div class="hint">Tip: type directly too — e.g. <b>7 - log2(80)</b> or <b>2^8</b>.</div>
+    </div>
+  </div>
+
+  <!-- REDUNDANCY -->
+  <div class="pane" data-pane="red">
+    <div class="panel-c">
+      <div class="sec-t">Redundancy calculator</div>
+      <div class="sec-d">R = n − log₂(N), where n = number of digits and N = realised symbols.</div>
+      <div class="row">
+        <div><label class="lbl">Digits n</label><input class="in" id="redN" value="7" style="width:120px"></div>
+        <div><label class="lbl">Realised symbols N</label><input class="in" id="redK" value="80" style="width:160px"></div>
+        <button class="btn btn-primary" id="redBtn"><svg class="ico"><use href="#i-server"/></svg> Calculate</button>
+      </div>
+      <div class="out-grid" id="redOut"></div>
+      <div class="steps" id="redSteps"></div>
+    </div>
+  </div>
+
+  <!-- HAMMING -->
+  <div class="pane" data-pane="ham">
+    <div class="panel-c">
+      <div class="sec-t">Hamming distance &amp; parity</div>
+      <div class="sec-d">Bit-difference between codewords, plus a parity check bit.</div>
+      <div class="seg2" id="hamMode" style="margin-bottom:16px"><button data-h="two" class="active">2 codes</button><button data-h="multi">Multiple</button><button data-h="par">Parity bit</button></div>
+
+      <div data-hm="two">
+        <div class="row">
+          <div style="flex:1;min-width:160px"><label class="lbl">Codeword A</label><input class="in" id="hamA" value="1011001"></div>
+          <div style="flex:1;min-width:160px"><label class="lbl">Codeword B</label><input class="in" id="hamB" value="1001101"></div>
+          <button class="btn btn-primary" id="hamBtn2">Compare</button>
+        </div>
+        <div class="steps" id="hamOut2"></div>
+      </div>
+
+      <div data-hm="multi" style="display:none">
+        <label class="lbl">Codewords (one per line)</label>
+        <textarea class="in" id="hamMulti" style="min-height:110px; resize:vertical">1011001
+1001101
+1111000
+0011011</textarea>
+        <button class="btn btn-primary" id="hamBtnM" style="margin-top:12px">Compute d_min</button>
+        <div class="steps" id="hamOutM"></div>
+      </div>
+
+      <div data-hm="par" style="display:none">
+        <div class="row">
+          <div style="flex:1;min-width:160px"><label class="lbl">Code</label><input class="in" id="parCode" value="1011001"></div>
+          <div><label class="lbl">Parity</label><div class="seg2" id="parType"><button data-t="even" class="active">Even</button><button data-t="odd">Odd</button></div></div>
+          <button class="btn btn-primary" id="parBtn">Add bit</button>
+        </div>
+        <div class="steps" id="parOut"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+// ===== tabs =====
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-p]'); if (!b) return;
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('[data-pane]').forEach(p => p.classList.toggle('show', p.dataset.pane === b.dataset.p));
+});
+
+// ===== converter =====
+let convBase = 10;
+document.getElementById('convBase').addEventListener('click', e => {
+  const b = e.target.closest('[data-b]'); if (!b) return;
+  document.querySelectorAll('#convBase button').forEach(x => x.classList.toggle('active', x === b));
+  convBase = +b.dataset.b; convert();
+});
+function divSteps(n, base) {
+  const lines = []; let z = n;
+  if (z === 0) lines.push(`   0 : ${base} = 0  remainder 0`);
+  while (z > 0) { const r = z % base, q = Math.floor(z / base); lines.push(`${String(z).padStart(5)} : ${base} = ${String(q).padEnd(5)} remainder ${r.toString(base).toUpperCase()}`); z = q; }
+  return lines;
+}
+function convert() {
+  const raw = document.getElementById('convIn').value.trim().replace(/^0x/i, '').replace(/\s/g, '');
+  let dec;
+  try {
+    if (convBase === 10) { if (!/^\d+$/.test(raw)) throw 0; dec = parseInt(raw, 10); }
+    else if (convBase === 16) { if (!/^[0-9a-f]+$/i.test(raw)) throw 0; dec = parseInt(raw, 16); }
+    else { if (!/^[01]+$/.test(raw)) throw 0; dec = parseInt(raw, 2); }
+    if (isNaN(dec)) throw 0;
+  } catch (e) {
+    document.getElementById('convOut').innerHTML = '<div><div class="k">Error</div><div class="v err">Invalid input for selected base</div></div>';
+    document.getElementById('convSteps').textContent = ''; return;
+  }
+  const bin = dec.toString(2);
+  const binGrouped = bin.padStart(Math.ceil(bin.length / 4) * 4, '0').replace(/(.{4})/g, '$1 ').trim();
+  const hex = dec.toString(16).toUpperCase();
+  document.getElementById('convOut').innerHTML = [
+    ['Decimal', dec.toLocaleString('en-US')], ['Hex', hex], ['Binary', binGrouped]
+  ].map(x => `<div><div class="k">${x[0]}</div><div class="v">${x[1]}</div></div>`).join('');
+  document.getElementById('convSteps').innerHTML =
+    `<b>Decimal → Binary</b> (divide by 2, read remainders bottom-up)\n` + divSteps(dec, 2).join('\n') +
+    `\n\n<b>Decimal → Hex</b> (divide by 16, read remainders bottom-up)\n` + divSteps(dec, 16).join('\n');
+}
+document.getElementById('convBtn').addEventListener('click', convert);
+document.getElementById('convIn').addEventListener('keydown', e => { if (e.key === 'Enter') convert(); });
+// ref table
+document.getElementById('refTab').innerHTML =
+  '<tr><th>Hex</th><th>Dec</th><th>8</th><th>4</th><th>2</th><th>1</th></tr>' +
+  Array.from({ length: 16 }, (_, i) => {
+    const b = i.toString(2).padStart(4, '0');
+    return `<tr><td class="hx">${i.toString(16).toUpperCase()}</td><td>${i}</td><td>${b[0]}</td><td>${b[1]}</td><td>${b[2]}</td><td>${b[3]}</td></tr>`;
+  }).join('');
+convert();
+
+// ===== scientific calculator =====
+let calcExpr = '';
+function safeEval(e) {
+  let x = e.replace(/,/g, '.').replace(/×/g, '*').replace(/÷/g, '/')
+    .replace(/\bsqrt\(/g, 'Math.sqrt(').replace(/\blog2\(/g, 'Math.log2(')
+    .replace(/\blog10\(/g, 'Math.log10(').replace(/\blog\(/g, 'Math.log10(')
+    .replace(/\bln\(/g, 'Math.log(').replace(/\babs\(/g, 'Math.abs(')
+    .replace(/\bpi\b/g, 'Math.PI').replace(/\^/g, '**');
+  const cleaned = x.replace(/Math\.(sqrt|log2|log10|log|abs|PI)/g, '').replace(/\*\*/g, '');
+  if (!/^[\s0-9.+\-*/()]*$/.test(cleaned)) return null;
+  try { const r = Function('"use strict"; return (' + x + ')')(); return (typeof r === 'number' && isFinite(r)) ? r : null; } catch (_) { return null; }
+}
+function calcRender() {
+  document.getElementById('calcEx').textContent = calcExpr || ' ';
+  const r = calcExpr ? safeEval(calcExpr) : 0;
+  document.getElementById('calcRes').textContent = r == null ? '—' : (Math.round(r * 1e10) / 1e10);
+}
+const KEYPAD = ['sqrt(', 'log2(', 'log(', 'ln(', 'C', '7', '8', '9', '(', ')', '4', '5', '6', '*', '/', '1', '2', '3', '+', '-', '0', '.', '^', 'DEL', '='];
+document.getElementById('keys').innerHTML = KEYPAD.map(k => {
+  let cls = 'key'; if (['sqrt(', 'log2(', 'log(', 'ln(', '^', '(', ')'].includes(k)) cls = 'fn';
+  if (['*', '/', '+', '-'].includes(k)) cls = 'op';
+  if (k === '=') cls = 'eq';
+  const lbl = k === '*' ? '×' : k === '/' ? '÷' : k;
+  return `<button class="${cls}" data-k="${k}">${lbl}</button>`;
+}).join('');
+document.getElementById('keys').addEventListener('click', e => {
+  const b = e.target.closest('[data-k]'); if (!b) return;
+  const k = b.dataset.k;
+  if (k === 'C') calcExpr = '';
+  else if (k === 'DEL') calcExpr = calcExpr.slice(0, -1);
+  else if (k === '=') { const r = safeEval(calcExpr); if (r != null) calcExpr = String(Math.round(r * 1e10) / 1e10); }
+  else calcExpr += k;
+  calcRender();
+});
+document.addEventListener('keydown', e => {
+  if (!document.querySelector('[data-pane="calc"]').classList.contains('show')) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'Enter') { const r = safeEval(calcExpr); if (r != null) { calcExpr = String(Math.round(r * 1e10) / 1e10); calcRender(); } e.preventDefault(); return; }
+  if (e.key === 'Backspace') { calcExpr = calcExpr.slice(0, -1); calcRender(); e.preventDefault(); return; }
+  if (/^[0-9+\-*/().^]$/.test(e.key)) { calcExpr += e.key; calcRender(); }
+});
+calcRender();
+
+// ===== redundancy =====
+function redCalc() {
+  const n = parseFloat(document.getElementById('redN').value), N = parseFloat(document.getElementById('redK').value);
+  const out = document.getElementById('redOut'), steps = document.getElementById('redSteps');
+  if (isNaN(n) || isNaN(N) || N <= 0 || n <= 0) { out.innerHTML = '<div><div class="k">Error</div><div class="v err">Enter positive numbers</div></div>'; steps.textContent = ''; return; }
+  const log2N = Math.log2(N), R = n - log2N, rel = R / n, maxC = Math.pow(2, n);
+  out.innerHTML = [
+    ['Absolute redundancy R', R.toFixed(4) + ' bit'],
+    ['Relative redundancy', (rel * 100).toFixed(2) + ' %'],
+    ['Possible codes (2ⁿ)', maxC.toLocaleString('en-US')]
+  ].map(x => `<div><div class="k">${x[0]}</div><div class="v">${x[1]}</div></div>`).join('');
+  steps.innerHTML = `<b>Working</b>\nPossible codes (2^n) = ${maxC}\nlog2(${N}) = ${log2N.toFixed(4)}\nR = ${n} − ${log2N.toFixed(4)} = <b>${R.toFixed(4)}</b> bit\nRelative = R / n = ${rel.toFixed(4)} = ${(rel*100).toFixed(2)} %`;
+}
+document.getElementById('redBtn').addEventListener('click', redCalc);
+redCalc();
+
+// ===== hamming =====
+let hamMode = 'two';
+document.getElementById('hamMode').addEventListener('click', e => {
+  const b = e.target.closest('[data-h]'); if (!b) return;
+  hamMode = b.dataset.h;
+  document.querySelectorAll('#hamMode button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('[data-hm]').forEach(p => p.style.display = p.dataset.hm === hamMode ? '' : 'none');
+});
+document.getElementById('hamBtn2').addEventListener('click', () => {
+  const a = document.getElementById('hamA').value.replace(/\s/g, ''), b = document.getElementById('hamB').value.replace(/\s/g, '');
+  const out = document.getElementById('hamOut2');
+  if (a.length !== b.length) { out.innerHTML = `<span class="err">Codewords differ in length (${a.length} vs ${b.length})</span>`; return; }
+  let d = 0, mark = '';
+  for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) { d++; mark += '^'; } else mark += ' '; }
+  out.innerHTML = `<b>Comparison</b> (^ = different)\nA : ${a}\nB : ${b}\n    <span class="err">${mark}</span>\n\nHamming distance d = <b>${d}</b>\nDetectable errors : ${Math.max(0, d - 1)} bit\nCorrectable errors : ${Math.max(0, Math.floor((d - 1) / 2))} bit`;
+});
+document.getElementById('hamBtnM').addEventListener('click', () => {
+  const codes = document.getElementById('hamMulti').value.split('\n').map(s => s.replace(/\s/g, '')).filter(Boolean);
+  const out = document.getElementById('hamOutM');
+  if (codes.length < 2) { out.innerHTML = '<span class="err">Enter at least 2 codes</span>'; return; }
+  const len = codes[0].length;
+  if (codes.some(c => c.length !== len)) { out.innerHTML = '<span class="err">All codes must have the same length</span>'; return; }
+  let min = Infinity, minPair = '', lines = [];
+  for (let i = 0; i < codes.length; i++) for (let j = i + 1; j < codes.length; j++) {
+    let d = 0; for (let k = 0; k < len; k++) if (codes[i][k] !== codes[j][k]) d++;
+    lines.push(`d(C${i + 1} ↔ C${j + 1}) = ${d}`);
+    if (d < min) { min = d; minPair = `C${i + 1} ↔ C${j + 1}`; }
+  }
+  out.innerHTML = `<b>${codes.length} codes (${len} bits)</b>\n` + codes.map((c, i) => `C${i + 1} : ${c}`).join('\n') +
+    `\n\n<b>Pairwise distances</b>\n` + lines.join('\n') +
+    `\n\nMinimum d_min = <b>${min}</b> (${minPair})\nDetectable errors : ${Math.max(0, min - 1)} bit\nCorrectable errors : ${Math.max(0, Math.floor((min - 1) / 2))} bit`;
+});
+let parType = 'even';
+document.getElementById('parType').addEventListener('click', e => {
+  const b = e.target.closest('[data-t]'); if (!b) return;
+  parType = b.dataset.t; document.querySelectorAll('#parType button').forEach(x => x.classList.toggle('active', x === b));
+});
+document.getElementById('parBtn').addEventListener('click', () => {
+  const code = document.getElementById('parCode').value.replace(/\s/g, ''), out = document.getElementById('parOut');
+  if (!/^[01]+$/.test(code)) { out.innerHTML = '<span class="err">Binary only (0/1)</span>'; return; }
+  const ones = (code.match(/1/g) || []).length;
+  const p = parType === 'even' ? (ones % 2 === 0 ? '0' : '1') : (ones % 2 === 0 ? '1' : '0');
+  out.innerHTML = `<b>${parType === 'even' ? 'Even' : 'Odd'} parity</b>\nCode         : ${code}\nNumber of 1s : ${ones}\nParity bit P : <b>${p}</b>\n\nCode with P  : <b>${code + p}</b>  (appended on the right)`;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payload Builder — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 56px 16px; }
+.page-head h1 { font-size: clamp(2.2rem,5vw,3.6rem); }
+.pb { display: grid; grid-template-columns: 240px 1fr 360px; gap: 16px; align-items: start; padding-bottom: 70px; }
+.pb-panel { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+.pb-h { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); padding: 16px 18px 8px; }
+/* library */
+.lib { padding: 0 14px 14px; }
+.lib .grp { font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--violet); padding: 12px 4px 6px; }
+.lib button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; font-family: var(--mono); font-size: .76rem; padding: 9px 11px; border: 1px solid var(--line-2); border-radius: 8px; background: rgba(255,255,255,.02); color: var(--ink); cursor: pointer; margin-bottom: 6px; transition: .15s; }
+.lib button:hover { border-color: var(--violet); color: var(--violet); }
+.lib button .plus { margin-left: auto; color: var(--faint); }
+/* canvas */
+.canvas { padding: 14px; min-height: 320px; }
+.blk { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: #0c0c13; margin-bottom: 8px; cursor: grab; }
+.blk.drag { opacity: .4; }
+.blk .grip { color: var(--faint); cursor: grab; }
+.blk .ty { font-family: var(--mono); font-size: .78rem; font-weight: 700; color: var(--violet); white-space: nowrap; }
+.blk input { flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: rgba(0,0,0,.3); color: var(--ink); font-family: var(--mono); font-size: .78rem; outline: none; }
+.blk input:focus { border-color: var(--violet); }
+.blk .x { color: var(--faint); cursor: pointer; background: none; border: none; font-size: 1rem; }
+.blk .x:hover { color: var(--pink); }
+.canvas-empty { text-align: center; padding: 50px 20px; font-family: var(--mono); font-size: .8rem; color: var(--faint); border: 1px dashed var(--line-2); border-radius: 10px; }
+.tmpl { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 18px 16px; }
+.tmpl button { font-family: var(--mono); font-size: .72rem; padding: 8px 12px; border: 1px solid var(--line-2); border-radius: 8px; background: none; color: var(--muted); cursor: pointer; }
+.tmpl button:hover { border-color: var(--violet); color: var(--violet); }
+/* preview */
+.pv-code { font-family: var(--mono); font-size: .8rem; line-height: 1.7; padding: 16px 18px; color: var(--ink); white-space: pre-wrap; min-height: 240px; background: #07070b; border-top: 1px solid var(--line); }
+.pv-code .kw { color: var(--violet); font-weight: 700; }
+.pv-foot { display: flex; gap: 10px; padding: 16px 18px; }
+@media (max-width:1000px){ .pb { grid-template-columns: 1fr; } }
+/* embedded DuckyScript Studio */
+.ds-head { display: flex; align-items: baseline; gap: 14px; margin: 4px 0 12px; flex-wrap: wrap; }
+.ds-head .idx { font-family: var(--mono); font-size: .8rem; color: var(--accent); letter-spacing: .1em; }
+.ds-head h2 { font-family: var(--display); font-style: italic; font-weight: 700; font-size: 1.5rem; }
+.ds-head .tag { margin-left: auto; font-family: var(--mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.ds-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.ds-btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--line-2); background: transparent; color: var(--ink); cursor: pointer; transition: .15s; }
+.ds-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ds-btn.primary { background: var(--grad); color: var(--accent-ink); border-color: transparent; box-shadow: var(--glow-sm); }
+.ds-note { font-family: var(--mono); font-size: .74rem; color: #4dffa6; opacity: 0; transition: .2s; }
+.ds-note.show { opacity: 1; }
+.ds-frame { display: block; width: 100%; height: calc(100vh - 150px); min-height: 560px; border: 1px solid var(--line); border-radius: 16px; background: #000; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 22px 60px -28px rgba(var(--glowcol),.4); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ BUILD ]</span><span class="tag">// duckyscript editor</span></div>
+  <h1 class="display">Payload builder.</h1>
+  <p class="lead" style="margin-top:16px">Build DuckyScript payloads from blocks — click commands from the library, drag to reorder, the code builds live on the right. <span class="muted">For learning only.</span></p>
+</section>
+
+<section class="wrap">
+  <div class="pb">
+    <!-- LIBRARY -->
+    <div class="pb-panel"><div class="pb-h">Library</div><div class="lib" id="lib"></div></div>
+    <!-- CANVAS -->
+    <div class="pb-panel">
+      <div class="pb-h">Canvas — <span style="color:var(--muted)">click blocks, drag to reorder</span></div>
+      <div class="canvas" id="canvas"></div>
+      <div class="pb-h">Templates</div>
+      <div class="tmpl" id="tmpl"></div>
+    </div>
+    <!-- PREVIEW -->
+    <div class="pb-panel">
+      <div class="pb-h">Live preview · payload.txt</div>
+      <pre class="pv-code" id="preview"></pre>
+      <div class="pv-foot">
+        <button class="btn btn-primary" id="exportBtn"><svg class="ico"><use href="#i-download"/></svg> Export .txt</button>
+        <button class="btn btn-ghost" id="clearBtn"><svg class="ico"><use href="#i-refresh"/></svg> Clear</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EMBEDDED DUCKYSCRIPT STUDIO — build above, compile & run right here -->
+<section class="wrap reveal" style="padding-bottom:70px">
+  <div class="ds-head"><span class="idx">[ COMPILE ]</span><h2>DuckyScript Studio</h2><span class="tag">// write · check · compile</span></div>
+  <p class="lead" style="max-width:74ch; margin:0 0 16px; font-size:1rem">Take the payload you built above straight into the full compiler — syntax-check it, tweak it and export the injectable file. It runs right here in-window, or pop it out fullscreen.</p>
+  <div class="ds-tools">
+    <button class="ds-btn primary" id="sendStudio"><svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg> Send my payload to the Studio</button>
+    <a class="ds-btn" href="quill/index.html" target="_blank" rel="noopener"><svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg> Open fullscreen</a>
+    <span class="ds-note" id="dsNote"></span>
+  </div>
+  <iframe class="ds-frame" id="studioFrame" src="quill/index.html" title="DuckyScript Studio"></iframe>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const CATALOG = {
+  'Basics': [
+    {ty:'STRING', v:true, ph:'Text…', def:'Hello from NULLBYTE'},
+    {ty:'DELAY', v:true, ph:'ms', def:'300'},
+    {ty:'ENTER', v:false}, {ty:'TAB', v:false}
+  ],
+  'Tastenkombis': [
+    {ty:'GUI', v:true, ph:'Key e.g. r', def:'r'},
+    {ty:'CTRL', v:true, ph:'Key', def:'c'},
+    {ty:'ALT', v:true, ph:'Key', def:'F4'},
+    {ty:'SHIFT', v:false}
+  ],
+  'Spezial': [
+    {ty:'ATTACKMODE', v:true, ph:'HID / STORAGE', def:'HID'},
+    {ty:'DEFAULT_DELAY', v:true, ph:'ms', def:'100'},
+    {ty:'REPEAT', v:true, ph:'Count', def:'3'},
+    {ty:'REM', v:true, ph:'Comment', def:'My payload'}
+  ]
+};
+const DEFS = {}; Object.values(CATALOG).flat().forEach(b => DEFS[b.ty] = b);
+const TEMPLATES = {
+  'Open Notepad': [['GUI','r'],['DELAY','300'],['STRING','notepad'],['ENTER',''],['DELAY','500'],['STRING','Hello from NULLBYTE :)']],
+  'Open command line': [['REM','open CMD'],['GUI','r'],['DELAY','300'],['STRING','cmd'],['ENTER','']],
+  'Empty script': []
+};
+
+let blocks = [];
+const lib = document.getElementById('lib'), canvas = document.getElementById('canvas'), preview = document.getElementById('preview'), tmpl = document.getElementById('tmpl');
+
+lib.innerHTML = Object.entries(CATALOG).map(([g, items]) =>
+  `<div class="grp">${g}</div>` + items.map(b => `<button data-add="${b.ty}">${b.ty}<span class="plus">+</span></button>`).join('')).join('');
+tmpl.innerHTML = Object.keys(TEMPLATES).map(t => `<button data-tmpl="${t}">${t}</button>`).join('');
+
+function add(ty) { blocks.push({ ty, v: DEFS[ty].v ? (DEFS[ty].def || '') : '' }); render(); }
+function render() {
+  if (!blocks.length) canvas.innerHTML = '<div class="canvas-empty">// empty — click a block on the left or load a template</div>';
+  else canvas.innerHTML = blocks.map((b, i) => `
+    <div class="blk" draggable="true" data-i="${i}">
+      <span class="grip">⠿</span><span class="ty">${b.ty}</span>
+      ${DEFS[b.ty].v ? `<input data-edit="${i}" value="${(b.v || '').replace(/"/g,'&quot;')}" placeholder="${DEFS[b.ty].ph || ''}">` : '<span style="flex:1"></span>'}
+      <button class="x" data-del="${i}">✕</button>
+    </div>`).join('');
+  // code
+  const code = blocks.map(b => DEFS[b.ty].v && b.v !== '' ? b.ty + ' ' + b.v : b.ty).join('\n');
+  preview.innerHTML = code.replace(/^([A-Z_]+)/gm, '<span class="kw">$1</span>') || '<span style="color:var(--faint)">// dein Code erscheint hier…</span>';
+  preview.dataset.raw = code;
+}
+canvas.addEventListener('input', e => { const i = e.target.dataset.edit; if (i !== undefined) { blocks[+i].v = e.target.value; const code = blocks.map(b => DEFS[b.ty].v && b.v !== '' ? b.ty + ' ' + b.v : b.ty).join('\n'); preview.innerHTML = code.replace(/^([A-Z_]+)/gm,'<span class="kw">$1</span>'); preview.dataset.raw = code; } });
+canvas.addEventListener('click', e => { const d = e.target.dataset.del; if (d !== undefined) { blocks.splice(+d, 1); render(); } });
+lib.addEventListener('click', e => { const b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
+tmpl.addEventListener('click', e => { const b = e.target.closest('[data-tmpl]'); if (b) { blocks = TEMPLATES[b.dataset.tmpl].map(x => ({ ty: x[0], v: x[1] })); render(); } });
+
+// drag reorder
+let dragI = null;
+canvas.addEventListener('dragstart', e => { const b = e.target.closest('.blk'); if (!b) return; dragI = +b.dataset.i; b.classList.add('drag'); });
+canvas.addEventListener('dragend', e => { const b = e.target.closest('.blk'); if (b) b.classList.remove('drag'); });
+canvas.addEventListener('dragover', e => { e.preventDefault(); });
+canvas.addEventListener('drop', e => {
+  e.preventDefault(); const b = e.target.closest('.blk'); if (b == null || dragI == null) return;
+  const to = +b.dataset.i; const [m] = blocks.splice(dragI, 1); blocks.splice(to, 0, m); dragI = null; render();
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([preview.dataset.raw || ''], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'payload.txt'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+document.getElementById('clearBtn').addEventListener('click', () => { blocks = []; render(); });
+
+// Push the built payload straight into the embedded DuckyScript Studio (same-origin
+// iframe): set its editor, trigger its live compile, and scroll it into view.
+(function(){
+  const sendBtn = document.getElementById('sendStudio'), frame = document.getElementById('studioFrame'), note = document.getElementById('dsNote');
+  function flash(msg, ok){ note.textContent = msg; note.style.color = ok === false ? 'var(--pink)' : '#4dffa6'; note.classList.add('show'); setTimeout(() => note.classList.remove('show'), 2600); }
+  sendBtn.addEventListener('click', () => {
+    const code = (preview.dataset.raw || '').trim();
+    if (!code){ flash('build a payload above first', false); return; }
+    try {
+      const ed = frame.contentDocument && frame.contentDocument.getElementById('editor');
+      if (!ed){ flash('studio still loading — try again', false); return; }
+      ed.value = code;
+      ed.dispatchEvent(new Event('input', { bubbles: true }));
+      ed.dispatchEvent(new Event('keyup', { bubbles: true }));
+      frame.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      flash('✓ sent — compiling below');
+    } catch(e){ flash('copy the payload and paste it in', false); }
+  });
+})();
+
+blocks = TEMPLATES['Open Notepad'].map(x => ({ ty: x[0], v: x[1] }));
+render();
+</script>
+</body>
+</html>

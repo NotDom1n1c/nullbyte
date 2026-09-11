@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Habit Tracker — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 44px 16px; }
+.acct-chip { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .72rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 13px; }
+.acct-chip b { color: var(--accent); }
+.acct-chip:hover { border-color: var(--accent); }
+
+.happ { padding-bottom: 70px; display: flex; flex-direction: column; gap: 16px; }
+.h-pane { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); padding: 18px 20px; }
+
+/* stats row */
+.h-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.h-stat { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 16px 18px; }
+.h-stat .k { font-family: var(--mono); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.h-stat .v { font-family: var(--display); font-weight: 700; font-size: 1.7rem; margin-top: 4px; }
+.h-stat .v small { font-size: .85rem; color: var(--muted); font-weight: 400; }
+@media (max-width: 760px){ .h-stats { grid-template-columns: 1fr 1fr; } }
+
+/* today bar */
+.h-todaybar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.h-todaybar h2 { font-size: 1.1rem; }
+.h-todaybar .date { font-family: var(--mono); font-size: .7rem; color: var(--faint); }
+.h-prog { flex: 1; min-width: 160px; height: 8px; border-radius: 99px; background: rgba(255,255,255,.07); overflow: hidden; }
+.h-prog i { display: block; height: 100%; background: var(--grad); border-radius: 99px; transition: width .4s; }
+.h-prog-t { font-family: var(--mono); font-size: .7rem; color: var(--accent); }
+.mkbtn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--accent); color: var(--accent-ink); background: var(--grad); cursor: pointer; box-shadow: var(--glow-sm); }
+
+/* habit cards */
+.h-list { display: flex; flex-direction: column; gap: 12px; }
+.h-card { display: grid; grid-template-columns: auto 1fr auto auto; gap: 16px; align-items: center; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 15px 18px; }
+.h-check { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--hc); background: transparent; cursor: pointer; display: grid; place-items: center; color: transparent; transition: .15s; flex: none; }
+.h-check.on { background: var(--hc); color: #08121a; }
+.h-check .ico { width: 22px; height: 22px; stroke-width: 3; }
+.h-info h3 { font-size: 1.02rem; }
+.h-info .sub { font-family: var(--mono); font-size: .66rem; color: var(--faint); margin-top: 3px; display: flex; gap: 12px; flex-wrap: wrap; }
+.h-info .sub b { color: var(--hc); }
+.h-week { display: flex; gap: 5px; }
+.h-week .day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.h-week .day span { font-family: var(--mono); font-size: .54rem; color: var(--faint); }
+.h-week .cell { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line-2); background: rgba(255,255,255,.03); cursor: pointer; transition: .12s; }
+.h-week .cell.on { background: var(--hc); border-color: var(--hc); }
+.h-week .cell.today { outline: 2px solid color-mix(in srgb, var(--hc) 60%, transparent); outline-offset: 1px; }
+.h-week .cell.future { opacity: .25; cursor: not-allowed; }
+.h-acts { display: flex; gap: 4px; }
+.h-acts button { width: 30px; height: 30px; border-radius: 7px; border: 1px solid transparent; background: none; color: var(--faint); cursor: pointer; display: grid; place-items: center; }
+.h-acts button:hover { color: var(--accent); border-color: var(--line-2); }
+.h-acts button.warn:hover { color: #ff8da3; }
+.h-acts .ico { width: 14px; height: 14px; }
+.h-empty { text-align: center; color: var(--faint); font-family: var(--mono); font-size: .76rem; padding: 34px 10px; }
+@media (max-width: 860px){ .h-card { grid-template-columns: auto 1fr; } .h-week { grid-column: 1 / -1; } .h-acts { grid-column: 1 / -1; justify-content: flex-end; } }
+
+/* heatmap */
+.hm-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.hm-head h2 { font-size: 1.1rem; }
+.hm-head select { margin-left: auto; background: rgba(0,0,0,.3); color: var(--muted); border: 1px solid var(--line-2); border-radius: 8px; font-family: var(--mono); font-size: .7rem; padding: 6px 10px; outline: none; }
+.hm-scroll { overflow-x: auto; padding-bottom: 6px; }
+.hm-grid { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 13px); gap: 3px; width: max-content; }
+.hm-cell { width: 13px; height: 13px; border-radius: 3px; background: rgba(255,255,255,.05); }
+.hm-cell[data-l="1"] { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.hm-cell[data-l="2"] { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+.hm-cell[data-l="3"] { background: var(--accent); }
+.hm-legend { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: .62rem; color: var(--faint); margin-top: 10px; }
+.hm-legend .hm-cell { display: inline-block; }
+
+/* modal */
+.h-modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); display: none; place-items: center; z-index: 200; padding: 20px; }
+.h-modal.open { display: grid; }
+.h-modal .box { width: min(430px, 100%); border: 1px solid var(--line-2); border-radius: 16px; background: #0b0b10; padding: 24px; }
+.h-modal h3 { margin-bottom: 16px; }
+.h-modal label { display: block; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin: 14px 0 6px; }
+.h-modal input[type=text] { width: 100%; padding: 11px 13px; border-radius: 9px; border: 1px solid var(--line-2); background: rgba(0,0,0,.3); color: var(--ink); font-size: .95rem; outline: none; }
+.h-modal input[type=text]:focus { border-color: var(--accent); }
+.h-colors { display: flex; gap: 8px; flex-wrap: wrap; }
+.h-colors button { width: 32px; height: 32px; border-radius: 9px; border: 2px solid transparent; cursor: pointer; background: var(--c); }
+.h-colors button.on { border-color: #fff; }
+.h-target { display: flex; gap: 6px; }
+.h-target button { flex: 1; font-family: var(--mono); font-size: .72rem; padding: 8px 0; border-radius: 8px; border: 1px solid var(--line-2); background: none; color: var(--muted); cursor: pointer; }
+.h-target button.on { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.h-modal .row { display: flex; gap: 10px; margin-top: 22px; }
+.h-modal .row button { flex: 1; font-family: var(--mono); font-size: .74rem; text-transform: uppercase; padding: 11px; border-radius: 9px; cursor: pointer; }
+.h-modal .ok { border: 1px solid var(--accent); background: var(--grad); color: var(--accent-ink); }
+.h-modal .no { border: 1px solid var(--line-2); background: none; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ HABITS ]</span><span class="tag">// streaks · check-ins · heatmap</span><span style="margin-left:auto"><a class="acct-chip" href="account.html" id="acctChip"><svg class="ico ico-sm" style="width:13px;height:13px"><use href="#i-user"/></svg> <span>guest</span></a></span></div>
+  <h1 class="display">Habit tracker.</h1>
+  <p class="lead" style="margin-top:14px">Build streaks, hit weekly targets and watch the heatmap fill up. Built into the site — saved to your account on this device.</p>
+</section>
+
+<section class="wrap reveal">
+  <div class="happ">
+
+    <div class="h-stats" id="stats"></div>
+
+    <div class="h-pane h-todaybar">
+      <div><h2 id="todayTitle">Today</h2><div class="date" id="todayDate"></div></div>
+      <div class="h-prog"><i id="progBar" style="width:0%"></i></div>
+      <span class="h-prog-t" id="progTxt">0 / 0</span>
+      <button class="mkbtn" id="addHabit"><svg class="ico ico-sm"><use href="#i-plus"/></svg> New habit</button>
+    </div>
+
+    <div class="h-list" id="list"></div>
+
+    <div class="h-pane">
+      <div class="hm-head"><h2>Last 26 weeks</h2><select id="hmSel"></select></div>
+      <div class="hm-scroll"><div class="hm-grid" id="hmGrid"></div></div>
+      <div class="hm-legend">less <span class="hm-cell"></span><span class="hm-cell" data-l="1"></span><span class="hm-cell" data-l="2"></span><span class="hm-cell" data-l="3"></span> more</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="h-modal" id="modal"><div class="box">
+  <h3 id="mTitle">New habit</h3>
+  <label>Name</label><input type="text" id="mName" maxlength="40" placeholder="e.g. Read 20 minutes">
+  <label>Colour</label><div class="h-colors" id="mColors"></div>
+  <label>Weekly target (days per week)</label><div class="h-target" id="mTarget"></div>
+  <div class="row"><button class="no" id="mCancel">Cancel</button><button class="ok" id="mSave">Save habit</button></div>
+</div></div>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+'use strict';
+const KEY = 'nb_habits_v1';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+const COLORS = ['#22e0ff','#34e07a','#a3e635','#ffcf4d','#ff7e33','#ff4d5e','#ff5fa2','#a855f7','#7c8cff','#4d9bff'];
+
+/* account chip */
+try { const p = JSON.parse(localStorage.getItem('nb_profile')) || {}; if (p.handle || p.name) $('#acctChip span').innerHTML = 'signed in — <b>@' + esc(p.handle || p.name) + '</b>'; } catch(e){}
+
+/* dates */
+const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const today = () => ymd(new Date());
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const monday = d => { const x = new Date(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+
+/* storage: { habits:[{id,name,color,target,created}], log:{ 'yyyy-mm-dd':[ids] } } */
+function load(){ try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && Array.isArray(d.habits)) return d; } catch(e){} return { habits: [], log: {} }; }
+let DB = load();
+const persist = () => localStorage.setItem(KEY, JSON.stringify(DB));
+
+const doneOn = (id, date) => (DB.log[date] || []).includes(id);
+function toggle(id, date){
+  const arr = DB.log[date] || (DB.log[date] = []);
+  const i = arr.indexOf(id);
+  if (i >= 0) arr.splice(i, 1); else arr.push(id);
+  if (!arr.length) delete DB.log[date];
+  persist(); renderAll();
+}
+
+/* streaks */
+function streak(id){
+  let s = 0, d = new Date();
+  if (!doneOn(id, ymd(d))) d = addDays(d, -1);          /* today not done yet doesn't break it */
+  while (doneOn(id, ymd(d))){ s++; d = addDays(d, -1); }
+  return s;
+}
+function bestStreak(id){
+  const days = Object.keys(DB.log).filter(k => doneOn(id, k)).sort();
+  let best = 0, cur = 0, prev = null;
+  for (const k of days){
+    cur = (prev && ymd(addDays(new Date(prev), 1)) === k) ? cur + 1 : 1;
+    if (cur > best) best = cur;
+    prev = k;
+  }
+  return best;
+}
+function weekCount(id){
+  const mon = monday(new Date());
+  let c = 0;
+  for (let i = 0; i < 7; i++) if (doneOn(id, ymd(addDays(mon, i)))) c++;
+  return c;
+}
+
+/* renders */
+function renderStats(){
+  const total = Object.values(DB.log).reduce((a, v) => a + v.length, 0);
+  const best = DB.habits.reduce((m, h) => Math.max(m, bestStreak(h.id)), 0);
+  let done30 = 0, poss30 = 0;
+  for (let i = 0; i < 30; i++){
+    const k = ymd(addDays(new Date(), -i));
+    done30 += (DB.log[k] || []).length; poss30 += DB.habits.length;
+  }
+  const rate = poss30 ? Math.round(done30 / poss30 * 100) : 0;
+  $('#stats').innerHTML =
+    '<div class="h-stat"><div class="k">Active habits</div><div class="v">' + DB.habits.length + '</div></div>' +
+    '<div class="h-stat"><div class="k">Total check-ins</div><div class="v">' + total + '</div></div>' +
+    '<div class="h-stat"><div class="k">Best streak</div><div class="v">' + best + ' <small>days</small></div></div>' +
+    '<div class="h-stat"><div class="k">30-day rate</div><div class="v">' + rate + '<small>%</small></div></div>';
+}
+function renderToday(){
+  const t = today();
+  const done = DB.habits.filter(h => doneOn(h.id, t)).length;
+  $('#todayDate').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('#progBar').style.width = (DB.habits.length ? done / DB.habits.length * 100 : 0) + '%';
+  $('#progTxt').textContent = done + ' / ' + DB.habits.length;
+  $('#todayTitle').textContent = done && done === DB.habits.length ? 'All done — clean sweep' : 'Today';
+}
+function renderList(){
+  const t = today(), mon = monday(new Date());
+  const DN = ['MO','TU','WE','TH','FR','SA','SU'];
+  $('#list').innerHTML = DB.habits.length ? DB.habits.map(h => {
+    const wk = weekCount(h.id);
+    let cells = '';
+    for (let i = 0; i < 7; i++){
+      const d = addDays(mon, i), k = ymd(d), future = k > t;
+      cells += '<div class="day"><span>' + DN[i] + '</span><div class="cell' + (doneOn(h.id, k) ? ' on' : '') + (k === t ? ' today' : '') + (future ? ' future' : '') + '"' + (future ? '' : ' data-cell="' + h.id + '|' + k + '"') + '></div></div>';
+    }
+    return '<div class="h-card" style="--hc:' + h.color + '">' +
+      '<button class="h-check' + (doneOn(h.id, t) ? ' on' : '') + '" data-today="' + h.id + '" title="Check off today"><svg class="ico"><use href="#i-check"/></svg></button>' +
+      '<div class="h-info"><h3>' + esc(h.name) + '</h3><div class="sub"><span>streak <b>' + streak(h.id) + 'd</b></span><span>best <b>' + bestStreak(h.id) + 'd</b></span><span>week <b>' + wk + '/' + h.target + '</b>' + (wk >= h.target ? ' — target hit' : '') + '</span></div></div>' +
+      '<div class="h-week">' + cells + '</div>' +
+      '<div class="h-acts"><button data-edit="' + h.id + '" title="Edit"><svg class="ico"><use href="#i-wrench"/></svg></button><button class="warn" data-del="' + h.id + '" title="Delete"><svg class="ico"><use href="#i-ban"/></svg></button></div>' +
+    '</div>';
+  }).join('') : '<div class="h-pane h-empty">// no habits yet — hit "New habit" and start a streak</div>';
+}
+function renderHeatmap(){
+  const sel = $('#hmSel');
+  const cur = sel.value || 'all';
+  sel.innerHTML = '<option value="all">All habits</option>' + DB.habits.map(h => '<option value="' + h.id + '"' + (cur === h.id ? ' selected' : '') + '>' + esc(h.name) + '</option>').join('');
+  const weeks = 26, start = monday(addDays(new Date(), -7 * (weeks - 1)));
+  let cells = '', t = today();
+  for (let w = 0; w < weeks; w++) for (let d = 0; d < 7; d++){
+    const k = ymd(addDays(start, w * 7 + d));
+    if (k > t){ cells += '<div class="hm-cell" style="opacity:.25"></div>'; continue; }
+    let l = 0;
+    if (cur === 'all'){
+      const c = (DB.log[k] || []).length, n = DB.habits.length || 1;
+      l = c === 0 ? 0 : c >= n ? 3 : c / n >= .5 ? 2 : 1;
+    } else l = doneOn(cur, k) ? 3 : 0;
+    cells += '<div class="hm-cell" data-l="' + l + '" title="' + k + '"></div>';
+  }
+  $('#hmGrid').innerHTML = cells;
+}
+function renderAll(){ renderStats(); renderToday(); renderList(); renderHeatmap(); }
+
+/* list events */
+$('#list').addEventListener('click', e => {
+  const td = e.target.closest('[data-today]'); if (td){ toggle(td.dataset.today, today()); return; }
+  const c = e.target.closest('[data-cell]'); if (c){ const parts = c.dataset.cell.split('|'); toggle(parts[0], parts[1]); return; }
+  const ed = e.target.closest('[data-edit]'); if (ed){ openModal(ed.dataset.edit); return; }
+  const dl = e.target.closest('[data-del]');
+  if (dl){
+    const h = DB.habits.find(x => x.id === dl.dataset.del);
+    if (confirm('Delete "' + h.name + '" and its full history?')){
+      DB.habits = DB.habits.filter(x => x.id !== h.id);
+      Object.keys(DB.log).forEach(k => { DB.log[k] = DB.log[k].filter(i => i !== h.id); if (!DB.log[k].length) delete DB.log[k]; });
+      persist(); renderAll();
+    }
+  }
+});
+$('#hmSel').addEventListener('change', renderHeatmap);
+
+/* modal */
+let editId = null, mColor = COLORS[0], mTarget = 7;
+function openModal(id){
+  editId = id || null;
+  const h = id ? DB.habits.find(x => x.id === id) : null;
+  $('#mTitle').textContent = h ? 'Edit habit' : 'New habit';
+  $('#mName').value = h ? h.name : '';
+  mColor = h ? h.color : COLORS[Math.floor(Math.random() * COLORS.length)];
+  mTarget = h ? h.target : 7;
+  $('#mColors').innerHTML = COLORS.map(c => '<button style="--c:' + c + '" data-c="' + c + '"' + (c === mColor ? ' class="on"' : '') + '></button>').join('');
+  $('#mTarget').innerHTML = [1,2,3,4,5,6,7].map(n => '<button data-t="' + n + '"' + (n === mTarget ? ' class="on"' : '') + '>' + n + '</button>').join('');
+  $('#modal').classList.add('open');
+  $('#mName').focus();
+}
+$('#addHabit').addEventListener('click', () => openModal());
+$('#mColors').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (!b) return; mColor = b.dataset.c; document.querySelectorAll('#mColors button').forEach(x => x.classList.toggle('on', x === b)); });
+$('#mTarget').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; mTarget = +b.dataset.t; document.querySelectorAll('#mTarget button').forEach(x => x.classList.toggle('on', x === b)); });
+$('#mCancel').addEventListener('click', () => $('#modal').classList.remove('open'));
+$('#modal').addEventListener('click', e => { if (e.target === e.currentTarget) $('#modal').classList.remove('open'); });
+$('#mSave').addEventListener('click', () => {
+  const name = $('#mName').value.trim();
+  if (!name){ $('#mName').focus(); return; }
+  if (editId){ const h = DB.habits.find(x => x.id === editId); h.name = name; h.color = mColor; h.target = mTarget; }
+  else DB.habits.push({ id: uid(), name: name, color: mColor, target: mTarget, created: Date.now() });
+  persist(); $('#modal').classList.remove('open'); renderAll();
+});
+$('#mName').addEventListener('keydown', e => { if (e.key === 'Enter') $('#mSave').click(); });
+
+renderAll();
+})();
+</script>
+</body>
+</html>

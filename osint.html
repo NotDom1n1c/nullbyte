@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSINT Suite — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=8">
+<style>
+/* ===== V6 liquid-glass OSINT console ===== */
+body { background: transparent; }
+.shell { display: grid; grid-template-columns: 286px 1fr; min-height: 100vh; gap: 18px; padding: 16px; }
+:root { --gl: rgba(255,255,255,.10); --gl2: rgba(255,255,255,.16); --gw: var(--glowcol, 46,228,255); }
+.glass { background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02) 62%); border: 1px solid var(--gl);
+   
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 24px 60px -34px rgba(0,0,0,.85); }
+
+/* sidebar */
+.side { border: 1px solid var(--gl); border-radius: 24px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02) 60%);
+   
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 30px 70px -36px rgba(0,0,0,.9);
+  position: sticky; top: 16px; height: calc(100vh - 32px); overflow-y: auto; display: flex; flex-direction: column; }
+.side::-webkit-scrollbar { width: 6px; } .side::-webkit-scrollbar-thumb { background: var(--gl2); border-radius: 3px; }
+.side-top { padding: 24px 20px 16px; }
+.side-top .logo { width: 52px; height: auto; display: block; filter: drop-shadow(0 0 16px rgba(var(--gw),.5)); }
+.side-search { margin: 0 16px 12px; display: flex; align-items: center; gap: 9px; padding: 11px 14px; border: 1px solid var(--gl); border-radius: 999px; background: rgba(0,0,0,.28); font-family: var(--mono); font-size: .76rem; color: var(--faint); transition: border-color .16s, box-shadow .16s; }
+.side-search:focus-within { border-color: rgba(var(--gw),.5); box-shadow: 0 0 0 3px rgba(var(--gw),.12); }
+.side-search .ico { color: var(--muted); }
+.side-search input { flex: 1; min-width: 0; background: none; border: none; outline: none; color: var(--ink); font-family: var(--mono); font-size: .76rem; }
+.side-search input::placeholder { color: var(--faint); }
+.tb-cmd input.tb-ph { color: var(--ink); min-width: 0; background: none; border: none; outline: none; }
+.tb-cmd input.tb-ph::placeholder { color: var(--faint); }
+.side-search kbd { margin-left: auto; border: 1px solid var(--gl); border-radius: 5px; padding: 1px 6px; font-size: .64rem; }
+.sgroup { padding: 6px 12px; }
+.sgroup h5 { font-family: var(--mono); font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); padding: 10px 12px 5px; margin: 0; }
+.nitem { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; color: var(--muted); font-size: .85rem; transition: .15s; cursor: pointer; }
+.nitem .ico { width: 17px; height: 17px; color: var(--faint); }
+.nitem:hover { background: rgba(255,255,255,.06); color: var(--ink); }
+.nitem:hover .ico { color: var(--muted); }
+.nitem.active { color: var(--accent); background: linear-gradient(180deg, rgba(var(--gw),.16), rgba(var(--gw),.05));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 0 20px -8px rgba(var(--gw),.8); }
+.nitem.active .ico { color: var(--accent); }
+.side-foot { margin-top: auto; padding: 16px 18px; border-top: 1px solid var(--gl); }
+.cbar { height: 5px; background: rgba(255,255,255,.08); overflow: hidden; margin: 8px 0; border-radius: 3px; }
+.cbar i { display: block; height: 100%; width: 24%; background: var(--accent); box-shadow: 0 0 10px rgba(var(--gw),.9); }
+.urow { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.urow .av { width: 36px; height: 36px; border: 1px solid rgba(var(--gw),.5); color: var(--accent); display: grid; place-items: center; font-family: var(--mono); font-weight: 700; border-radius: 12px; background: rgba(var(--gw),.08); }
+
+/* main */
+.main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.topbar { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 20px; position: sticky; top: 16px; z-index: 10;
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03) 60%); border: 1px solid var(--gl);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 20px 50px -30px rgba(0,0,0,.85); }
+.tb-cmd { flex: 1; max-width: 560px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--gl); border-radius: 999px; background: rgba(0,0,0,.28); font-family: var(--mono); transition: border-color .16s, box-shadow .16s; }
+.tb-cmd:hover, .tb-cmd:focus-within { border-color: rgba(var(--gw),.5); box-shadow: 0 0 0 3px rgba(var(--gw),.12); }
+.tb-slash { color: var(--accent); font-weight: 700; }
+.tb-ph { flex: 1; color: var(--faint); font-size: .8rem; }
+.tb-key { border: 1px solid var(--gl); border-radius: 6px; padding: 3px 8px; font-size: .64rem; color: var(--muted); font-family: var(--mono); }
+.tb-status { display: flex; align-items: center; gap: 13px; font-family: var(--mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.tb-status .sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px rgba(var(--gw),.9); animation: pulse 2s infinite; }
+.tb-sep { width: 1px; height: 16px; background: var(--gl2); }
+.tb-cr { color: var(--faint); } .tb-cr b { color: var(--ink); }
+.tb-buy { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: 11px 18px; border-radius: 999px; color: #06222b;
+  background: linear-gradient(180deg, #ffffff, var(--accent) 70%); box-shadow: 0 0 26px -6px rgba(var(--gw),.9), inset 0 1px 0 rgba(255,255,255,.7); transition: transform .16s, box-shadow .16s, filter .16s; }
+.tb-buy:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 0 40px -4px rgba(var(--gw),1); }
+.burger-os { display: none; background: rgba(255,255,255,.05); border: 1px solid var(--gl); color: var(--ink); width: 42px; height: 42px; border-radius: 50%; }
+@media (max-width: 720px){ .tb-status { display: none; } .tb-cmd { font-size: .7rem; } }
+
+.main-in { padding: 0 6px; }
+.welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 30px; }
+.welcome h1 { font-family: var(--display); font-weight: 800; font-size: clamp(2.1rem,4.4vw,3.3rem); line-height: 1.04; letter-spacing: -.02em; text-shadow: 0 0 30px rgba(var(--gw),.25); }
+.welcome h1 span { color: transparent; background: linear-gradient(95deg, #eafcff, var(--accent) 60%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 22px rgba(var(--gw),.5)); }
+
+.stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 30px; }
+.stat { border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02) 62%); border: 1px solid var(--gl);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.13); }
+.stat .ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; color: var(--accent);
+  background: linear-gradient(180deg, rgba(var(--gw),.16), rgba(var(--gw),.05)); border: 1px solid rgba(var(--gw),.3); box-shadow: 0 0 22px -8px rgba(var(--gw),.9); }
+.stat .k { font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.stat .v { font-family: var(--display); font-size: 2rem; font-weight: 700; line-height: 1; }
+.stat .v small { font-size: .8rem; color: var(--faint); font-weight: 400; font-family: var(--mono); }
+
+.bhead { display: flex; align-items: baseline; justify-content: space-between; margin: 8px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--gl); }
+.bhead h2 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; letter-spacing: -.01em; }
+.bhead a, .bhead .tag { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+.bhead a { color: var(--accent); }
+
+.mod-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(230px,1fr)); gap: 14px; }
+.mod { border-radius: 18px; padding: 22px; transition: transform .18s, border-color .18s, box-shadow .18s; cursor: pointer; position: relative; overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02) 62%); border: 1px solid var(--gl);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+.mod:hover { transform: translateY(-4px); border-color: rgba(var(--mgw, var(--gw)),.45); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 26px 60px -30px rgba(var(--mgw, var(--gw)),.6); }
+.mod .ic { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; color: var(--mc, var(--accent)); margin-bottom: 16px;
+  background: linear-gradient(180deg, rgba(var(--mgw, var(--gw)),.16), rgba(var(--mgw, var(--gw)),.05)); border: 1px solid rgba(var(--mgw, var(--gw)),.28); }
+.mod h3 { font-family: var(--display); font-weight: 700; font-size: 1.02rem; }
+.mod p { font-size: .82rem; color: var(--muted); margin-top: 5px; font-weight: 300; }
+.mod .cost { position: absolute; top: 18px; right: 18px; font-family: var(--mono); font-size: .64rem; color: var(--mc, var(--accent)); border: 1px solid var(--gl); border-radius: 999px; padding: 3px 9px; background: rgba(0,0,0,.25); }
+
+.two-col { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-top: 30px; }
+.pnl { border-radius: 20px; padding: 24px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02) 62%); border: 1px solid var(--gl);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+.pnl h2 { font-family: var(--display); font-weight: 700; font-size: 1.15rem; margin-bottom: 16px; }
+.act { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px dashed var(--gl); font-size: .88rem; }
+.act:last-child { border-bottom: none; }
+.act .ic { width: 34px; height: 34px; border: 1px solid var(--gl); border-radius: 11px; display: grid; place-items: center; color: var(--muted); flex: none; background: rgba(255,255,255,.03); }
+.act .ic .ico { width: 16px; height: 16px; }
+.act .sub { font-family: var(--mono); font-size: .7rem; color: var(--faint); }
+.act .when { margin-left: auto; font-family: var(--mono); font-size: .7rem; color: var(--faint); white-space: nowrap; }
+.acc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.acc-grid div { background: rgba(255,255,255,.04); border: 1px solid var(--gl); border-radius: 12px; padding: 14px; }
+.acc-grid .k { font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.acc-grid .v { margin-top: 4px; font-weight: 500; font-family: var(--mono); font-size: .85rem; }
+
+@media (max-width:1000px){ .stat-row{ grid-template-columns:1fr; } .two-col{ grid-template-columns:1fr; } }
+@media (max-width:860px){
+  .shell{ grid-template-columns:1fr; padding: 12px; }
+  .side{ position:fixed; left:12px; top:12px; bottom:12px; height:auto; z-index:60; width:274px; transform:translateX(-115%); transition:.25s; }
+  .side.open{ transform:none; }
+  .burger-os{ display:grid; place-items:center; }
+}
+</style>
+<style>
+/* ---- V6 liquid-glass identity layer (typography + backdrop) ---- */
+:root { --display: "Unbounded", sans-serif; --body: "Outfit", sans-serif; --mono: "JetBrains Mono", monospace; }
+body { font-family: var(--body); }
+.sky { position: fixed; inset: 0; z-index: -3; background:
+  radial-gradient(110% 75% at 50% -12%, rgba(46,228,255,.17), transparent 55%),
+  radial-gradient(70% 55% at 88% 30%, rgba(120,90,255,.10), transparent 60%),
+  radial-gradient(75% 60% at 8% 85%, rgba(46,228,255,.12), transparent 60%),
+  #04060d; }
+.blob { position: fixed; z-index: -2; border-radius: 50%; filter: blur(64px); opacity: .5; pointer-events: none; will-change: transform; }
+.blob.a { width: 560px; height: 560px; top: -220px; left: 8%; background: rgba(46,228,255,.16); animation: drift 26s ease-in-out infinite alternate; }
+.blob.b { width: 460px; height: 460px; top: 30%; right: -160px; background: rgba(110,80,255,.13); animation: drift 32s ease-in-out infinite alternate-reverse; }
+.blob.c { width: 500px; height: 500px; bottom: -200px; left: 32%; background: rgba(46,228,255,.10); animation: drift 38s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translate(60px, 40px); } }
+.grain { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"); }
+</style>
+</head>
+<body data-osint-active="dashboard">
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div><div class="grain"></div>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="side" id="osintSide">
+    <div class="side-top"><a class="brand" href="index.html"><svg class="logo" viewBox="0 0 120 132" role="img" aria-label="NULLBYTE"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></a></div>
+    <div class="side-search"><svg class="ico ico-sm"><use href="#i-search"/></svg><input type="text" placeholder="Search modules…" data-side-search><kbd>Ctrl K</kbd></div>
+
+    <div id="osintSideNav"></div>
+
+    <div class="side-foot">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); font-size:.72rem; color:var(--muted)"><span>Credits</span><a href="shop.html" style="color:var(--accent)">+ Add</a></div>
+      <div class="mono" style="font-size:1.15rem; font-weight:700; color:var(--ink); margin-top:6px"><span data-cr>5</span> <span style="font-size:.7rem; font-weight:400; color:var(--faint)">CR</span></div>
+      <div class="urow">
+        <span class="av" id="sideAv">D</span>
+        <div><div id="sideName" style="font-size:.84rem; font-weight:500">guest</div><div class="mono" id="sidePlan" style="font-size:.66rem; color:var(--faint)">Not signed in</div></div>
+        <svg class="ico ico-sm" id="sideLogout" style="margin-left:auto; color:var(--faint); cursor:pointer; display:none"><use href="#i-logout"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <button class="burger-os" onclick="document.getElementById('osintSide').classList.toggle('open')"><svg class="ico"><use href="#i-menu"/></svg></button>
+      <label class="tb-cmd"><span class="tb-slash">/</span><input class="tb-ph" type="text" placeholder="search a target — phone · email · domain · username" data-osint-search><kbd class="tb-key">⌘K</kbd></label>
+      <div class="tb-status"><span class="sdot"></span> online <span class="tb-sep"></span> <span class="tb-cr"><b data-cr>5</b> CR</span></div>
+      <a class="tb-buy" href="shop.html"><svg class="ico ico-sm"><use href="#i-credit"/></svg> Add credits</a>
+    </div>
+
+    <div class="main-in">
+      <div class="welcome reveal">
+        <div>
+          <span class="tag tag-acc">// recon dashboard</span>
+          <h1 style="margin-top:12px">Welcome back, <span>@dominic</span></h1>
+          <p class="muted" style="margin-top:6px">Search less, discover more.</p>
+        </div>
+        <a class="btn btn-ghost" href="osint-module.html#cases"><svg class="ico"><use href="#i-plus"/></svg> New case</a>
+      </div>
+
+      <!-- STATS -->
+      <div class="stat-row reveal" style="animation-delay:.05s">
+        <div class="stat"><svg class="ico ico-lg ic"><use href="#i-credit"/></svg><div><div class="k">Credits available</div><div class="v"><span data-cr>5</span></div></div></div>
+        <div class="stat"><svg class="ico ico-lg ic"><use href="#i-activity"/></svg><div><div class="k">Lookups today</div><div class="v">0</div></div></div>
+        <div class="stat"><svg class="ico ico-lg ic"><use href="#i-folder"/></svg><div><div class="k">Open cases</div><div class="v">3</div></div></div>
+      </div>
+
+      <!-- MODULE LAUNCHER -->
+      <div class="bhead"><h2>Run a lookup</h2><span class="tag" style="color:var(--faint)">// 30 modules</span></div>
+      <div class="mod-grid reveal" id="osintModGrid" style="animation-delay:.08s"></div>
+
+      <!-- ACTIVITY + ACCOUNT -->
+      <div class="two-col">
+        <div class="pnl">
+          <h2>Recent activity</h2>
+          <div class="act"><span class="ic"><svg class="ico"><use href="#i-phone"/></svg></span><div><div>Phone lookup · +41 ** *** ** 12</div><div class="sub">Completed · 1 credit</div></div><span class="when">2h ago</span></div>
+          <div class="act"><span class="ic"><svg class="ico"><use href="#i-mail"/></svg></span><div><div>Email breach check · d***@gmail.com</div><div class="sub">3 results found</div></div><span class="when">5h ago</span></div>
+          <div class="act"><span class="ic"><svg class="ico"><use href="#i-server"/></svg></span><div><div>IP info · 192.0.2.44</div><div class="sub">Completed · 1 credit</div></div><span class="when">Yesterday</span></div>
+          <div class="act"><span class="ic"><svg class="ico"><use href="#i-at"/></svg></span><div><div>Username resolver · "manster"</div><div class="sub">11 matches</div></div><span class="when">Yesterday</span></div>
+        </div>
+
+        <div class="pnl">
+          <h2>Account</h2>
+          <div class="urow" style="margin-top:0">
+            <span class="av" style="width:44px;height:44px;font-size:1.1rem">D</span>
+            <div><div style="font-weight:600">@dominic</div><div class="mono" style="font-size:.7rem;color:var(--accent)">● Free · active</div></div>
+          </div>
+          <div class="acc-grid">
+            <div><div class="k">Plan</div><div class="v">Free</div></div>
+            <div><div class="k">Credits</div><div class="v" data-cr>5</div></div>
+            <div><div class="k">Today</div><div class="v">0</div></div>
+            <div><div class="k">Status</div><div class="v" style="color:var(--accent)">Online</div></div>
+          </div>
+          <a class="btn btn-primary btn-block" style="margin-top:18px" href="shop.html"><svg class="ico"><use href="#i-arrow-ur"/></svg> Upgrade plan</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js?v=37"></script>
+<script type="module" src="assets/firebase.js"></script>
+<script>
+(function () {
+  function upd(u) {
+    var av = document.getElementById('sideAv'), nm = document.getElementById('sideName'),
+        pl = document.getElementById('sidePlan'), lo = document.getElementById('sideLogout');
+    if (u) {
+      var h = ''; try { h = (JSON.parse(localStorage.getItem('nb_profile') || '{}').handle || '').replace(/^@/, ''); } catch (e) {}
+      var name = h || u.displayName || (u.email || '').split('@')[0] || 'you';
+      if (nm) nm.textContent = name; if (av) av.textContent = (name[0] || 'U').toUpperCase();
+      if (pl) pl.textContent = u.email || 'Signed in'; if (lo) lo.style.display = '';
+    } else {
+      if (nm) nm.textContent = 'guest'; if (av) av.textContent = 'G';
+      if (pl) pl.textContent = 'Not signed in'; if (lo) lo.style.display = 'none';
+    }
+  }
+  var lo = document.getElementById('sideLogout');
+  if (lo) lo.addEventListener('click', function () { if (window.NBAuth) window.NBAuth.logout(); });
+  (function bind() { if (window.NBAuth) window.NBAuth.onUser(upd); else setTimeout(bind, 150); })();
+})();
+</script>
+</body>
+</html>

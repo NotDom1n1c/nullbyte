@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTF Cheatsheet — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 24px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.cats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; padding-bottom: 70px; }
+.cat { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); position: relative; }
+.cat::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--mc); }
+.cat-head { display: flex; align-items: center; gap: 14px; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+.cat-ic { width: 44px; height: 44px; border-radius: 11px; display: grid; place-items: center; color: var(--mc); border: 1px solid var(--line-2); background: color-mix(in srgb, var(--mc) 14%, transparent); flex: none; }
+.cat-head h3 { font-size: 1.2rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; }
+.cat-body { padding: 6px 22px 16px; }
+.ent { padding: 14px 0; border-bottom: 1px dashed var(--line); }
+.ent:last-child { border-bottom: none; }
+.ent .nm { font-weight: 600; }
+.ent p { color: var(--muted); font-size: .88rem; margin-top: 4px; }
+.ent .cmd { font-family: var(--mono); font-size: .78rem; background: #07070b; border: 1px solid var(--line-2); border-left: 3px solid var(--mc); border-radius: 8px; padding: 9px 11px; margin-top: 8px; color: var(--ink); overflow-x: auto; }
+@media (max-width:860px){ .cats { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ CTF ]</span><span class="tag">// capture the flag</span></div>
+  <h1 class="display">CTF cheatsheet.</h1>
+  <p class="lead" style="margin-top:20px">The most common CTF categories, tools &amp; tricks — a compact reference.</p>
+</section>
+
+<section class="wrap"><div class="cats" id="cats"></div></section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const CTF = [
+  { t:'Steganography', i:'i-image', c:'#a855f7', ents:[
+    ['strings','Find readable text in files — the flag is often hidden inside.','strings image.png | grep -i flag'],
+    ['binwalk','Detect & extract embedded files/archives.','binwalk -e file.jpg'],
+    ['steghide','Hide or extract data in image/audio (with a passphrase).','steghide extract -sf image.jpg'] ] },
+  { t:'Cryptography', i:'i-lock', c:'#22d3ee', ents:[
+    ['Identify the cipher','Base64, ROT13, Vigenère, XOR — format & frequency reveal the type.','→ see the Crypto Tools on this site'],
+    ['XOR','Brute-force simple XOR encryption against single-byte keys.','for k in {0..255}; do …; done'],
+    ['CyberChef principle','Try several encodings in a row ("Magic").','Base64 → Hex → ASCII'] ] },
+  { t:'Web', i:'i-globe', c:'#3b82f6', ents:[
+    ['Recon first','Always check robots.txt, /sitemap.xml and the page source first.','curl https://target/robots.txt'],
+    ['SQL injection','Test inputs with \'; use UNION SELECT to read data.',"id=1' OR '1'='1"],
+    ['XSS','Test reflected inputs with a script payload.','<scr'+'ipt>alert(1)<\/scr'+'ipt>'] ] },
+  { t:'Reverse Engineering', i:'i-cpu', c:'#f5a524', ents:[
+    ['file','Determine file type from magic bytes.','file binary'],
+    ['strings','Pull hardcoded strings / passwords from .exe/.elf.','strings -n 6 binary'],
+    ['Ghidra / IDA','Disassembler/decompiler for deeper analysis.','(GUI tools)'] ] },
+  { t:'Forensics', i:'i-folder', c:'#fb6a5d', ents:[
+    ['exiftool','Read metadata from images/files (GPS, camera, comments).','exiftool photo.jpg'],
+    ['Magic Bytes','Check file headers — spot a wrong extension.','xxd file | head'],
+    ['Autopsy','Forensically examine deleted files & drives.','(GUI tool)'] ] },
+  { t:'OSINT', i:'i-scope', c:'#ec4899', ents:[
+    ['Google Dorks','Targeted search: site:, filetype:, intitle:.','site:target.com filetype:pdf'],
+    ['Reverse Image','Find image origin & duplicates.','→ see the OSINT suite'],
+    ['WHOIS / Archive','Domain data & old snapshots.','whois target.com · archive.org'] ] }
+];
+document.getElementById('cats').innerHTML = CTF.map(c => `
+  <div class="cat" style="--mc:${c.c}">
+    <div class="cat-head"><span class="cat-ic"><svg class="ico ico-lg"><use href="#${c.i}"/></svg></span><h3>${c.t}</h3></div>
+    <div class="cat-body">${c.ents.map(e=>`<div class="ent"><div class="nm">${e[0]}</div><p>${e[1]}</p><div class="cmd">${e[2]}</div></div>`).join('')}</div>
+  </div>`).join('');
+</script>
+</body>
+</html>

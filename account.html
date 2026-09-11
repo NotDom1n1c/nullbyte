@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+.acct-grid { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+.profile { text-align: center; padding: 30px 26px; }
+.avatar { width: 96px; height: 96px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 40% 30%, rgba(255,255,255,.14), rgba(var(--glow), .1)); border: 1px solid var(--gline-2);
+  box-shadow: 0 0 30px -8px rgba(var(--glow), .8), inset 0 1px 0 rgba(255,255,255,.2); }
+.avatar svg { width: 52px; height: 58px; }
+.profile h3 { font-family: var(--display); font-size: 1.3rem; }
+.profile .handle { font-family: var(--mono); font-size: .74rem; color: var(--cyan); margin-top: 2px; }
+.profile .clear { display: inline-block; margin-top: 12px; font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); padding: 6px 14px; border-radius: 999px; border: 1px solid var(--gline); }
+.mini-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+.mini-stats div { padding: 12px 6px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); }
+.mini-stats .n { font-family: var(--display); font-weight: 700; font-size: 1.2rem; color: var(--cyan); }
+.mini-stats .l { font-family: var(--mono); font-size: .54rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin-top: 3px; }
+
+.pane h3.ph { font-family: var(--display); margin-bottom: 6px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+.field input[type=text], .field input[type=email], .field input[type=password] { width: 100%; padding: 11px 14px; border-radius: 12px; background: rgba(0,0,0,.28); border: 1px solid var(--gline); color: var(--ink); font-family: var(--body); font-size: .95rem; }
+.field input:focus { border-color: rgba(var(--glow), .5); outline: none; box-shadow: 0 0 0 3px rgba(var(--glow), .12); }
+
+.setting { display: flex; align-items: center; gap: 14px; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,.06); flex-wrap: wrap; }
+.setting:last-child { border-bottom: none; }
+.setting .txt { flex: 1; min-width: 180px; } .setting .txt b { font-size: .94rem; } .setting .txt span { font-size: .8rem; color: var(--faint); }
+.toggle { width: 46px; height: 26px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid var(--gline); position: relative; cursor: pointer; transition: .2s; flex: none; }
+.toggle i { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--faint); transition: .2s; }
+.toggle.on { background: linear-gradient(180deg, rgba(var(--glow), .5), rgba(var(--glow), .25)); border-color: rgba(var(--glow), .5); box-shadow: 0 0 16px -4px rgba(var(--glow), .8); }
+.toggle.on i { left: 22px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+
+.themes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.sw { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .15s; }
+.sw:hover { transform: scale(1.1); } .sw.sel { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.15); }
+.sw.ghost-def { background: linear-gradient(135deg,#fff,#c8d6ec); }
+.pick { width: 40px; height: 34px; border-radius: 10px; border: 1px solid var(--gline); background: rgba(0,0,0,.28); padding: 3px; cursor: pointer; }
+
+.seg { display: inline-flex; border: 1px solid var(--gline); border-radius: 999px; overflow: hidden; }
+.seg button { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; padding: 9px 15px; color: var(--muted); border-right: 1px solid var(--gline); transition: .15s; }
+.seg button:last-child { border-right: none; }
+.seg button.on { color: var(--cyan); background: rgba(var(--glow), .14); }
+
+.act-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.btn-sm { font-family: var(--mono); font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--gline); color: var(--ink); cursor: pointer; transition: .15s; }
+.btn-sm:hover { border-color: rgba(var(--glow), .5); color: var(--cyan); }
+.btn-sm.danger:hover { border-color: rgba(255,95,104,.6); color: #ff5f68; }
+.saved { font-family: var(--mono); font-size: .62rem; color: #39e585; opacity: 0; transition: .2s; align-self: center; }
+.saved.show { opacity: 1; }
+
+.ach-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 6px; }
+.ach { text-align: center; padding: 18px 10px; border-radius: 16px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); }
+.ach.locked { opacity: .35; }
+.ach .b { color: var(--cyan); line-height: 0; display: inline-block; filter: drop-shadow(0 0 12px rgba(var(--glow), .7)); }
+.ach .b .ico { width: 26px; height: 26px; }
+.ach .t { font-family: var(--mono); font-size: .58rem; letter-spacing: .04em; color: var(--muted); margin-top: 8px; }
+@media (max-width: 1020px) { .acct-grid { grid-template-columns: 1fr; } .ach-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 620px) { .ach-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>V6 CONCEPT</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span>
+    <a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html" class="active">Account</a>
+  </nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html" class="active">Account</a></div>
+
+<main class="wrap">
+  <div class="page-head rv" style="padding-bottom:26px">
+    <span class="kick"><i class="pip"></i>Account · Sign in or stay local</span>
+    <h1>Your <em>operator card.</em></h1>
+    <p>Use it locally with no sign-up, or create an account to sync your credits, profile, notes &amp; settings across devices.</p>
+  </div>
+
+  <div class="acct-grid">
+    <div class="pane profile rv d1">
+      <div class="avatar"><svg viewBox="0 0 120 132"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></div>
+      <h3 id="pName">operator</h3>
+      <div class="handle" id="pHandle">@you</div>
+      <span class="clear">Local profile</span>
+      <div class="mini-stats">
+        <div><div class="n" id="stCredits">—</div><div class="l">Credits</div></div>
+        <div><div class="n" id="stCases">—</div><div class="l">Cases</div></div>
+        <div><div class="n" id="stNotes">—</div><div class="l">Notes</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <!-- ACCOUNT / SIGN IN -->
+      <div class="pane rv d2" id="authPane">
+        <h3 class="ph" style="margin-bottom:12px">Account</h3>
+        <div id="authLoading" style="font-family:var(--mono);font-size:.72rem;color:var(--faint)">Connecting to Firebase…</div>
+        <div id="authedOut" style="display:none">
+          <div class="seg" id="authTabs" style="margin-bottom:16px"><button type="button" data-tab="login" class="on">Sign in</button><button type="button" data-tab="signup">Create account</button></div>
+          <div class="field" id="fldHandle" style="display:none"><label>Display name</label><input type="text" id="auHandle" maxlength="32" placeholder="operator"></div>
+          <div class="field"><label>Email</label><input type="email" id="auEmail" placeholder="you@example.com" autocomplete="email"></div>
+          <div class="field"><label>Password</label><input type="password" id="auPass" placeholder="at least 6 characters" autocomplete="current-password"></div>
+          <div class="act-row"><button class="btn-sm" id="auSubmit">Sign in</button><a class="btn-sm" id="auForgot" style="cursor:pointer">Forgot password</a></div>
+          <div style="display:flex;align-items:center;gap:12px;margin:16px 0 4px"><span style="flex:1;height:1px;background:var(--gline)"></span><span style="font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)">or</span><span style="flex:1;height:1px;background:var(--gline)"></span></div>
+          <button class="btn-sm" id="auGoogle" style="width:100%;justify-content:center;display:inline-flex;align-items:center;gap:9px"><svg viewBox="0 0 18 18" style="width:15px;height:15px"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8l3-2.3z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.1 6.6 3.6 9 3.6z"/></svg> Continue with Google</button>
+          <div id="auMsg" style="font-family:var(--mono);font-size:.72rem;margin-top:12px;min-height:1em"></div>
+        </div>
+        <div id="authedIn" style="display:none">
+          <div class="setting" style="padding:0 0 12px"><div class="txt"><b id="auUserEmail">—</b><br><span id="auVerify"></span></div></div>
+          <p style="color:var(--muted);font-size:.86rem;font-weight:300;margin:0 0 14px">Signed in — your credits, profile, notes, habits, snippets &amp; settings sync to this account across devices.</p>
+          <div class="act-row"><button class="btn-sm" id="auSync">Sync now</button><button class="btn-sm" id="auVerifyBtn" style="display:none">Resend verification</button><button class="btn-sm danger" id="auLogout">Log out</button></div>
+          <div id="auMsg2" style="font-family:var(--mono);font-size:.72rem;margin-top:12px;min-height:1em"></div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="pane rv d2">
+        <h3 class="ph">Profile</h3>
+        <div class="field"><label>Display name</label><input type="text" id="fName" maxlength="32" placeholder="operator"></div>
+        <div class="field"><label>Handle</label><input type="text" id="fHandle" maxlength="24" placeholder="you"></div>
+        <div class="act-row"><button class="btn-sm" id="saveProfile">Save profile</button><span class="saved" id="savedNote">✓ saved</span></div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="pane rv d3">
+        <h3 class="ph" style="margin-bottom:14px">Appearance</h3>
+
+        <div class="setting"><div class="txt"><b>Accent colour</b><br><span>Retints the whole interface — glow, links & the LED.</span></div>
+          <div class="themes" id="accentRow"><input type="color" class="pick" id="accentPicker" value="#ffffff" title="Custom accent"></div>
+        </div>
+
+        <div class="setting"><div class="txt"><b>Ghost colour</b><br><span>Tint the ghost body. Default keeps the classic look.</span></div>
+          <div class="themes" id="ghostRow">
+            <span class="sw ghost-def sel" data-gh="" title="Default"></span>
+            <span class="sw" data-gh="#ff7e33" style="background:#ff7e33"></span>
+            <span class="sw" data-gh="#2ee4ff" style="background:#2ee4ff"></span>
+            <span class="sw" data-gh="#39e585" style="background:#39e585"></span>
+            <span class="sw" data-gh="#ff5fa2" style="background:#ff5fa2"></span>
+            <input type="color" class="pick" id="ghostPicker" value="#ff7e33" title="Custom ghost">
+          </div>
+        </div>
+
+        <div class="setting"><div class="txt"><b>Background</b><br><span>Switch between the dark theme and a light (white) theme.</span></div>
+          <div class="seg" id="segMode"><button data-mode="dark">Dark</button><button data-mode="light">Light</button></div>
+        </div>
+
+        <div class="setting"><div class="txt"><b>Edge LED</b><br><span>Glow along the screen edges — Bright adds a slow pulse.</span></div>
+          <div class="seg" id="segEdge"></div>
+        </div>
+
+        <div class="setting"><div class="txt"><b>Black &amp; white</b><br><span>Drain all colour — the whole site goes grayscale.</span></div><div class="toggle" id="tMono"><i></i></div></div>
+
+        <div class="setting"><div class="txt"><b>Reduced motion</b><br><span>Calm the floating, pulsing &amp; scanline animations.</span></div><div class="toggle" id="tMotion"><i></i></div></div>
+      </div>
+
+      <!-- DATA -->
+      <div class="pane rv d4">
+        <h3 class="ph" style="margin-bottom:12px">Local data</h3>
+        <p style="color:var(--muted);font-size:.9rem;font-weight:300;margin-bottom:14px">Your notes, habits, snippets, OSINT cases, credits and settings all live in this browser. Export a backup or wipe everything.</p>
+        <div class="act-row">
+          <button class="btn-sm" id="exportAll">Export backup</button>
+          <label class="btn-sm" for="importFile" style="cursor:pointer">Import backup<input type="file" id="importFile" accept=".json" hidden></label>
+          <button class="btn-sm danger" id="clearAll">Clear all local data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="wrap"><div class="foot-pill rv d4"><span>NULLBYTE · LOCAL PROFILE</span><span>NO SIGN-UP · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/shared.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+  var flash = function () { var n = $('#savedNote'); n.classList.add('show'); setTimeout(function () { n.classList.remove('show'); }, 1200); };
+
+  /* ---------- profile ---------- */
+  function loadProfile() { try { return JSON.parse(localStorage.getItem('nb_profile')) || {}; } catch (e) { return {}; } }
+  var p = loadProfile();
+  $('#fName').value = p.name || ''; $('#fHandle').value = (p.handle || '').replace(/^@/, '');
+  function paintProfile() {
+    var nm = ($('#fName').value.trim() || 'operator');
+    var hd = ($('#fHandle').value.trim() || 'you').replace(/^@/, '');
+    $('#pName').textContent = nm; $('#pHandle').textContent = '@' + hd;
+  }
+  paintProfile();
+  $('#fName').addEventListener('input', paintProfile); $('#fHandle').addEventListener('input', paintProfile);
+  $('#saveProfile').addEventListener('click', function () {
+    try { localStorage.setItem('nb_profile', JSON.stringify({ name: $('#fName').value.trim(), handle: $('#fHandle').value.trim().replace(/^@/, '') })); } catch (e) {}
+    flash();
+  });
+
+  /* ---------- mini-stats from real local data ---------- */
+  function num(v) { return (v === undefined || v === null) ? '—' : v; }
+  try { var os = JSON.parse(localStorage.getItem('nb_osint')) || {}; $('#stCredits').textContent = num(os.account && os.account.credits); $('#stCases').textContent = num((os.cases || []).length); } catch (e) {}
+  try { var nt = JSON.parse(localStorage.getItem('nb_notes_v1')) || {}; $('#stNotes').textContent = num((nt.notes || []).length); } catch (e) {}
+
+  /* ---------- accent colour ---------- */
+  var accentRow = $('#accentRow'), accentPicker = $('#accentPicker');
+  (window.NB_THEMES || []).forEach(function (t) {
+    var s = document.createElement('span'); s.className = 'sw'; s.title = t[0]; s.dataset.hex = t[1]; s.style.background = t[1];
+    accentRow.insertBefore(s, accentPicker);
+  });
+  function markAccent(hex) {
+    hex = (hex || '').toLowerCase();
+    accentRow.querySelectorAll('.sw').forEach(function (s) { s.classList.toggle('sel', (s.dataset.hex || '').toLowerCase() === hex); });
+    if (/^#[0-9a-f]{6}$/i.test(hex)) accentPicker.value = hex;
+  }
+  function setAccent(hex) { if (window.nbApplyTheme) { nbApplyTheme(hex, true); markAccent(hex); flash(); } }
+  accentRow.addEventListener('click', function (e) { var s = e.target.closest('.sw'); if (s) setAccent(s.dataset.hex); });
+  accentPicker.addEventListener('input', function () { setAccent(accentPicker.value); });
+  markAccent(window.nbCurrentTheme ? nbCurrentTheme() : '#ffffff');
+
+  /* ---------- ghost colour ---------- */
+  var ghostRow = $('#ghostRow'), ghostPicker = $('#ghostPicker');
+  function markGhost(hex) {
+    hex = (hex || '').toLowerCase();
+    ghostRow.querySelectorAll('.sw').forEach(function (s) { s.classList.toggle('sel', (s.dataset.gh || '').toLowerCase() === hex); });
+    if (/^#[0-9a-f]{6}$/i.test(hex)) ghostPicker.value = hex;
+  }
+  function setGhost(hex) { if (window.nbApplyGhost) { nbApplyGhost(hex, true); markGhost(hex); flash(); } }
+  ghostRow.addEventListener('click', function (e) { var s = e.target.closest('.sw'); if (s) setGhost(s.dataset.gh); });
+  ghostPicker.addEventListener('input', function () { setGhost(ghostPicker.value); });
+  markGhost(window.nbCurrentGhost ? nbCurrentGhost() : '');
+
+  /* ---------- background dark/light ---------- */
+  var segMode = $('#segMode');
+  function markMode(m) { [].forEach.call(segMode.children, function (b) { b.classList.toggle('on', b.dataset.mode === m); }); }
+  segMode.addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (!b) return; if (window.nbApplyMode) nbApplyMode(b.dataset.mode, true); markMode(b.dataset.mode); flash(); });
+  markMode(window.nbCurrentMode ? nbCurrentMode() : 'dark');
+
+  /* ---------- edge LED ---------- */
+  var segEdge = $('#segEdge');
+  (window.NB_EDGE_LEVELS || ['Off', 'Soft', 'Medium', 'Bright']).forEach(function (lbl, i) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = lbl; b.dataset.lv = i; segEdge.appendChild(b);
+  });
+  function markEdge(lv) { [].forEach.call(segEdge.children, function (b, i) { b.classList.toggle('on', i === lv); }); }
+  segEdge.addEventListener('click', function (e) { var b = e.target.closest('[data-lv]'); if (!b) return; var lv = +b.dataset.lv; if (window.nbApplyEdge) nbApplyEdge(lv, true); markEdge(lv); flash(); });
+  markEdge(window.nbCurrentEdge ? nbCurrentEdge() : 3);
+
+  /* ---------- black & white ---------- */
+  var tMono = $('#tMono');
+  tMono.classList.toggle('on', window.nbCurrentMono ? nbCurrentMono() : false);
+  tMono.addEventListener('click', function () { var on = !tMono.classList.contains('on'); tMono.classList.toggle('on', on); if (window.nbApplyMono) nbApplyMono(on, true); flash(); });
+
+  /* ---------- reduce motion ---------- */
+  var tMotion = $('#tMotion');
+  tMotion.classList.toggle('on', window.nbCurrentMotion ? nbCurrentMotion() : false);
+  tMotion.addEventListener('click', function () { var on = !tMotion.classList.contains('on'); tMotion.classList.toggle('on', on); if (window.nbApplyMotion) nbApplyMotion(on, true); flash(); });
+
+  /* ---------- data: export / import / clear ---------- */
+  $('#exportAll').addEventListener('click', function () {
+    var dump = {}; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('nb_') === 0) dump[k] = localStorage.getItem(k); }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
+    a.download = 'nullbyte-backup.json'; a.click(); URL.revokeObjectURL(a.href);
+  });
+  $('#importFile').addEventListener('change', function (e) {
+    var f = e.target.files[0]; if (!f) return; var r = new FileReader();
+    r.onload = function () { try { var d = JSON.parse(r.result); Object.keys(d).forEach(function (k) { if (k.indexOf('nb_') === 0) localStorage.setItem(k, d[k]); }); alert('Backup imported. Reloading.'); location.reload(); } catch (err) { alert('That is not a valid NULLBYTE backup.'); } };
+    r.readAsText(f); e.target.value = '';
+  });
+  $('#clearAll').addEventListener('click', function () {
+    if (!confirm('Erase ALL local NULLBYTE data — notes, habits, snippets, OSINT cases, credits and settings? This cannot be undone.')) return;
+    var keys = []; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('nb_') === 0) keys.push(k); }
+    keys.forEach(function (k) { localStorage.removeItem(k); }); location.reload();
+  });
+
+  /* ---------- Firebase account (auth + cloud sync) ---------- */
+  function withAuth(fn) { if (window.NBAuth) return fn(window.NBAuth); var t = setInterval(function () { if (window.NBAuth) { clearInterval(t); fn(window.NBAuth); } }, 120); }
+  var authTabs = $('#authTabs'), auSubmit = $('#auSubmit'), auMsg = $('#auMsg'), authMode = 'login';
+  function amsg(t, ok) { auMsg.style.color = ok ? '#39e585' : '#ff8da3'; auMsg.textContent = t || ''; }
+  authTabs.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]'); if (!b) return;
+    authMode = b.dataset.tab;
+    [].forEach.call(authTabs.children, function (x) { x.classList.toggle('on', x === b); });
+    $('#fldHandle').style.display = authMode === 'signup' ? '' : 'none';
+    auSubmit.textContent = authMode === 'signup' ? 'Create account' : 'Sign in';
+    $('#auPass').setAttribute('autocomplete', authMode === 'signup' ? 'new-password' : 'current-password');
+    amsg('');
+  });
+  auSubmit.addEventListener('click', function () {
+    var email = $('#auEmail').value.trim(), pass = $('#auPass').value, handle = $('#auHandle').value.trim();
+    if (!email || !pass) { amsg('Enter your email and password.'); return; }
+    auSubmit.disabled = true; amsg(authMode === 'signup' ? 'Creating account…' : 'Signing in…', true);
+    withAuth(function (A) {
+      var pr = authMode === 'signup' ? A.signup(email, pass, handle) : A.login(email, pass);
+      pr.then(function () { amsg(''); }).catch(function (e) { amsg(A.friendlyError(e)); })
+        .finally(function () { auSubmit.disabled = false; });
+    });
+  });
+  $('#auGoogle').addEventListener('click', function () {
+    amsg('Opening Google sign-in…', true);
+    withAuth(function (A) { A.loginGoogle().then(function () { amsg(''); }).catch(function (e) { amsg(A.friendlyError(e)); }); });
+  });
+  $('#auForgot').addEventListener('click', function () {
+    var email = $('#auEmail').value.trim(); if (!email) { amsg('Enter your email first, then tap Forgot.'); return; }
+    withAuth(function (A) { A.resetPassword(email).then(function () { amsg('Password-reset email sent.', true); }).catch(function (e) { amsg(A.friendlyError(e)); }); });
+  });
+  $('#auLogout').addEventListener('click', function () { withAuth(function (A) { A.logout(); }); });
+  $('#auSync').addEventListener('click', function () {
+    var m = $('#auMsg2'); m.style.color = 'var(--faint)'; m.textContent = 'Syncing…';
+    withAuth(function (A) { A.syncNow().then(function () { m.style.color = '#39e585'; m.textContent = 'Synced to the cloud.'; setTimeout(function () { m.textContent = ''; }, 1600); }); });
+  });
+  $('#auVerifyBtn').addEventListener('click', function () {
+    var m = $('#auMsg2'); withAuth(function (A) { A.verifyEmail().then(function () { m.style.color = '#39e585'; m.textContent = 'Verification email sent.'; }).catch(function (e) { m.style.color = '#ff8da3'; m.textContent = A.friendlyError(e); }); });
+  });
+  function renderAuth(user) {
+    $('#authLoading').style.display = 'none';
+    $('#authedOut').style.display = user ? 'none' : '';
+    $('#authedIn').style.display = user ? '' : 'none';
+    if (user) {
+      $('#auUserEmail').textContent = user.email || 'signed in';
+      var v = $('#auVerify');
+      if (user.emailVerified) { v.textContent = '● verified'; v.style.color = '#39e585'; $('#auVerifyBtn').style.display = 'none'; }
+      else { v.textContent = '● email not verified'; v.style.color = '#ffb347'; $('#auVerifyBtn').style.display = ''; }
+    }
+  }
+  withAuth(function (A) { A.onUser(renderAuth); });
+
+  /* after a cloud restore, re-sync every control + stat to the restored values */
+  window.addEventListener('nb-cloud-synced', function () {
+    p = loadProfile(); $('#fName').value = p.name || ''; $('#fHandle').value = (p.handle || '').replace(/^@/, ''); paintProfile();
+    try { var os = JSON.parse(localStorage.getItem('nb_osint')) || {}; $('#stCredits').textContent = num(os.account && os.account.credits); $('#stCases').textContent = num((os.cases || []).length); } catch (e) {}
+    try { var nt = JSON.parse(localStorage.getItem('nb_notes_v1')) || {}; $('#stNotes').textContent = num((nt.notes || []).length); } catch (e) {}
+    if (window.nbCurrentTheme) markAccent(nbCurrentTheme());
+    if (window.nbCurrentGhost) markGhost(nbCurrentGhost());
+    if (window.nbCurrentMode) markMode(nbCurrentMode());
+    if (window.nbCurrentEdge) markEdge(nbCurrentEdge());
+    if (window.nbCurrentMono) tMono.classList.toggle('on', nbCurrentMono());
+    if (window.nbCurrentMotion) tMotion.classList.toggle('on', nbCurrentMotion());
+  });
+})();
+</script>
+</body>
+</html>

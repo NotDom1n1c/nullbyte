@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NULLBYTE — Your toolkit, your rules</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   NULLBYTE V6 — "LIQUID GLASS" design concept  (layout only, non-functional)
+   Single-screen landing: glass pill nav, title, one CTA, ghost + terminal.
+   ========================================================================== */
+:root {
+  --bg: #04060d;
+  --ink: #eef6ff;
+  --muted: #9db1cf;
+  --faint: #5d6b8a;
+  --cyan: #2ee4ff;
+  --cyan-soft: #9df0ff;
+  --glow: 46, 228, 255;
+  --gline: rgba(255, 255, 255, .12);
+  --gline-2: rgba(255, 255, 255, .22);
+  --display: "Unbounded", sans-serif;
+  --body: "Outfit", sans-serif;
+  --mono: "JetBrains Mono", monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.6;
+  overflow: hidden;
+  height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+.ico { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.7; fill: none; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ------------------------------ backdrop ------------------------------ */
+.sky { position: fixed; inset: 0; z-index: -3; background:
+  radial-gradient(110% 75% at 50% -12%, rgba(var(--glow), .17), transparent 55%),
+  radial-gradient(70% 55% at 88% 30%, rgba(120, 90, 255, .10), transparent 60%),
+  radial-gradient(75% 60% at 8% 85%, rgba(var(--glow), .12), transparent 60%),
+  var(--bg); }
+.blob { position: fixed; z-index: -2; border-radius: 50%; filter: blur(64px); opacity: .5; pointer-events: none; will-change: transform; }
+.blob.a { width: 560px; height: 560px; top: -220px; left: 8%; background: rgba(var(--glow), .16); animation: drift 26s ease-in-out infinite alternate; }
+.blob.b { width: 460px; height: 460px; top: 30%; right: -160px; background: rgba(110, 80, 255, .13); animation: drift 32s ease-in-out infinite alternate-reverse; }
+.blob.c { width: 500px; height: 500px; bottom: -200px; left: 32%; background: rgba(var(--glow), .10); animation: drift 38s ease-in-out infinite alternate; }
+@keyframes drift { to { transform: translate(60px, 40px); } }
+.mesh { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(rgba(140, 190, 255, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(140, 190, 255, .05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(80% 60% at 50% 0%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(80% 60% at 50% 0%, #000 30%, transparent 100%); }
+.grain { position: fixed; inset: 0; z-index: 50; pointer-events: none; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"); }
+
+/* ------------------------- THE GLASS PILL NAV ------------------------- */
+.nav {
+  position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  width: min(1240px, calc(100% - 28px));
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 10px 9px 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.035) 55%, rgba(255,255,255,.06));
+  border: 1px solid var(--gline);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  box-shadow: 0 18px 50px -18px rgba(0, 0, 0, .75), 0 0 60px -30px rgba(var(--glow), .55),
+              inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(255,255,255,.05);
+}
+.nav::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.10) 38%, rgba(255,255,255,.02) 52%, transparent 70%); }
+
+.brand { display: flex; align-items: center; gap: 11px; margin-right: 8px; }
+.brand .puck { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.16), rgba(255,255,255,.04));
+  border: 1px solid var(--gline-2); box-shadow: 0 0 22px -6px rgba(var(--glow), .8), inset 0 1px 0 rgba(255,255,255,.2); }
+.brand .puck svg { width: 21px; height: 23px; }
+.brand b { font-family: var(--display); font-weight: 700; font-size: .92rem; letter-spacing: .06em; }
+.brand small { display: block; font-family: var(--mono); font-size: .56rem; letter-spacing: .3em; color: var(--faint); margin-top: 1px; }
+
+.nav-links { display: flex; align-items: center; gap: 2px; margin-inline: auto;
+  padding: 4px; border-radius: 999px; background: rgba(0, 0, 0, .22);
+  border: 1px solid rgba(255,255,255,.06); box-shadow: inset 0 2px 6px rgba(0,0,0,.35); }
+.nav-links a { font-family: var(--mono); font-size: .68rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); padding: 9px 15px; border-radius: 999px; transition: color .18s, background .18s, box-shadow .18s; }
+.nav-links a:hover { color: var(--ink); background: rgba(255,255,255,.07); }
+.nav-links a.active { color: var(--cyan);
+  background: linear-gradient(180deg, rgba(var(--glow), .16), rgba(var(--glow), .06));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 0 18px -6px rgba(var(--glow), .8);
+  text-shadow: 0 0 12px rgba(var(--glow), .8); }
+
+.nav-cta { display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--mono); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: #06222b; padding: 11px 20px; border-radius: 999px;
+  background: linear-gradient(180deg, var(--cyan-soft), var(--cyan) 60%);
+  box-shadow: 0 0 26px -6px rgba(var(--glow), .9), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -6px 12px rgba(0,60,80,.25);
+  transition: transform .16s, box-shadow .16s, filter .16s; }
+.nav-cta:hover { transform: translateY(-1px); filter: brightness(1.07); box-shadow: 0 0 40px -4px rgba(var(--glow), 1), inset 0 1px 0 rgba(255,255,255,.7); }
+.nav-burger { display: none; width: 40px; height: 40px; border-radius: 50%; place-items: center;
+  border: 1px solid var(--gline); background: rgba(255,255,255,.05); color: var(--muted); }
+
+/* mobile sheet */
+.sheet { position: fixed; z-index: 99; top: 84px; left: 50%; transform: translateX(-50%) translateY(-12px);
+  width: min(420px, calc(100% - 28px)); border-radius: 24px; padding: 12px;
+  background: linear-gradient(180deg, rgba(18,24,42,.85), rgba(10,14,26,.8));
+  border: 1px solid var(--gline); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.14);
+  opacity: 0; pointer-events: none; transition: opacity .22s, transform .22s; }
+.sheet.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.sheet a { display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 13px 16px; border-radius: 14px; }
+.sheet a:hover { background: rgba(255,255,255,.06); color: var(--ink); }
+
+/* ------------------------------- hero -------------------------------- */
+.hero {
+  height: 100dvh;
+  width: min(1240px, calc(100% - 48px));
+  margin-inline: auto;
+  display: grid;
+  place-items: center;
+  padding-top: 64px;
+}
+.hero-cta { margin-top: 30px; }
+.btn-osint { display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--mono); font-size: .84rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: #06222b; padding: 18px 34px; border-radius: 999px;
+  background: linear-gradient(180deg, var(--cyan-soft), var(--cyan) 60%);
+  box-shadow: 0 0 44px -8px rgba(var(--glow), .95), 0 18px 40px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -8px 16px rgba(0,60,80,.22);
+  transition: transform .16s, box-shadow .16s, filter .16s;
+  position: relative; }
+.btn-osint:hover { transform: translateY(-2px); filter: brightness(1.07);
+  box-shadow: 0 0 64px -6px rgba(var(--glow), 1), 0 22px 44px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.7); }
+.btn-osint .ico { width: 20px; height: 20px; }
+.hero-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 26px; }
+.chip { font-family: var(--mono); font-size: .66rem; letter-spacing: .05em; color: var(--faint);
+  padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); }
+.chip b { color: var(--cyan); font-weight: 600; }
+@keyframes rise { from { opacity: 0; transform: translateY(30px); } }
+
+/* --------------------- ghost + terminal showcase --------------------- */
+.deck { position: relative; display: flex; flex-direction: column; align-items: center;
+  animation: rise .9s .15s cubic-bezier(.2,.7,.2,1) both; }
+
+.ghost-stage { position: relative; display: grid; place-items: center; margin-bottom: -52px; z-index: 2; }
+.ghost-stage::before { content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--glow), .38), rgba(var(--glow), .1) 50%, transparent 72%);
+  filter: blur(14px); animation: halo 6s ease-in-out infinite; }
+@keyframes halo { 50% { transform: scale(1.1); opacity: .65; } }
+.ghost-ring { position: absolute; width: 330px; height: 330px; border-radius: 50%; border: 1px dashed rgba(var(--glow), .28); animation: spin 40s linear infinite; }
+.ghost-ring i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); top: -4px; left: 50%; }
+.ghost-ring.r2 { width: 400px; height: 400px; border-color: rgba(var(--glow), .14); animation-duration: 70s; animation-direction: reverse; }
+.ghost-ring.r2 i { width: 5px; height: 5px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ghost-wrap { position: relative; z-index: 1; animation: float 5.5s ease-in-out infinite; }
+.ghost { display: block; width: 210px; filter: drop-shadow(0 0 26px rgba(var(--glow), .75)) drop-shadow(0 22px 44px rgba(0,0,0,.65)); }
+@keyframes float { 50% { transform: translateY(-16px) rotate(-2deg); } }
+/* blink: eyelids squash the eye group */
+.ghost .eyes { animation: blink 4.6s infinite; transform-origin: 60px 56px; }
+@keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 96%, 98% { transform: scaleY(.08); } }
+/* pupils are nudged by JS toward the cursor */
+.ghost .pupils { transition: transform .12s ease-out; }
+/* ghost shadow puddle on the terminal */
+.ghost-shadow { position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%); width: 150px; height: 26px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,.55), transparent 70%); filter: blur(6px);
+  animation: shadowpulse 5.5s ease-in-out infinite; }
+@keyframes shadowpulse { 50% { transform: translateX(-50%) scale(.82); opacity: .7; } }
+
+.term { width: min(620px, 92vw); border-radius: 26px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(16,22,40,.6), rgba(7,10,20,.72));
+  border: 1px solid var(--gline); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 34px 80px -30px rgba(0,0,0,.85), 0 0 60px -28px rgba(var(--glow), .6), inset 0 1px 0 rgba(255,255,255,.14);
+  transform: perspective(1200px) rotateX(4deg); transform-origin: 50% 100%; }
+.term-bar { display: flex; align-items: center; gap: 8px; padding: 13px 18px; border-bottom: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); }
+.term-bar i { width: 11px; height: 11px; border-radius: 50%; }
+.term-bar i:nth-child(1) { background: #ff5f68; } .term-bar i:nth-child(2) { background: #ffd34e; } .term-bar i:nth-child(3) { background: #39e585; }
+.term-bar span { margin-left: 10px; font-family: var(--mono); font-size: .7rem; color: var(--faint); }
+/* "this shell is live" hint — pulses until the first keystroke */
+.term-hint { margin-left: auto !important; display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--mono); font-size: .6rem !important; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--cyan) !important; padding: 5px 12px; border-radius: 999px;
+  background: rgba(var(--glow), .1); border: 1px solid rgba(var(--glow), .35);
+  box-shadow: 0 0 16px -4px rgba(var(--glow), .8);
+  animation: hintpulse 1.6s ease-in-out infinite; transition: opacity .4s; }
+.term-hint .pip { width: 5px; height: 5px; margin-left: 0; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.term-hint b { color: var(--cyan-soft); font-weight: 700; }
+@keyframes hintpulse { 50% { box-shadow: 0 0 26px -2px rgba(var(--glow), 1); transform: scale(1.05); } }
+.term-hint.off { opacity: 0; animation: none; }
+/* the whole pane breathes cyan until someone types */
+.term.await { animation: termglow 2.6s ease-in-out infinite; }
+@keyframes termglow {
+  50% { box-shadow: 0 34px 80px -30px rgba(0,0,0,.85), 0 0 80px -18px rgba(var(--glow), .85), inset 0 1px 0 rgba(255,255,255,.14); } }
+.term-body { padding: 58px 24px 26px; font-family: var(--mono); font-size: .8rem; line-height: 1.9; color: var(--muted); min-height: 224px; }
+.term-body .ln { min-height: 1.9em; white-space: pre-wrap; }
+.term-body .p { color: var(--cyan); } .term-body .ok { color: #39e585; } .term-body .dim { color: var(--faint); }
+.cursor { display: inline-block; width: 8px; height: 15px; background: var(--cyan); vertical-align: -2px; box-shadow: 0 0 10px var(--cyan); animation: blinkc 1s steps(1) infinite; }
+@keyframes blinkc { 50% { opacity: 0; } }
+
+/* cursor spotlight */
+.spot { position: fixed; top: 0; left: 0; z-index: -1; width: 640px; height: 640px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(var(--glow), .08), transparent 62%); transform: translate(-50%, -50%); }
+/* nav hover glide pill */
+.nav-links { position: relative; }
+.glide { position: absolute; z-index: 0; top: 4px; bottom: 4px; border-radius: 999px;
+  background: rgba(255,255,255,.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  opacity: 0; pointer-events: none;
+  transition: left .22s cubic-bezier(.3,.7,.3,1), width .22s cubic-bezier(.3,.7,.3,1), opacity .18s; }
+.nav-links a { position: relative; z-index: 1; }
+/* ghost flight */
+.ghost-wrap { cursor: pointer; }
+.ghost-shadow { transition: opacity .5s; }
+.ghost-stage.flying .ghost-shadow { opacity: 0; }
+/* interactive terminal scroll */
+.term-body { max-height: 300px; overflow-y: auto; scrollbar-width: none; }
+.term-body::-webkit-scrollbar { display: none; }
+.term-body .err { color: #ff6d76; }
+
+/* corner status line */
+.corner { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 60;
+  font-family: var(--mono); font-size: .6rem; letter-spacing: .28em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+.corner b { color: var(--cyan); font-weight: 600; }
+
+/* ---------------------------- responsive ----------------------------- */
+@media (max-width: 1020px) {
+  body { overflow-y: auto; }
+  .nav-links { display: none; }
+  .nav-burger { display: grid; }
+  .nav { padding-left: 14px; }
+  .hero { height: auto; min-height: 100dvh; padding: 120px 0 60px; }
+  .corner { display: none; }
+}
+@media (max-width: 620px) {
+  .nav-cta span { display: none; }
+  .nav-cta { padding: 11px 13px; }
+  .ghost { width: 160px; }
+  .ghost-ring { width: 260px; height: 260px; }
+  .ghost-ring.r2 { width: 320px; height: 320px; }
+  .term { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div>
+<div class="spot" id="spot"></div>
+<div class="grain"></div>
+
+<!-- ============================ GLASS PILL NAV ============================ -->
+<header class="nav" id="nav">
+  <a class="brand" href="index.html">
+    <span class="puck">
+      <svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/>
+        <circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/>
+        <circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/>
+        <path fill="#2ee4ff" d="M52 72h16l-8 14z"/>
+      </svg>
+    </span>
+    <span><b>NULLBYTE</b><small>OPEN SOURCE</small></span>
+  </a>
+
+  <nav class="nav-links">
+    <span class="glide" id="glide"></span>
+    <a href="features.html">Features</a>
+    <a href="learn.html">Learn</a>
+    <a href="personal.html">Personal</a>
+    <a href="osint.html">OSINT</a>
+    <a href="threatmap.html">Threat Map</a>
+    <a href="console.html">Console</a>
+    <a href="daily.html">Daily</a>
+    <a href="shop.html">Shop</a>
+    <a href="account.html">Account</a>
+  </nav>
+
+  <a class="nav-cta" href="osint.html">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    <span>Launch OSINT</span>
+  </a>
+  <button class="nav-burger" id="burger" aria-label="Menu">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+</header>
+
+<div class="sheet" id="sheet">
+  <a href="features.html">Features <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="learn.html">Learn <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="personal.html">Personal <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="osint.html">OSINT <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="threatmap.html">Threat Map <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="console.html">Console <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="daily.html">Daily <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="shop.html">Shop <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a href="account.html">Account <svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+</div>
+
+<!-- ================================ HERO ================================= -->
+<main class="hero">
+  <div class="deck">
+    <div class="ghost-stage">
+      <div class="ghost-ring"><i></i></div>
+      <div class="ghost-ring r2"><i></i></div>
+      <div id="ghostFly">
+      <div class="ghost-wrap" id="ghostWrap">
+        <svg class="ghost" viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/>
+          <g class="eyes">
+            <circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/>
+            <g class="pupils" id="pupils">
+              <circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/>
+            </g>
+          </g>
+          <path fill="#2ee4ff" d="M52 72h16l-8 14z"/>
+        </svg>
+        <div class="ghost-shadow"></div>
+      </div>
+      </div>
+    </div>
+    <div class="term await" id="term">
+      <div class="term-bar"><i></i><i></i><i></i><span>operator@nullbyte:~</span>
+        <span class="term-hint" id="termHint"><span class="pip"></span>Live shell — type <b>help</b></span>
+      </div>
+      <div class="term-body" id="termBody"></div>
+    </div>
+    <div class="hero-cta">
+      <a class="btn-osint" href="osint.html">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        Launch OSINT
+      </a>
+    </div>
+    <div class="hero-meta">
+      <span class="chip"><b>40+</b> tools</span>
+      <span class="chip"><b>30</b> OSINT modules</span>
+      <span class="chip"><b>200+</b> terms</span>
+      <span class="chip"><b>100%</b> client-side</span>
+    </div>
+  </div>
+</main>
+
+<div class="corner">System online · <b>V6</b> · Open source · <b id="clock">--:--:--</b></div>
+
+<script src="assets/shared.js"></script>
+<script>
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// clock
+const clock = document.getElementById('clock');
+setInterval(() => clock.textContent = new Date().toLocaleTimeString('de-CH', { hour12: false }), 1000);
+
+// ghost pupils follow the cursor
+const pupils = document.getElementById('pupils');
+const ghostWrap = document.getElementById('ghostWrap');
+addEventListener('mousemove', e => {
+  const r = ghostWrap.getBoundingClientRect();
+  const dx = e.clientX - (r.left + r.width / 2);
+  const dy = e.clientY - (r.top + r.height / 2);
+  const d = Math.hypot(dx, dy) || 1;
+  const k = Math.min(d, 160) / 160 * 3.4;           // max 3.4 svg-units of travel
+  pupils.style.transform = `translate(${dx / d * k}px, ${dy / d * k}px)`;
+});
+
+/* ---------------- ghost flight: a lap around the terminal ---------------- */
+const ghostFly = document.getElementById('ghostFly');
+const stage = document.querySelector('.ghost-stage');
+let flying = false;
+function fly() {
+  if (flying || RM) return;
+  flying = true;
+  stage.classList.add('flying');
+  const rx = Math.min(360, innerWidth * .26), ry = 155, N = 60, frames = [];
+  for (let i = 0; i <= N; i++) {
+    const a = i / N * 2 * Math.PI;
+    const x = rx * Math.sin(a);            // swing right, then left, back to start
+    const y = ry * (1 - Math.cos(a));      // dip down over the terminal
+    const rot = 14 * Math.cos(a);          // tilt into the direction of travel
+    frames.push({ transform: `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${rot.toFixed(1)}deg)` });
+  }
+  const anim = ghostFly.animate(frames, { duration: 5600, easing: 'ease-in-out' });
+  anim.onfinish = () => { flying = false; stage.classList.remove('flying'); };
+}
+// take a lap early and often, so nobody clicks away before seeing it
+if (!RM) setTimeout(function lap() { fly(); setTimeout(lap, 8000 + Math.random() * 7000); }, 3500);
+
+// poke the ghost: barrel roll + sass in the terminal
+const SASS = [
+  '<span class="dim">[ghost] boo.</span>',
+  '<span class="dim">[ghost] hey — personal space.</span>',
+  '<span class="dim">[ghost] i am 100% client-side. no poking required.</span>',
+  '<span class="dim">[ghost] do that again and I clear your streak.</span>',
+];
+let sassIx = 0;
+ghostWrap.addEventListener('click', () => {
+  if (!RM) ghostWrap.animate(
+    [{ transform: 'rotate(0deg) scale(1)' }, { transform: 'rotate(180deg) scale(.82)' }, { transform: 'rotate(360deg) scale(1)' }],
+    { duration: 650, easing: 'ease-in-out' });
+  addLine(SASS[sassIx++ % SASS.length]);
+});
+
+/* -------------------- terminal: boot, then playable ---------------------- */
+const body = document.getElementById('termBody');
+const BOOT = [
+  '<span class="p">$</span> nullbyte --status',
+  '<span class="ok">[ok]</span> 40+ interactive tools online',
+  '<span class="ok">[ok]</span> 30 OSINT modules armed',
+  '<span class="ok">[ok]</span> 200+ glossary terms indexed',
+  '<span class="dim">type</span> <span class="p">help</span> <span class="dim">and hit enter — this shell listens.</span>',
+];
+let promptLn = null, cmdSpan = null, buf = '';
+const scrollDown = () => { body.scrollTop = body.scrollHeight; };
+function addLine(html) {
+  const d = document.createElement('div');
+  d.className = 'ln';
+  d.innerHTML = html;
+  if (promptLn) body.insertBefore(d, promptLn); else body.appendChild(d);
+  while (body.children.length > 40) body.removeChild(body.firstChild);
+  scrollDown();
+  return d;
+}
+function newPrompt() {
+  promptLn = document.createElement('div');
+  promptLn.className = 'ln';
+  promptLn.innerHTML = '<span class="p">$</span> <span class="cmd"></span><span class="cursor"></span>';
+  body.appendChild(promptLn);
+  cmdSpan = promptLn.querySelector('.cmd');
+  buf = '';
+  scrollDown();
+}
+function freezePrompt() {
+  const c = promptLn.querySelector('.cursor');
+  if (c) c.remove();
+  promptLn = null;
+}
+function run(cmd) {
+  freezePrompt();
+  const c = cmd.toLowerCase();
+  if (c === '') { /* just a new prompt */ }
+  else if (c === 'help') {
+    addLine('<span class="dim">available commands:</span>');
+    addLine('  <span class="p">status</span>   <span class="dim">platform status</span>');
+    addLine('  <span class="p">whoami</span>   <span class="dim">who is asking?</span>');
+    addLine('  <span class="p">ghost</span>    <span class="dim">send the ghost on a lap</span>');
+    addLine('  <span class="p">hack</span>     <span class="dim">breach the mainframe</span>');
+    addLine('  <span class="p">clear</span>    <span class="dim">wipe the screen</span>');
+  }
+  else if (c === 'status') { BOOT.slice(1, 4).forEach(l => addLine(l)); addLine('<span class="ok">[ok]</span> ui: liquid-glass v6 <span class="dim">// concept build</span>'); }
+  else if (c === 'whoami') addLine('operator <span class="dim">// guest clearance // 100% client-side</span>');
+  else if (c === 'ghost') { addLine('<span class="dim">[ghost] taking a lap…</span>'); fly(); }
+  else if (c === 'clear') body.innerHTML = '';
+  else if (c === 'hack') { hackSeq(); return; }
+  else addLine(`<span class="err">nbsh:</span> command not found: ${cmd.replace(/[<>&]/g, '')} <span class="dim">— try 'help'</span>`);
+  newPrompt();
+}
+function hackSeq() {
+  const bar = addLine('<span class="dim">breaching mainframe</span> [----------] 0%');
+  let p = 0;
+  const t = setInterval(() => {
+    p += Math.ceil(Math.random() * 18);
+    if (p >= 100) {
+      clearInterval(t);
+      bar.innerHTML = '<span class="dim">breaching mainframe</span> [██████████] 100%';
+      setTimeout(() => { addLine('<span class="err">[denied]</span> access refused. <span class="dim">nice try, operator.</span>'); newPrompt(); }, 420);
+      return;
+    }
+    const f = Math.round(p / 10);
+    bar.innerHTML = `<span class="dim">breaching mainframe</span> [${'█'.repeat(f)}${'-'.repeat(10 - f)}] ${p}%`;
+  }, 240);
+}
+// first keystroke dismisses the "live shell" hint + glow
+function hintOff() {
+  document.getElementById('termHint').classList.add('off');
+  document.getElementById('term').classList.remove('await');
+}
+addEventListener('keydown', e => {
+  if (!promptLn || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === 'Enter' || e.key === 'Backspace' || e.key.length === 1) hintOff();
+  if (e.key === 'Enter') run(buf.trim());
+  else if (e.key === 'Backspace') { buf = buf.slice(0, -1); cmdSpan.textContent = buf; }
+  else if (e.key.length === 1 && buf.length < 40) {
+    if (e.key === ' ') e.preventDefault();
+    buf += e.key;
+    cmdSpan.textContent = buf;
+  }
+});
+
+// boot: type each line character by character, then hand over the prompt
+function typeLine(i) {
+  if (i >= BOOT.length) { newPrompt(); return; }
+  const tpl = document.createElement('template');
+  tpl.innerHTML = BOOT[i];
+  const text = tpl.content.textContent;
+  const ln = addLine('');
+  let c = 0;
+  const t = setInterval(() => {
+    c++;
+    let remaining = c, out = '';
+    tpl.content.childNodes.forEach(node => {
+      if (remaining <= 0) return;
+      const s = node.textContent;
+      const take = Math.min(s.length, remaining);
+      remaining -= take;
+      if (node.nodeType === 3) out += s.slice(0, take);
+      else { const el = node.cloneNode(false); el.textContent = s.slice(0, take); out += el.outerHTML; }
+    });
+    ln.innerHTML = out;
+    if (c >= text.length) { clearInterval(t); ln.innerHTML = BOOT[i]; setTimeout(() => typeLine(i + 1), 300); }
+  }, 14);
+}
+if (RM) { BOOT.forEach(l => addLine(l)); newPrompt(); }
+else setTimeout(() => typeLine(0), 700);
+
+// idle chatter: the deck mutters to itself when you leave it alone
+const CHATTER = [
+  '<span class="dim">[scan] sweep 192.168.0.0/24 :: 3 hosts up</span>',
+  '<span class="dim">[net] handshake with node-07 ok</span>',
+  '<span class="dim">[recon] module cached: dork-gen</span>',
+  '<span class="dim">[sys] entropy pool refilled</span>',
+  '<span class="dim">[ghost] …boo?</span>',
+  '<span class="dim">[jobs] daily challenge rotates at 00:00</span>',
+];
+if (!RM) setTimeout(function mutter() {
+  if (promptLn && buf === '') addLine(CHATTER[Math.floor(Math.random() * CHATTER.length)]);
+  setTimeout(mutter, 18000 + Math.random() * 16000);
+}, 14000);
+</script>
+</body>
+</html>

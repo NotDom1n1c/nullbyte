@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Studio — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.2rem,5.5vw,3.8rem); }
+.privacy-pill { display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:#9fe7ff; border:1px solid rgba(34,211,242,.4); background:rgba(34,211,242,.08); padding:6px 12px; border-radius:999px; }
+
+/* tabs */
+.tabs { display:flex; gap:6px; margin:6px 0 22px; flex-wrap:wrap; }
+.tabs button { font-family:var(--mono); font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; padding:11px 18px; border-radius:var(--r); border:1px solid var(--line-2); background:transparent; color:var(--muted); cursor:pointer; transition:.15s; }
+.tabs button.active, .tabs button:hover { border-color:var(--accent); color:var(--accent); }
+.pane { display:none; } .pane.on { display:block; }
+
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; } @media(max-width:820px){ .cols{grid-template-columns:1fr} }
+.panel { border:1px solid var(--line); border-radius:var(--r); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); padding:22px; }
+.panel h3 { font-size:1.06rem; margin-bottom:12px; }
+label.fld { display:block; font-family:var(--mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); margin:14px 0 6px; }
+textarea.in, input.in, select.in { width:100%; background:rgba(0,0,0,.32); border:1px solid var(--line-2); border-radius:10px; color:var(--ink); font-family:var(--mono); font-size:.86rem; padding:12px 14px; outline:none; }
+textarea.in { min-height:120px; resize:vertical; line-height:1.6; }
+textarea.in:focus, input.in:focus, select.in:focus { border-color:var(--accent); }
+.row { display:flex; gap:12px; flex-wrap:wrap; } .row > * { flex:1; min-width:120px; }
+.qr-stage { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:300px; }
+#qrCanvas { image-rendering:pixelated; border-radius:12px; background:#fff; box-shadow:0 10px 40px -14px rgba(0,0,0,.7); max-width:100%; }
+.qr-meta { font-family:var(--mono); font-size:.72rem; color:var(--faint); margin-top:14px; text-align:center; }
+.btnrow { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+
+/* drop / scan */
+.drop { border:2px dashed var(--line-2); border-radius:var(--r); padding:40px 20px; text-align:center; cursor:pointer; transition:.18s; background:rgba(255,255,255,.015); }
+.drop.over { border-color:#22d3ee; background:rgba(34,211,242,.07); }
+.drop svg { width:42px; height:42px; color:var(--muted); margin-bottom:12px; }
+.drop h3 { font-size:1.02rem; } .drop p { color:var(--muted); font-size:.86rem; margin-top:6px; }
+video, #scanImg { width:100%; border-radius:12px; display:block; background:#000; }
+.scanwrap { position:relative; }
+.scanline { position:absolute; left:8%; right:8%; height:2px; background:linear-gradient(90deg,transparent,#22d3ee,transparent); box-shadow:0 0 12px #22d3ee; animation:scan 2s ease-in-out infinite; }
+@keyframes scan { 0%,100%{top:12%} 50%{top:88%} }
+.result { margin-top:16px; border:1px solid #22c55e; border-radius:12px; background:rgba(34,197,94,.08); padding:16px; display:none; word-break:break-all; }
+.result.show { display:block; }
+.result .lbl { font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:#7CFFB2; margin-bottom:8px; }
+.result .val { font-family:var(--mono); font-size:.9rem; color:var(--ink); line-height:1.6; }
+.result a.open { color:var(--violet); }
+.err { color:#ff9b8a; font-family:var(--mono); font-size:.82rem; margin-top:12px; }
+.hint { font-family:var(--mono); font-size:.72rem; color:var(--faint); margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ QR ]</span><span class="tag">// generate &amp; decode</span></div>
+  <h1 class="display">QR Studio.</h1>
+  <p class="lead" style="margin-top:14px">Encode any text or URL into a real QR code, then decode one back from your <b>camera</b> or an <b>uploaded image</b>. Genuine QR encoding (Reed–Solomon error correction) and real image decoding — all in your browser.</p>
+  <div style="margin-top:14px"><span class="privacy-pill"><svg class="ico ico-sm"><use href="#i-lock"/></svg> 100% local · nothing is uploaded</span></div>
+</section>
+
+<section class="wrap" style="padding-bottom:80px">
+  <div class="tabs">
+    <button class="active" data-tab="gen">Generate</button>
+    <button data-tab="scan">Decode</button>
+  </div>
+
+  <!-- GENERATE -->
+  <div class="pane on" id="pane-gen">
+    <div class="cols">
+      <div class="panel">
+        <h3>Input</h3>
+        <label class="fld">Text or URL to encode</label>
+        <textarea class="in" id="genText" placeholder="https://example.com  ·  WIFI:S:MyNet;T:WPA;P:pass;;  ·  any text…">https://nullbyte.local</textarea>
+        <div class="row" style="margin-top:14px">
+          <div>
+            <label class="fld">Error correction</label>
+            <select class="in" id="genEcc">
+              <option value="L">L — 7% recovery</option>
+              <option value="M" selected>M — 15% recovery</option>
+              <option value="Q">Q — 25% recovery</option>
+              <option value="H">H — 30% recovery</option>
+            </select>
+          </div>
+          <div>
+            <label class="fld">Module size (px)</label>
+            <input class="in" id="genScale" type="number" min="2" max="20" value="8">
+          </div>
+        </div>
+        <div class="hint" id="genHint">Higher correction = denser code but survives more damage.</div>
+        <div class="err" id="genErr" style="display:none"></div>
+      </div>
+      <div class="panel">
+        <h3>QR code</h3>
+        <div class="qr-stage">
+          <canvas id="qrCanvas" width="300" height="300"></canvas>
+          <div class="qr-meta" id="qrMeta"></div>
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="dlPng"><svg class="ico ico-sm"><use href="#i-download"/></svg> Download PNG</button>
+          <button class="btn btn-ghost" id="dlSvg"><svg class="ico ico-sm"><use href="#i-download"/></svg> Download SVG</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECODE -->
+  <div class="pane" id="pane-scan">
+    <div class="cols">
+      <div class="panel">
+        <h3>From an image</h3>
+        <div class="drop" id="drop">
+          <svg><use href="#i-image"/></svg>
+          <h3>Drop a QR image, or click to choose</h3>
+          <p>PNG / JPEG / WebP · screenshots work too</p>
+          <input type="file" id="file" accept="image/*" hidden>
+        </div>
+        <div class="scanwrap" id="imgWrap" style="margin-top:14px; display:none"><img id="scanImg" alt="uploaded"></div>
+      </div>
+      <div class="panel">
+        <h3>From the camera</h3>
+        <div class="scanwrap">
+          <video id="video" playsinline muted style="display:none"></video>
+          <div class="scanline" id="scanline" style="display:none"></div>
+          <div id="camPlaceholder" style="text-align:center; padding:34px 10px; color:var(--faint); font-family:var(--mono); font-size:.82rem">Camera is off. Start it to scan a QR code live.</div>
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="camStart"><svg class="ico ico-sm"><use href="#i-camera"/></svg> Start camera</button>
+          <button class="btn btn-ghost" id="camStop" style="display:none"><svg class="ico ico-sm"><use href="#i-ban"/></svg> Stop</button>
+        </div>
+        <div class="hint">Camera access needs HTTPS or localhost, and your permission.</div>
+      </div>
+    </div>
+    <div class="result" id="decResult">
+      <div class="lbl">✓ Decoded content</div>
+      <div class="val" id="decVal"></div>
+      <div class="btnrow"><button class="btn btn-ghost" id="decCopy"><svg class="ico ico-sm"><use href="#i-check"/></svg> Copy</button><a class="btn btn-ghost" id="decOpen" target="_blank" rel="noopener" style="display:none"><svg class="ico ico-sm"><use href="#i-globe"/></svg> Open link</a></div>
+    </div>
+    <div class="err" id="decErr" style="display:none"></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/qrcode-generator.js"></script>
+<script src="js/jsqr.js"></script>
+<script>
+(function(){
+  var didUnlock = { gen:false, dec:false };
+  function maybeUnlock(){ if (didUnlock.gen && didUnlock.dec && window.NB) NB.unlock('qr-smith'); }
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll('.tabs button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.tabs button').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('on'); });
+      b.classList.add('active');
+      document.getElementById('pane-' + b.dataset.tab).classList.add('on');
+    });
+  });
+
+  /* ================= GENERATE ================= */
+  var genText = document.getElementById('genText'), genEcc = document.getElementById('genEcc'),
+      genScale = document.getElementById('genScale'), canvas = document.getElementById('qrCanvas'),
+      ctx = canvas.getContext('2d'), qrMeta = document.getElementById('qrMeta'),
+      genErr = document.getElementById('genErr');
+  var lastQr = null, lastCount = 0, lastScale = 8;
+
+  function drawQR(){
+    var text = genText.value;
+    genErr.style.display = 'none';
+    if (!text){ ctx.clearRect(0,0,canvas.width,canvas.height); qrMeta.textContent=''; lastQr=null; return; }
+    var scale = Math.max(2, Math.min(20, parseInt(genScale.value)||8));
+    try {
+      // typeNumber 0 = auto-pick the smallest version that fits
+      var qr = qrcode(0, genEcc.value);
+      qr.addData(text);
+      qr.make();
+      var count = qr.getModuleCount();
+      var quiet = 4; // required quiet zone in modules
+      var px = (count + quiet*2) * scale;
+      canvas.width = px; canvas.height = px;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,px,px);
+      ctx.fillStyle = '#000000';
+      for (var r=0; r<count; r++) for (var c=0; c<count; c++) {
+        if (qr.isDark(r,c)) ctx.fillRect((c+quiet)*scale, (r+quiet)*scale, scale, scale);
+      }
+      lastQr = qr; lastCount = count; lastScale = scale;
+      qrMeta.textContent = count + '×' + count + ' modules · v' + ((count-17)/4) + ' · ECC ' + genEcc.value + ' · ' + new TextEncoder().encode(text).length + ' bytes';
+      didUnlock.gen = true; maybeUnlock();
+    } catch (e) {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      qrMeta.textContent = '';
+      genErr.style.display = 'block';
+      genErr.textContent = 'Too much data for a QR code — shorten the text (max is ~2,900 bytes at level L).';
+      lastQr = null;
+    }
+  }
+  genText.addEventListener('input', drawQR);
+  genEcc.addEventListener('change', drawQR);
+  genScale.addEventListener('input', drawQR);
+
+  document.getElementById('dlPng').addEventListener('click', function(){
+    if (!lastQr) return;
+    var a = document.createElement('a');
+    a.download = 'qr.png'; a.href = canvas.toDataURL('image/png'); a.click();
+  });
+  document.getElementById('dlSvg').addEventListener('click', function(){
+    if (!lastQr) return;
+    var quiet = 4, n = lastCount, size = n + quiet*2, path = '';
+    for (var r=0;r<n;r++) for (var c=0;c<n;c++) if (lastQr.isDark(r,c)) path += 'M'+(c+quiet)+' '+(r+quiet)+'h1v1h-1z';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+size+' '+size+'" shape-rendering="crispEdges"><rect width="'+size+'" height="'+size+'" fill="#fff"/><path d="'+path+'" fill="#000"/></svg>';
+    var a = document.createElement('a');
+    a.download = 'qr.svg'; a.href = 'data:image/svg+xml,' + encodeURIComponent(svg); a.click();
+  });
+
+  /* ================= DECODE ================= */
+  var decResult = document.getElementById('decResult'), decVal = document.getElementById('decVal'),
+      decErr = document.getElementById('decErr'), decOpen = document.getElementById('decOpen'),
+      work = document.createElement('canvas'), wctx = work.getContext('2d', { willReadFrequently: true });
+
+  function showResult(data){
+    decErr.style.display = 'none';
+    decResult.classList.add('show');
+    decVal.textContent = data;
+    if (/^https?:\/\//i.test(data.trim())) { decOpen.style.display=''; decOpen.href = data.trim(); }
+    else decOpen.style.display = 'none';
+    didUnlock.dec = true; maybeUnlock();
+  }
+  function decodeFromCanvas(w, h){
+    var img = wctx.getImageData(0,0,w,h);
+    return jsQR(img.data, w, h, { inversionAttempts: 'attemptBoth' });
+  }
+
+  /* --- image file --- */
+  var drop = document.getElementById('drop'), file = document.getElementById('file'),
+      imgWrap = document.getElementById('imgWrap'), scanImg = document.getElementById('scanImg');
+  function handleImage(f){
+    if (!f) return;
+    var url = URL.createObjectURL(f);
+    var im = new Image();
+    im.onload = function(){
+      // cap working size for speed while keeping enough detail
+      var max = 1400, scale = Math.min(1, max/Math.max(im.width, im.height));
+      work.width = Math.round(im.width*scale); work.height = Math.round(im.height*scale);
+      wctx.drawImage(im, 0, 0, work.width, work.height);
+      scanImg.src = url; imgWrap.style.display = '';
+      var code = decodeFromCanvas(work.width, work.height);
+      if (code && code.data) showResult(code.data);
+      else { decResult.classList.remove('show'); decErr.style.display='block'; decErr.textContent='No QR code found in that image. Try a sharper or less-cropped shot.'; }
+    };
+    im.onerror = function(){ decErr.style.display='block'; decErr.textContent='Could not read that image file.'; };
+    im.src = url;
+  }
+  drop.addEventListener('click', function(){ file.click(); });
+  file.addEventListener('change', function(){ handleImage(file.files[0]); });
+  ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); }); });
+  drop.addEventListener('drop', function(e){ var f = e.dataTransfer.files[0]; if (f) handleImage(f); });
+
+  /* --- camera --- */
+  var video = document.getElementById('video'), stream = null, raf = null,
+      camStart = document.getElementById('camStart'), camStop = document.getElementById('camStop'),
+      scanline = document.getElementById('scanline'), camPh = document.getElementById('camPlaceholder');
+  function tick(){
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      work.width = video.videoWidth; work.height = video.videoHeight;
+      wctx.drawImage(video, 0, 0, work.width, work.height);
+      var code = decodeFromCanvas(work.width, work.height);
+      if (code && code.data) { showResult(code.data); stopCam(); return; }
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  function stopCam(){
+    if (raf) cancelAnimationFrame(raf), raf = null;
+    if (stream) stream.getTracks().forEach(function(t){ t.stop(); }), stream = null;
+    video.style.display='none'; scanline.style.display='none'; camPh.style.display='';
+    camStart.style.display=''; camStop.style.display='none';
+  }
+  camStart.addEventListener('click', function(){
+    decErr.style.display = 'none';
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      decErr.style.display='block'; decErr.textContent='This browser has no camera API available here.'; return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function(s){
+      stream = s; video.srcObject = s; video.style.display=''; scanline.style.display='';
+      camPh.style.display='none'; camStart.style.display='none'; camStop.style.display='';
+      video.play(); raf = requestAnimationFrame(tick);
+    }).catch(function(err){
+      decErr.style.display='block';
+      decErr.textContent = 'Camera unavailable: ' + err.name + '. Grant permission, or use HTTPS/localhost.';
+    });
+  });
+  camStop.addEventListener('click', stopCam);
+  window.addEventListener('beforeunload', stopCam);
+  document.getElementById('decCopy').addEventListener('click', function(){
+    navigator.clipboard.writeText(decVal.textContent);
+    var b = document.getElementById('decCopy'); var t = b.innerHTML; b.textContent = 'Copied';
+    setTimeout(function(){ b.innerHTML = t; }, 1200);
+  });
+
+  drawQR();
+})();
+</script>
+</body>
+</html>

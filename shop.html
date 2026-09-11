@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop &amp; Checkout — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 64px 30px; }
+.page-head h1 { font-size: clamp(2.6rem,7vw,5rem); }
+
+/* ===== custom top-up ===== */
+.topup { display: grid; grid-template-columns: 1.45fr 1fr; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012)); backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+.topup-l { padding: 34px; }
+.topup-r { padding: 34px; border-left: 1px solid var(--line); background: rgba(0,0,0,.18); display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+.topup h3 { font-size: 1.2rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; }
+.cred-input { display: flex; align-items: center; gap: 14px; margin: 24px 0 26px; }
+.cred-field { flex: 1; display: flex; align-items: center; gap: 10px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: rgba(0,0,0,.3); }
+.cred-field .ic { color: var(--violet); }
+.cred-field input { width: 100%; background: none; border: none; outline: none; color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 1.6rem; }
+.cred-field span { font-family: var(--mono); font-size: .72rem; color: var(--faint); text-transform: uppercase; letter-spacing: .1em; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--grad); outline: none; margin: 8px 0; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--violet); box-shadow: var(--glow-sm); cursor: pointer; }
+input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--violet); cursor: pointer; }
+.cred-marks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: .66rem; color: var(--faint); margin-top: 8px; }
+.cred-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
+.cred-chips button { font-family: var(--mono); font-size: .74rem; padding: 9px 15px; border-radius: 8px; border: 1px solid var(--line-2); background: rgba(255,255,255,.02); color: var(--muted); transition: .15s; }
+.cred-chips button:hover { border-color: var(--violet); color: var(--violet); }
+.topup-r .lab { font-family: var(--mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.topup-r .big { font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; }
+.topup-r .rate { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.topup-r .save { font-family: var(--mono); font-size: .72rem; color: var(--violet); border: 1px solid var(--violet); border-radius: 6px; padding: 3px 9px; align-self: flex-start; margin: 6px 0 16px; }
+
+/* ===== plans ===== */
+.billing { display: inline-flex; padding: 5px; gap: 4px; border: 1px solid var(--line-2); border-radius: 999px; background: rgba(0,0,0,.25); margin-bottom: 28px; }
+.billing button { font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; padding: 9px 18px; border: none; background: transparent; color: var(--muted); border-radius: 999px; transition: .15s; }
+.billing button.active { background: var(--grad); color: #fff; font-weight: 700; box-shadow: var(--glow-sm); }
+.billing .save-tag { color: var(--violet); font-size: .64rem; margin-left: 4px; }
+.plans { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.plan { position: relative; padding: 28px 24px; border-radius: var(--r); border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); display: flex; flex-direction: column; }
+.plan.pop { border-color: var(--violet); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), var(--glow); }
+.plan .badge { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; background: var(--grad); color: #fff; box-shadow: var(--glow-sm); }
+.plan .pname { font-family: var(--display); font-weight: 600; font-size: 1.4rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; }
+.plan .ptag { font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.plan-price { margin: 18px 0 4px; font-family: var(--mono); color: var(--faint); font-size: .9rem; }
+.plan-price .amt { font-family: var(--display); font-weight: 700; font-size: 2.4rem; color: var(--ink); }
+.plan-price small { font-size: .72rem; color: var(--faint); margin-left: 4px; }
+.plan ul { list-style: none; padding: 0; margin: 20px 0 22px; flex: 1; }
+.plan li { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; font-size: .88rem; color: var(--muted); border-bottom: 1px dashed var(--line); }
+.plan li .ico { color: var(--violet); flex: none; margin-top: 1px; }
+.plan li:last-child { border-bottom: none; }
+.plan .btn { width: 100%; justify-content: center; }
+
+/* ===== checkout ===== */
+.checkout { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.checkout > div { background: rgba(10,10,16,.5); backdrop-filter: blur(14px); padding: 36px; }
+.cc-flip { perspective: 1400px; }
+.cc-inner { position: relative; aspect-ratio: 1.586/1; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.cc-flip.flipped .cc-inner { transform: rotateY(180deg); }
+.cc-card { position: absolute; inset: 0; border: 1px solid var(--line-2); border-radius: var(--r); padding: 26px; overflow: hidden; display: flex; flex-direction: column; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: linear-gradient(150deg, color-mix(in srgb, var(--violet) 24%, transparent), color-mix(in srgb, var(--fuchsia) 12%, transparent) 60%, rgba(255,255,255,0.02)), var(--bg); }
+.cc-back { transform: rotateY(180deg); }
+.cc-card::before { content: ""; position: absolute; inset: 0; opacity: .9; background: radial-gradient(160px 160px at 82% 12%, color-mix(in srgb, var(--fuchsia) 36%, transparent), transparent 65%), radial-gradient(180px 180px at 10% 110%, color-mix(in srgb, var(--violet) 34%, transparent), transparent 60%); }
+.cc-card > * { position: relative; z-index: 1; }
+.cc-stripe { height: 44px; background: #0b0712; margin: 18px -26px 0; border-block: 1px solid var(--line); }
+.cc-cvv-row { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 18px; }
+.cc-cvv-row .lab { font-family: var(--mono); font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.cc-cvv { background: #fff; color: #111; font-family: var(--mono); font-weight: 700; padding: 7px 14px; border-radius: 5px; letter-spacing: .25em; min-width: 76px; text-align: right; }
+.cc-back-brand { margin-top: auto; font-family: var(--display); font-weight: 700; opacity: .45; font-size: .9rem; }
+.cc-back-brand b { color: var(--muted); font-weight: 400; }
+.cc-top { display: flex; align-items: center; justify-content: space-between; }
+.cc-brand { font-family: var(--display); font-weight: 700; }
+.cc-brand b { color: var(--muted); font-weight: 400; }
+.cc-net { font-family: var(--mono); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: #fff; border: 1px solid rgba(255,255,255,.4); padding: 3px 8px; border-radius: var(--r); }
+.cc-chip { width: 44px; height: 32px; border: 1px solid rgba(255,255,255,.5); border-radius: 6px; margin: 24px 0 auto; position: relative; }
+.cc-chip::after { content: ""; position: absolute; inset: 6px 9px; border: 1px solid rgba(255,255,255,.3); border-radius: 3px; }
+.cc-number { font-family: var(--mono); font-size: clamp(1.05rem,2.6vw,1.45rem); letter-spacing: .12em; color: #fff; }
+.cc-bottom { display: flex; justify-content: space-between; margin-top: 18px; }
+.cc-bottom .lab { font-family: var(--mono); font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+.cc-bottom .val { font-family: var(--mono); font-size: .9rem; margin-top: 4px; color: #fff; }
+.osum h3 { font-family: var(--mono); font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); margin: 24px 0 0; }
+.osum .line { display: flex; justify-content: space-between; padding: 9px 0; color: var(--muted); font-family: var(--mono); font-size: .85rem; border-bottom: 1px dashed var(--line); }
+.osum .total { display: flex; justify-content: space-between; padding-top: 14px; margin-top: 8px; border-top: 1px solid var(--line-2); font-family: var(--display); font-weight: 700; font-size: 1.4rem; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.field input, .field select { width: 100%; padding: 13px 15px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(0,0,0,.3); color: var(--ink); font-family: var(--mono); font-size: .9rem; outline: none; transition: .15s; }
+.field input:focus, .field select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet) 20%, transparent); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.secure { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-family: var(--mono); font-size: .72rem; color: var(--faint); }
+.secure .ico { color: var(--violet); }
+
+@media (max-width:980px){ .plans { grid-template-columns: 1fr 1fr; } }
+@media (max-width:820px){ .topup { grid-template-columns: 1fr; } .topup-r { border-left: none; border-top: 1px solid var(--line); } .checkout { grid-template-columns: 1fr; } }
+@media (max-width:560px){ .plans { grid-template-columns: 1fr; } .field-row { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ M-04 ]</span><span class="tag">// shop</span></div>
+  <h1 class="display">Top up &amp; upgrade.</h1>
+  <p class="lead" style="margin-top:20px">Buy exactly the credits you need, or go further with a plan. The tools are learn-only — this is where you power the OSINT suite.</p>
+</section>
+
+<!-- CUSTOM TOP-UP -->
+<section class="wrap section-sm" style="padding-block:30px">
+  <div class="shead"><span class="idx">[ 01 ]</span><h2>Buy credits.</h2><span class="meta">// pick your amount</span></div>
+  <div class="topup reveal">
+    <div class="topup-l">
+      <h3>How many credits?</h3>
+      <div class="cred-input">
+        <div class="cred-field">
+          <svg class="ico"><use href="#i-credit"/></svg>
+          <input id="credAmt" type="number" min="5" max="500" step="5" value="25">
+          <span>credits</span>
+        </div>
+      </div>
+      <input id="credRange" type="range" min="5" max="500" step="5" value="25">
+      <div class="cred-marks"><span>5</span><span>100</span><span>250</span><span>500</span></div>
+      <div class="cred-chips">
+        <button data-cred="10">10</button>
+        <button data-cred="25">25</button>
+        <button data-cred="50">50</button>
+        <button data-cred="100">100</button>
+        <button data-cred="250">250</button>
+      </div>
+    </div>
+    <div class="topup-r">
+      <span class="lab">Total</span>
+      <span class="big" id="credPrice">CHF 3.75</span>
+      <span class="rate" id="credRate">CHF 0.15 / credit</span>
+      <span class="save" id="credSave">save CHF 0.75</span>
+      <a class="btn btn-primary btn-block" href="#checkout"><svg class="ico"><use href="#i-credit"/></svg> Add to cart</a>
+      <p class="mono" style="font-size:.68rem; color:var(--faint); margin-top:12px; text-align:center">Bulk pricing · more credits, lower rate</p>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="wrap section-sm" id="plans" style="padding-block:40px 30px">
+  <div class="shead"><span class="idx">[ 02 ]</span><h2>Plans.</h2><span class="meta">// monthly · annual · lifetime</span></div>
+  <div class="billing">
+    <button data-bill="m" class="active">Monthly</button>
+    <button data-bill="a">Annual <span class="save-tag">−20%</span></button>
+  </div>
+
+  <div class="plans reveal">
+    <!-- FREE -->
+    <div class="plan">
+      <div class="pname">Free</div>
+      <div class="ptag">Current plan</div>
+      <div class="plan-price"><span class="amt">CHF 0</span></div>
+      <ul>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> 3 daily credits</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Core lookup modules</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> 1 active case</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Community support</li>
+      </ul>
+      <a class="btn btn-ghost" href="#">Active</a>
+    </div>
+
+    <!-- PRO -->
+    <div class="plan pop">
+      <span class="badge">Most popular</span>
+      <div class="pname">Pro</div>
+      <div class="ptag">For regular operators</div>
+      <div class="plan-price" data-plan-price="pro">CHF <span class="amt">19</span><small data-plan-per>/month</small></div>
+      <ul>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> <b style="color:var(--ink)">20</b>&nbsp;daily credits</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> All 30 modules</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Priority queue</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Exports · JSON / CSV</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> 10 active cases · 24h cache</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Email support</li>
+      </ul>
+      <a class="btn btn-primary" href="#checkout"><svg class="ico"><use href="#i-arrow-ur"/></svg> Upgrade to Pro</a>
+    </div>
+
+    <!-- ELITE -->
+    <div class="plan">
+      <div class="pname">Elite</div>
+      <div class="ptag">Power &amp; teams</div>
+      <div class="plan-price" data-plan-price="elite">CHF <span class="amt">49</span><small data-plan-per>/month</small></div>
+      <ul>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> <b style="color:var(--ink)">60</b>&nbsp;daily credits</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Everything in Pro</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> API access · bulk lookups</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Reverse Face + Image Geo</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Unlimited cases · 3 team seats</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> No rate limits · priority support</li>
+      </ul>
+      <a class="btn btn-ghost" href="#checkout"><svg class="ico"><use href="#i-arrow-ur"/></svg> Go Elite</a>
+    </div>
+
+    <!-- LIFETIME -->
+    <div class="plan">
+      <div class="pname">Lifetime</div>
+      <div class="ptag">One-time · forever</div>
+      <div class="plan-price">CHF <span class="amt">299</span><small>once</small></div>
+      <ul>
+        <li><svg class="ico ico-sm"><use href="#i-infinity"/></svg> Pro features, forever</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> 30 daily credits</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> All current &amp; future modules</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Founder badge</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Lifetime updates</li>
+        <li><svg class="ico ico-sm"><use href="#i-check"/></svg> Priority support</li>
+      </ul>
+      <a class="btn btn-ghost" href="#checkout"><svg class="ico"><use href="#i-badge"/></svg> Get Lifetime</a>
+    </div>
+  </div>
+</section>
+
+<!-- CHECKOUT -->
+<section class="wrap section" id="checkout">
+  <div class="shead"><span class="idx">[ PAY ]</span><h2>Checkout.</h2><span class="meta">// secure payment</span></div>
+  <div class="checkout">
+    <div>
+      <div class="cc-flip" data-card-flip>
+        <div class="cc-inner">
+          <div class="cc-card cc-front">
+            <div class="cc-top"><span class="cc-brand"><svg class="logo" viewBox="0 0 32 32" style="width:22px;height:22px;display:inline-block;vertical-align:-5px;margin-right:7px"><path d="M6 14C6 7.4 10.4 3 16 3s10 4.4 10 11v13l-3.3-2.6L19.3 27 16 24.4 12.7 27 9.3 24.4 6 27Z" fill="url(#g1)"/><circle cx="12.2" cy="14" r="2.2" fill="#0b0712"/><circle cx="19.8" cy="14" r="2.2" fill="#0b0712"/></svg>NULL<b>BYTE</b></span><span class="cc-net">Credit</span></div>
+            <div class="cc-chip"></div>
+            <div class="cc-number" data-card-number>0000 0000 0000 0000</div>
+            <div class="cc-bottom">
+              <div><div class="lab">Card holder</div><div class="val" data-card-holder>CARD HOLDER</div></div>
+              <div><div class="lab">Expires</div><div class="val" data-card-expiry>MM/YY</div></div>
+            </div>
+          </div>
+          <div class="cc-card cc-back">
+            <div class="cc-stripe"></div>
+            <div class="cc-cvv-row"><span class="lab">CVV</span><div class="cc-cvv" data-card-cvv>•••</div></div>
+            <div class="cc-back-brand">NULL<b>BYTE</b> · secure</div>
+          </div>
+        </div>
+      </div>
+      <div class="osum">
+        <h3>Order summary</h3>
+        <div class="line"><span>25 credits</span><span>CHF 3.75</span></div>
+        <div class="line"><span>Pro plan · monthly</span><span>CHF 19.00</span></div>
+        <div class="line"><span>VAT incl.</span><span>—</span></div>
+        <div class="total"><span>Total</span><span>CHF 22.75</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="field"><label>Card Number</label><input type="text" placeholder="0000 0000 0000 0000" inputmode="numeric" data-cc-number></div>
+      <div class="field"><label>Card Holder</label><input type="text" placeholder="Dominic Aebersold" data-cc-holder></div>
+      <div class="field-row">
+        <div class="field"><label>Month</label><select data-cc-month><option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select></div>
+        <div class="field"><label>Year</label><select data-cc-year><option value="">YY</option><option>2026</option><option>2027</option><option>2028</option><option>2029</option><option>2030</option></select></div>
+        <div class="field"><label>CVV</label><input type="text" placeholder="•••" inputmode="numeric" maxlength="4" data-cc-cvv></div>
+      </div>
+      <a class="btn btn-primary btn-block" style="margin-top:8px" href="#"><svg class="ico"><use href="#i-lock"/></svg> Pay CHF 22.75</a>
+      <div class="secure"><svg class="ico ico-sm"><use href="#i-lock"/></svg> Encrypted &amp; secure · layout demo, no real payment</div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+  // ---- custom credit top-up ----
+  const rateOf = (c) => c>=250?0.09 : c>=100?0.11 : c>=50?0.13 : c>=25?0.15 : 0.18;
+  const amt = document.getElementById('credAmt'), rng = document.getElementById('credRange');
+  const pEl = document.getElementById('credPrice'), rEl = document.getElementById('credRate'), sEl = document.getElementById('credSave');
+  function setCred(v){
+    v = Math.round((+v || 0)/5)*5; v = Math.max(5, Math.min(500, v));
+    amt.value = v; rng.value = v;
+    const r = rateOf(v), price = v*r, save = v*0.18 - price;
+    pEl.textContent = 'CHF ' + price.toFixed(2);
+    rEl.textContent = 'CHF ' + r.toFixed(2) + ' / credit';
+    if (save > 0.01) { sEl.style.display = ''; sEl.textContent = 'save CHF ' + save.toFixed(2); }
+    else sEl.style.display = 'none';
+  }
+  rng.addEventListener('input', e => setCred(e.target.value));
+  amt.addEventListener('input', e => setCred(e.target.value));
+  document.querySelectorAll('[data-cred]').forEach(b => b.addEventListener('click', () => setCred(b.dataset.cred)));
+  setCred(25);
+
+  // ---- billing toggle ----
+  const PRICE = { pro:{m:19,a:15}, elite:{m:49,a:39} };
+  document.querySelectorAll('[data-bill]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-bill]').forEach(x => x.classList.toggle('active', x===b));
+    const cyc = b.dataset.bill;
+    document.querySelectorAll('[data-plan-price]').forEach(el => el.querySelector('.amt').textContent = PRICE[el.dataset.planPrice][cyc]);
+    document.querySelectorAll('[data-plan-per]').forEach(el => el.textContent = cyc==='a' ? '/mo · billed yearly' : '/month');
+  }));
+
+  // ---- live card fill: type in the form → it appears on the card ----
+  const q = s => document.querySelector(s);
+  const ccNum = q('[data-cc-number]'), ccHolder = q('[data-cc-holder]'), ccMonth = q('[data-cc-month]'),
+        ccYear = q('[data-cc-year]'), ccCvv = q('[data-cc-cvv]'), flip = q('[data-card-flip]');
+  const cardNum = q('[data-card-number]'), cardHolder = q('[data-card-holder]'),
+        cardExp = q('[data-card-expiry]'), cardCvv = q('[data-card-cvv]');
+
+  if (ccNum) ccNum.addEventListener('input', () => {
+    const raw = ccNum.value.replace(/\D/g, '').slice(0, 16);
+    ccNum.value = raw.replace(/(.{4})(?=.)/g, '$1 ');            // group the input in 4s
+    const padded = (raw + '0'.repeat(16)).slice(0, 16);          // fill the rest with 0s on the card
+    cardNum.textContent = padded.replace(/(.{4})(?=.)/g, '$1 ');
+  });
+  if (ccHolder) ccHolder.addEventListener('input', () => {
+    cardHolder.textContent = ccHolder.value.trim() ? ccHolder.value.toUpperCase() : 'CARD HOLDER';
+  });
+  function updateExp() {
+    const m = ccMonth && ccMonth.value, y = ccYear && ccYear.value ? ccYear.value.slice(-2) : '';
+    cardExp.textContent = (m || y) ? ((m || 'MM') + '/' + (y || 'YY')) : 'MM/YY';
+  }
+  if (ccMonth) ccMonth.addEventListener('change', updateExp);
+  if (ccYear) ccYear.addEventListener('change', updateExp);
+  if (ccCvv) {
+    ccCvv.addEventListener('input', () => {
+      const d = ccCvv.value.replace(/\D/g, '').slice(0, 4); ccCvv.value = d;
+      cardCvv.textContent = d || '•••';
+    });
+    ccCvv.addEventListener('focus', () => flip && flip.classList.add('flipped'));   // flip to show the CVV side
+    ccCvv.addEventListener('blur', () => flip && flip.classList.remove('flipped'));
+  }
+</script>
+</body>
+</html>

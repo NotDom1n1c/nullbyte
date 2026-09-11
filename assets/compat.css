@@ -1,0 +1,69 @@
+/* ==========================================================================
+   NULLBYTE — compatibility layer for pages migrated to the V6 shell.
+   Maps the old design tokens + utility classes onto the V6 "liquid glass"
+   system so a page's existing inner styles adopt the new palette without a
+   full rewrite. Loaded AFTER shared.css, BEFORE the page's own inline <style>.
+   ========================================================================== */
+:root {
+  /* old colour tokens -> V6 */
+  --line:      var(--gline);
+  --line-2:    var(--gline-2);
+  --violet:    var(--cyan);
+  --violet-2:  var(--cyan-soft);
+  --fuchsia:   var(--cyan);
+  --indigo:    var(--cyan);
+  --mag:       var(--cyan);
+  --accent:    var(--cyan);          /* shared.js also sets this on <body> */
+  --accent-ink:#06222b;
+  --glowcol:   var(--glow);
+  --pink:      #ff5f68;
+  /* surfaces */
+  --bg-1: #0a0e18;
+  --bg-2: rgba(255,255,255,.035);
+  --bg-3: rgba(255,255,255,.06);
+  /* gradients + shadows */
+  --grad:      linear-gradient(180deg, var(--cyan-soft), var(--cyan) 60%);
+  --grad-soft: linear-gradient(120deg, rgba(46,228,255,.18), rgba(46,228,255,.12));
+  --glow-sm:   0 10px 36px -14px rgba(var(--glow), .55);
+  /* radii + width */
+  --r: 14px; --r-sm: 9px; --maxw: 1240px;
+}
+
+/* the V6 nav is fixed at the top — give migrated content clearance */
+body { padding-top: 88px; }
+
+/* old chrome that may linger in un-swapped fragments */
+.statusbar { display: none !important; }
+
+/* old typography / utility classes (were in the dropped style.css) */
+.display { font-family: var(--display); font-weight: 800; letter-spacing: -.02em; line-height: 1.06; }
+.lead    { color: var(--muted); font-weight: 300; }
+.muted   { color: var(--muted); }
+.grad    { color: var(--cyan); }
+.reveal  { opacity: 1 !important; transform: none !important; }   /* old scroll-reveal -> just show */
+
+/* the old page-head "shead" strip */
+.shead { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.shead .idx { font-family: var(--mono); font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); }
+.shead .tag { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; color: var(--faint); }
+
+/* old buttons -> V6 pills */
+.btn { display: inline-flex; align-items: center; gap: 9px; padding: 11px 18px; border-radius: 999px;
+  font-family: var(--mono); font-size: .74rem; letter-spacing: .06em; text-transform: uppercase;
+  border: 1px solid var(--gline); color: var(--ink); background: rgba(255,255,255,.04); transition: .15s; }
+.btn:hover { border-color: rgba(var(--glow), .5); color: var(--cyan); }
+.btn-primary, .btn.btn-primary { color: #06222b; border-color: transparent;
+  background: linear-gradient(180deg, var(--cyan-soft), var(--cyan) 60%);
+  box-shadow: 0 0 26px -6px rgba(var(--glow), .9), inset 0 1px 0 rgba(255,255,255,.6); }
+.btn-primary:hover { color: #06222b; filter: brightness(1.06); }
+
+/* old grid helpers */
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* icons default to the new stroke look; sized ones keep their size */
+.ico { width: 18px; height: 18px; }
+.ico-sm { width: 14px; height: 14px; } .ico-lg { width: 40px; height: 40px; }

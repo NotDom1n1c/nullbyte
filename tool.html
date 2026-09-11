@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flipper Zero — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.crumbs { font-family: var(--mono); font-size: .74rem; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); padding-block: 26px 0; }
+.crumbs a:hover { color: var(--accent); }
+.crumbs .sep { color: var(--line-2); }
+
+.tool-hero { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 44px; align-items: center; padding-block: 32px 50px; }
+.tool-visual { aspect-ratio: 4/3; border: 1px solid var(--line); background: radial-gradient(120% 120% at 50% 12%, color-mix(in srgb, var(--accent) 12%, transparent), var(--bg-2) 66%); display: grid; place-items: center; color: var(--accent); border-radius: var(--r); overflow: hidden; }
+.tool-visual .ico { width: 96px; height: 96px; stroke-width: 1; }
+.tool-visual img { width: 100%; height: 100%; object-fit: contain; padding: 22px; }
+.tool-hero h1 { font-size: clamp(2.6rem,6vw,4.4rem); margin-block: 16px; }
+.tool-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+
+.level-wrap { margin-top: 30px; }
+.level-bar { display: inline-flex; border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; }
+.level-bar button { font-family: var(--mono); font-size: .76rem; text-transform: uppercase; letter-spacing: .06em; padding: 12px 20px; border: none; background: transparent; color: var(--muted); transition: .15s; display: flex; align-items: center; gap: 8px; border-right: 1px solid var(--line-2); }
+.level-bar button:last-child { border-right: none; }
+.level-bar button i { width: 7px; height: 7px; border-radius: 50%; }
+.level-bar button.active { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+
+.layout-cols { display: grid; grid-template-columns: 1fr 320px; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.explain { padding-bottom: 90px; }
+.panel-x { display: none; background: var(--bg-2); padding: 44px; }
+.panel-x.show { display: block; animation: rise .5s ease; }
+.panel-x h2 { font-size: 1.7rem; margin-block: 16px 6px; }
+.panel-x .lnote { font-family: var(--mono); font-size: .74rem; color: var(--faint); margin-bottom: 26px; text-transform: uppercase; letter-spacing: .06em; }
+.panel-x p { color: var(--muted); margin-bottom: 16px; max-width: 68ch; }
+.panel-x p b { color: var(--ink); font-weight: 500; }
+.panel-x h3 { margin-block: 30px 12px; font-size: 1.05rem; }
+.bullets { list-style: none; padding: 0; margin: 0; }
+.bullets li { padding: 10px 0 10px 28px; position: relative; color: var(--muted); border-bottom: 1px dashed var(--line); }
+.bullets li::before { content: "//"; position: absolute; left: 0; color: var(--accent); font-family: var(--mono); font-size: .8rem; }
+
+.spec-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; margin-top: 26px; }
+.spec-grid div { background: var(--bg-3); padding: 16px 18px; }
+.spec-grid .k { font-family: var(--mono); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.spec-grid .v { margin-top: 5px; font-weight: 500; font-family: var(--mono); font-size: .86rem; }
+
+.aside { background: var(--bg-2); }
+.aside-block { padding: 28px; border-bottom: 1px solid var(--line); }
+.aside .price { font-family: var(--display); font-size: 2.2rem; font-weight: 700; }
+.aside .price small { font-family: var(--mono); font-size: .76rem; color: var(--faint); font-weight: 400; }
+.aside .stock { font-family: var(--mono); font-size: .76rem; color: var(--muted); margin-block: 10px 18px; display: flex; align-items: center; gap: 8px; }
+.aside .stock i { width: 7px; height: 7px; border-radius: 50%; background: #5cc8ff; }
+.aside .feat { font-family: var(--mono); font-size: .78rem; color: var(--muted); display: flex; gap: 8px; padding: 7px 0; align-items: center; }
+.aside .feat .ico { color: var(--accent); }
+.aside h4 { font-family: var(--mono); font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); margin-bottom: 14px; }
+.term-links { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.addon-list { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; margin-top: 18px; }
+.addon { background: var(--bg-3); padding: 16px 18px; }
+.addon h4 { font-size: 1rem; margin-bottom: 4px; }
+.addon p { color: var(--muted); font-size: .88rem; }
+@media (max-width:900px){ .tool-hero{ grid-template-columns:1fr; } .layout-cols{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<div id="toolContent"></div>
+
+<div hidden>
+<div class="wrap crumbs"><a href="tools.html">Tools</a> <span class="sep">/</span> Hardware <span class="sep">/</span> <span style="color:var(--ink)">Flipper Zero</span></div>
+
+<section class="wrap tool-hero">
+  <div class="tool-visual reveal"><svg class="ico"><use href="#i-cpu"/></svg></div>
+  <div class="reveal" style="animation-delay:.08s">
+    <span class="tag tag-acc">Hardware · Multi-tool</span>
+    <h1>Flipper Zero</h1>
+    <p class="lead">A portable device for interacting with radio, access-control and digital signals — built for tinkering, learning and security research.</p>
+    <div class="tool-tags">
+      <span class="chip"><span class="dot"></span>Sub-GHz</span>
+      <span class="chip"><span class="dot"></span>RFID / NFC</span>
+      <span class="chip"><span class="dot"></span>Infrared</span>
+      <span class="chip"><span class="dot"></span>GPIO</span>
+    </div>
+    <div class="level-wrap">
+      <p class="tag" style="margin-bottom:10px">Select clearance level</p>
+      <div class="level-bar" data-levels>
+        <button data-level="beginner" class="active"><i style="background:#5cc8ff"></i>Beginner</button>
+        <button data-level="inter"><i style="background:#e6c455"></i>Intermediate</button>
+        <button data-level="pro"><i style="background:#e57b6a"></i>Professional</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap explain">
+  <div class="layout-cols">
+    <div>
+      <!-- BEGINNER -->
+      <div class="panel-x show" data-panel="beginner">
+        <span class="chip lvl-beginner"><span class="dot"></span>Beginner</span>
+        <h2>What is it, simply?</h2>
+        <p class="lnote">Explained as if you've never touched one before</p>
+        <p>Think of the Flipper Zero as a tiny pocket "remote control for everything wireless." It can <b>listen to</b> and <b>copy</b> certain signals — like the chip in a hotel key card, a garage remote, or your TV's infrared.</p>
+        <p>It has a small screen and a playful dolphin mascot that "levels up" the more you use it. You explore menus, save signals, and play them back later.</p>
+        <h3>What you can try first</h3>
+        <ul class="bullets">
+          <li>Read a contactless card and see its ID on screen</li>
+          <li>Copy your TV remote and use the Flipper instead</li>
+          <li>Save a signal and replay it later</li>
+        </ul>
+      </div>
+
+      <!-- INTERMEDIATE -->
+      <div class="panel-x" data-panel="inter">
+        <span class="chip lvl-inter"><span class="dot"></span>Intermediate</span>
+        <h2>How it actually works</h2>
+        <p class="lnote">For people comfortable with the basics of radio &amp; protocols</p>
+        <p>The Flipper bundles several radios into one device: a <b>sub-GHz transceiver</b> (300–928 MHz) for remotes and sensors, a <b>125 kHz RFID</b> reader, a <b>13.56 MHz NFC</b> module, infrared, plus GPIO pins for hardware projects.</p>
+        <p>Each "app" decodes a protocol — for example reading a card's UID, capturing a remote's modulation, or emulating a saved tag. Fixed-code signals can be replayed; rolling-code ones can't simply be cloned.</p>
+        <h3>Key concepts to understand</h3>
+        <ul class="bullets">
+          <li>Fixed code vs. rolling code (and why replay sometimes fails)</li>
+          <li>Reading vs. emulating an RFID/NFC tag</li>
+          <li>Modulation types on sub-GHz (ASK/OOK, FSK)</li>
+          <li>Extending it with custom firmware &amp; GPIO modules</li>
+        </ul>
+      </div>
+
+      <!-- PROFESSIONAL -->
+      <div class="panel-x" data-panel="pro">
+        <span class="chip lvl-pro"><span class="dot"></span>Professional</span>
+        <h2>Deep dive &amp; tradecraft</h2>
+        <p class="lnote">For practitioners doing security research &amp; red-team work</p>
+        <p>At its core sits an STM32WB55 (Cortex-M4 + M0+) coordinating a CC1101 for sub-GHz and an ST25R3916 NFC front-end. Custom firmwares unlock raw capture, extended frequency ranges, BadUSB, and protocol fuzzing via the GPIO/CLI.</p>
+        <p>Realistic engagements focus on weak access-control: 125 kHz EM4100/HID Prox cloning, MIFARE Classic key recovery, and analysis of fixed-code OOK remotes. Rolling-code (KeeLoq) and modern MIFARE DESFire resist trivial replay — document scope and rules of engagement.</p>
+        <div class="spec-grid">
+          <div><div class="k">MCU</div><div class="v">STM32WB55</div></div>
+          <div><div class="k">Sub-GHz</div><div class="v">CC1101</div></div>
+          <div><div class="k">NFC</div><div class="v">ST25R3916</div></div>
+          <div><div class="k">RFID</div><div class="v">125 kHz LF</div></div>
+          <div><div class="k">Interfaces</div><div class="v">GPIO·USB·BLE</div></div>
+          <div><div class="k">Firmware</div><div class="v">Stock/Custom</div></div>
+        </div>
+        <h3>Ethics &amp; legality</h3>
+        <ul class="bullets">
+          <li>Only test systems you own or are authorized to assess</li>
+          <li>Jamming &amp; unauthorized interception are illegal in most regions</li>
+          <li>Keep written scope &amp; rules of engagement</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ASIDE -->
+    <aside class="aside">
+      <div class="aside-block">
+        <h4>At a glance</h4>
+        <div class="feat"><svg class="ico ico-sm"><use href="#i-cpu"/></svg> Class · Hardware multi-tool</div>
+        <div class="feat"><svg class="ico ico-sm"><use href="#i-bolt"/></svg> Skill · Beginner → Pro</div>
+        <div class="feat"><svg class="ico ico-sm"><use href="#i-shield"/></svg> Educational reference only</div>
+        <a class="btn btn-ghost btn-block" style="margin-top:16px" href="abilities.html"><svg class="ico"><use href="#i-radar"/></svg> View all abilities</a>
+      </div>
+      <div class="aside-block">
+        <div class="feat"><svg class="ico ico-sm"><use href="#i-book"/></svg> Beginner-friendly guide</div>
+        <div class="feat"><svg class="ico ico-sm"><use href="#i-grid"/></svg> 3 explanation levels</div>
+        <div class="feat"><svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg> Linked glossary terms</div>
+      </div>
+      <div class="aside-block" style="border-bottom:none">
+        <h4>Related terms</h4>
+        <div class="term-links">
+          <a href="glossary.html" class="chip">RFID</a>
+          <a href="glossary.html" class="chip">NFC</a>
+          <a href="glossary.html" class="chip">Replay attack</a>
+          <a href="glossary.html" class="chip">Rolling code</a>
+          <a href="glossary.html" class="chip">Sub-GHz</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+</div>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/tools-data.js?v=3"></script>
+</body>
+</html>

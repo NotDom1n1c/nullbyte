@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NULLBYTE — IT Tools, Decoded</title>
+<link rel="stylesheet" href="css/style.css?v=8">
+<style>
+/* ============================================================
+   FRONT PAGE — "cyber-grid" cover theme (scoped to this page only)
+   Electric cyan + magenta neon on deep space-navy. Retints the
+   shared nav/footer via local var overrides on body.t-cyber.
+   ============================================================ */
+/* default theme = cyan; nbApplyTheme() (app.js) overrides these on <body> when
+   the user picks another accent in account settings, so the whole front page —
+   ghost nose, halo, grid, glows — re-tints too. */
+body.t-cyber {
+  --bg: #05060f; --bg-1: #070912; --ink: #eaf6ff; --muted: #93a7c4; --faint: #56617e;
+  --line: rgba(120,180,255,0.12); --line-2: rgba(120,200,255,0.26);
+  --violet: #22e0ff; --violet-2: #8beeff; --fuchsia: #22e0ff;
+  --accent: #22e0ff; --accent-ink: #04222b; --glowcol: 34, 224, 255;
+  --grad: linear-gradient(120deg, #8beeff, #22e0ff);
+  --cyan: var(--accent); --mag: var(--violet-2);   /* alias page-local colours to the theme so they retint too */
+  background: var(--bg);
+}
+body.t-cyber::before, body.t-cyber::after { display: none; } /* kill the shared orange edge-glow + grain */
+
+/* animated cyber background */
+.cyber-bg { position: fixed; inset: 0; z-index: -2; overflow: hidden; background:
+  radial-gradient(120% 80% at 50% -10%, rgba(var(--glowcol),.16), transparent 55%),
+  radial-gradient(90% 70% at 85% 20%, rgba(var(--glowcol),.14), transparent 55%),
+  radial-gradient(80% 60% at 10% 90%, rgba(var(--glowcol),.14), transparent 55%),
+  #05060f; }
+/* perspective grid floor */
+.cyber-grid { position: absolute; left: -20%; right: -20%; bottom: -10%; height: 62%;
+  background-image: linear-gradient(rgba(var(--glowcol),.32) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--glowcol),.28) 1px, transparent 1px);
+  background-size: 46px 46px;
+  transform: perspective(340px) rotateX(64deg); transform-origin: 50% 100%;
+  mask-image: linear-gradient(transparent, #000 40%, #000); -webkit-mask-image: linear-gradient(transparent, #000 40%, #000);
+  animation: gridpull 3.2s linear infinite; }
+@keyframes gridpull { to { background-position: 0 46px, 0 0; } }
+/* scanlines */
+.cyber-scan { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
+  background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.16) 3px); }
+
+/* ============================ HERO ============================ */
+.hero { position: relative; overflow: visible; padding-block: 44px 48px; }
+.hero-inner { display: grid; grid-template-columns: 1.05fr .95fr; gap: 44px; align-items: center; }
+.ghost-wrap { position: relative; display: grid; place-items: center; }
+.ghost-wrap::before { content: ""; position: absolute; width: min(66%, 320px); aspect-ratio: 1; border-radius: 50%; z-index: 0;
+  background: radial-gradient(circle, rgba(var(--glowcol),.5), rgba(var(--glowcol),.16) 46%, transparent 70%); filter: blur(10px); animation: halo 6s ease-in-out infinite; }
+@keyframes halo { 0%,100% { transform: scale(1); opacity:.9 } 50% { transform: scale(1.08); opacity:.6 } }
+.ghost { position: relative; z-index: 1; width: clamp(150px, 21vw, 250px); height: auto;
+  filter: drop-shadow(0 0 22px rgba(var(--glowcol),.8)) drop-shadow(0 0 46px rgba(var(--glowcol),.4)); animation: float 5.5s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-16px) } }
+
+.hero-kick { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--cyan); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 14px; box-shadow: 0 0 20px -6px var(--cyan); background: rgba(var(--glowcol),.05); }
+.hero-kick .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: pulse 2s infinite; }
+.hero-title { font-family: var(--display); font-weight: 800; font-size: clamp(2.7rem, 6.4vw, 5.4rem); line-height: .9; letter-spacing: -.035em; margin: 22px 0 0; color: #fff;
+  text-shadow: 0 0 22px rgba(var(--glowcol),.55), 0 0 46px rgba(var(--glowcol),.28); }
+.hero-title em { font-style: italic; display: block; color: transparent; -webkit-text-fill-color: transparent;
+  background: linear-gradient(92deg, var(--accent), var(--violet-2) 45%, var(--violet-2)); -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(var(--glowcol),.55)); }
+.hero-sub { max-width: 46ch; margin: 22px 0 0; color: var(--muted); font-size: 1.05rem; line-height: 1.6; }
+.hero-cta { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+.btn-neon { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 700; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); padding: 13px 24px; border-radius: 11px;
+  background: linear-gradient(120deg, var(--accent), var(--violet-2)); box-shadow: 0 0 26px -4px rgba(var(--glowcol),.8); transition: transform .16s, box-shadow .16s, filter .16s; }
+.btn-neon:hover { transform: translateY(-2px); box-shadow: 0 0 40px -2px rgba(var(--glowcol),1); filter: brightness(1.08); }
+.btn-wire { display: inline-flex; align-items: center; gap: 10px; font-family: var(--mono); font-weight: 600; font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--cyan); padding: 13px 22px; border-radius: 11px; border: 1px solid var(--line-2); background: rgba(var(--glowcol),.04); transition: .16s; }
+.btn-wire:hover { border-color: var(--cyan); box-shadow: 0 0 22px -6px var(--cyan); color: #fff; }
+.hero-meta { margin-top: 24px; font-family: var(--mono); font-size: .74rem; letter-spacing: .04em; color: var(--faint); display: flex; gap: 18px; flex-wrap: wrap; }
+.hero-meta b { color: var(--cyan); font-weight: 600; }
+
+/* terminal */
+.term { border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; background: rgba(5,8,18,.72); backdrop-filter: blur(10px); box-shadow: 0 0 44px -14px rgba(var(--glowcol),.6), inset 0 1px 0 rgba(255,255,255,.05); margin-top: 30px; }
+.term-bar { display: flex; align-items: center; gap: 8px; padding: 11px 15px; border-bottom: 1px solid var(--line); background: rgba(var(--glowcol),.04); }
+.term-bar i { width: 11px; height: 11px; border-radius: 50%; }
+.term-bar i:nth-child(1){ background:var(--violet-2); box-shadow:0 0 8px var(--violet-2); } .term-bar i:nth-child(2){ background:#ffd34e; } .term-bar i:nth-child(3){ background:var(--accent); box-shadow:0 0 8px var(--accent); }
+.term-bar span { margin-left: 8px; font-family: var(--mono); font-size: .72rem; color: var(--faint); }
+.term-body { padding: 16px 18px; font-family: var(--mono); font-size: .82rem; line-height: 1.75; min-height: 172px; color: var(--muted); }
+.term-body .ln { white-space: pre-wrap; }
+.term-body .p { color: var(--cyan); } .term-body .ok { color: #4dffa6; } .term-body .dim { color: var(--faint); }
+.term-cursor { display: inline-block; width: 8px; height: 15px; background: var(--cyan); vertical-align: -2px; box-shadow: 0 0 8px var(--cyan); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ============================ BENTO ============================ */
+.bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: minmax(150px, auto); gap: 14px; }
+.bcard { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: rgba(10,14,26,.55); backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); padding: 22px 24px; display: flex; flex-direction: column; transition: transform .18s, border-color .18s, box-shadow .18s; }
+.bcard::after { content: ""; position: absolute; inset: 0; border-radius: 16px; padding: 1px; background: linear-gradient(135deg, rgba(var(--glowcol),.5), transparent 40%, transparent 60%, rgba(var(--glowcol),.5)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: .5; transition: opacity .2s; pointer-events: none; }
+.bcard:hover { transform: translateY(-5px); box-shadow: 0 24px 60px -24px rgba(var(--glowcol),.6); }
+.bcard:hover::after { opacity: 1; }
+.bcard .ic { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; color: var(--cyan); background: rgba(var(--glowcol),.10); border: 1px solid rgba(var(--glowcol),.3); box-shadow: 0 0 20px -8px var(--cyan); }
+.bcard .ic .ico { width: 22px; height: 22px; }
+.bcard .kick { font-family: var(--mono); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-top: 16px; }
+.bcard h3 { font-size: 1.35rem; margin: 4px 0 6px; letter-spacing: -.01em; }
+.bcard p { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+.bcard .foot { margin-top: auto; padding-top: 16px; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: .72rem; color: var(--faint); }
+.bcard .foot .go { color: var(--cyan); display: inline-flex; align-items: center; gap: 6px; transition: transform .18s; }
+.bcard:hover .foot .go { transform: translateX(3px); }
+.b-osint { grid-column: span 2; grid-row: span 2; }
+.b-osint::after { background: linear-gradient(135deg, rgba(var(--glowcol),.6), transparent 42%, transparent 58%, rgba(var(--glowcol),.6)); }
+.b-osint h3 { font-size: 1.9rem; }
+.b-osint p { font-size: .98rem; max-width: 40ch; }
+.osint-viz { position: absolute; right: -30px; top: 10px; width: 260px; height: 260px; opacity: .55; pointer-events: none; }
+.osint-viz circle.n { fill: var(--cyan); } .osint-viz line { stroke: var(--cyan); stroke-opacity: .32; stroke-width: 1; }
+.osint-viz .core { fill: var(--mag); filter: drop-shadow(0 0 6px var(--mag)); }
+
+/* featured tools */
+.feat { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.fcard { border: 1px solid var(--line); border-radius: 13px; background: rgba(10,14,26,.5); backdrop-filter: blur(8px); padding: 16px; text-align: left; transition: .18s; display: flex; flex-direction: column; gap: 10px; min-height: 132px; }
+.fcard:hover { border-color: var(--cyan); transform: translateY(-3px); box-shadow: 0 16px 40px -20px var(--cyan); }
+.fcard .ic { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; color: var(--cyan); background: rgba(var(--glowcol),.09); border: 1px solid rgba(var(--glowcol),.24); }
+.fcard .ic .ico { width: 18px; height: 18px; }
+.fcard b { font-size: .96rem; color: var(--ink); }
+.fcard span { font-family: var(--mono); font-size: .68rem; color: var(--faint); margin-top: auto; }
+
+/* stats band */
+.statband { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border: 1px solid var(--line-2); border-radius: 16px; overflow: hidden; background: var(--line-2); box-shadow: 0 0 44px -18px rgba(var(--glowcol),.6); }
+.statband > div { background: rgba(8,11,22,.85); padding: 28px 26px; }
+.statband .n { font-family: var(--display); font-weight: 800; font-size: 2.6rem; line-height: 1; color: var(--cyan); text-shadow: 0 0 20px rgba(var(--glowcol),.5); }
+.statband .l { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin-top: 8px; }
+
+.sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 22px; }
+.sec-head .idx { font-family: var(--mono); font-size: .8rem; color: var(--mag); letter-spacing: .1em; }
+.sec-head h2 { font-family: var(--display); font-style: italic; font-weight: 700; font-size: 1.6rem; }
+.sec-head .more { margin-left: auto; font-family: var(--mono); font-size: .74rem; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.sec-head .more:hover { color: var(--cyan); }
+
+/* retint shared nav/footer for this page */
+body.t-cyber .nav { background: rgba(5,8,18,.72); border-bottom-color: var(--line); }
+body.t-cyber .nav-links a:hover { color: var(--cyan); }
+body.t-cyber .footer a:hover { color: var(--cyan); }
+body.t-cyber .statusbar .live i { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+body.t-cyber .btn-primary { background: linear-gradient(120deg,var(--accent),var(--violet-2)); color:var(--accent-ink); box-shadow: 0 0 24px -6px var(--cyan); }
+
+@media (max-width: 940px){
+  .hero-inner { grid-template-columns: 1fr; gap: 12px; text-align: center; }
+  .ghost-wrap { order: -1; }
+  .hero-kick, .hero-cta, .hero-meta { justify-content: center; }
+  .hero-sub { margin-inline: auto; }
+  .term { text-align: left; }
+  .bento { grid-template-columns: 1fr 1fr; }
+  .b-osint { grid-column: span 2; grid-row: span 1; }
+  .feat { grid-template-columns: 1fr 1fr 1fr; }
+  .statband { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px){
+  .bento, .b-osint { grid-column: span 1; }
+  .bento { grid-template-columns: 1fr; }
+  .feat { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body class="t-cyber">
+
+<div class="cyber-bg"><div class="cyber-grid"></div></div>
+<div class="cyber-scan"></div>
+
+<div class="statusbar"><div class="wrap">
+  <span class="live"><i></i> System online</span>
+  <span>v5 · open source</span>
+  <span class="sep">// your tools · your rules</span>
+  <span id="clock">--:--:--</span>
+</div></div>
+
+<header class="nav"><div class="wrap nav-inner">
+  <a class="brand" href="index.html"><svg class="logo" viewBox="0 0 32 32" role="img" aria-label="NULLBYTE"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--violet-2)"/><stop offset=".55" stop-color="#a855f7"/><stop offset="1" stop-color="#e040fb"/></linearGradient></defs><path d="M6 14C6 7.4 10.4 3 16 3s10 4.4 10 11v13l-3.3-2.6L19.3 27 16 24.4 12.7 27 9.3 24.4 6 27Z" fill="url(#g1)"/><circle cx="12.2" cy="14" r="2.2" fill="#0b0712"/><circle cx="19.8" cy="14" r="2.2" fill="#0b0712"/><circle cx="12.2" cy="14" r=".7" fill="#fff"/><circle cx="19.8" cy="14" r=".7" fill="#fff"/></svg></a>
+  <button class="nav-burger" data-burger aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+  <nav class="nav-links">
+    <a href="tools.html">Tools</a><a href="abilities.html">Abilities</a><a href="glossary.html">Glossary</a><a href="learn.html">Learn</a><a href="osint.html">OSINT</a><a href="shop.html">Shop</a><a href="account.html">Account</a><a href="console.html">Console</a>
+    <a class="btn btn-primary nav-cta" href="osint.html"><svg class="ico"><use href="#i-scope"/></svg> Launch OSINT</a>
+  </nav>
+</div></header>
+
+<!-- HERO -->
+<section class="hero wrap">
+  <div class="hero-inner">
+    <div class="hero-copy reveal">
+      <span class="hero-kick"><span class="pip"></span> NULLBYTE · operator deck</span>
+      <h1 class="hero-title">Your toolkit.<br><em>Your rules.</em></h1>
+      <p class="hero-sub">No gatekeeping. No fluff. Every hacker tool, OSINT module and concept — decoded from beginner to pro, and built entirely in the open. Runs 100% in your browser.</p>
+      <div class="hero-cta">
+        <a class="btn-neon" href="tools.html"><svg class="ico"><use href="#i-wrench"/></svg> Open the toolkit</a>
+        <a class="btn-wire" href="osint.html"><svg class="ico"><use href="#i-scope"/></svg> Launch OSINT</a>
+      </div>
+      <div class="hero-meta"><span><b>40+</b> tools</span><span><b>30</b> OSINT modules</span><span><b>200+</b> terms</span><span><b>100%</b> client-side</span></div>
+    </div>
+
+    <div class="hero-side reveal">
+      <div class="ghost-wrap">
+        <svg class="ghost" viewBox="0 0 32 32" role="img" aria-label="NULLBYTE ghost">
+          <defs><linearGradient id="gHero" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ffd9b8"/></linearGradient></defs>
+          <path d="M5.4 14.5C5.4 7.2 10.1 2.4 16 2.4s10.6 4.8 10.6 12.1v12.8c0 1.2-1.4 1.7-2.2.9l-2.2-2.1c-.6-.6-1.6-.6-2.2 0l-2 2c-.7.7-1.8.7-2.5 0l-1.5-1.5c-.6-.6-1.6-.6-2.2 0l-2 2c-.6.6-1.6.6-2.2 0l-1.6-1.6c-.4-.4-.6-.9-.6-1.4Z" fill="url(#gHero)"/>
+          <ellipse cx="11.8" cy="13.8" rx="2.5" ry="2.8" fill="#16100a"/>
+          <ellipse cx="20.2" cy="13.8" rx="2.5" ry="2.8" fill="#16100a"/>
+          <circle cx="12.7" cy="12.7" r=".85" fill="#fff"/>
+          <circle cx="21.1" cy="12.7" r=".85" fill="#fff"/>
+          <path d="M13.5 17.4h5L16 21.4Z" fill="var(--accent)"/>
+        </svg>
+      </div>
+      <div class="term">
+        <div class="term-bar"><i></i><i></i><i></i><span>operator@nullbyte:~</span></div>
+        <div class="term-body" id="term"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section class="wrap" style="margin-top:26px">
+  <div class="sec-head"><span class="idx">[ 01 ]</span><h2>The platform</h2><a class="more" href="features.html">All features <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+  <div class="bento">
+    <a class="bcard b-osint" href="osint.html">
+      <svg class="osint-viz" viewBox="0 0 200 200" aria-hidden="true">
+        <line x1="100" y1="100" x2="40" y2="40"/><line x1="100" y1="100" x2="165" y2="55"/><line x1="100" y1="100" x2="55" y2="150"/><line x1="100" y1="100" x2="150" y2="150"/><line x1="100" y1="100" x2="100" y2="30"/>
+        <circle class="n" cx="40" cy="40" r="4"/><circle class="n" cx="165" cy="55" r="4"/><circle class="n" cx="55" cy="150" r="4"/><circle class="n" cx="150" cy="150" r="4"/><circle class="n" cx="100" cy="30" r="4"/>
+        <circle class="core" cx="100" cy="100" r="6"/>
+      </svg>
+      <div class="ic"><svg class="ico"><use href="#i-scope"/></svg></div>
+      <div class="kick">// recon suite</div>
+      <h3>OSINT Console</h3>
+      <p>An operator console driving 30+ recon modules — live IP, DNS, WHOIS, certificates, breach &amp; social lookups, all keyless and in the open.</p>
+      <div class="foot"><span>12 live · client-side</span><span class="go">Launch <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></span></div>
+    </a>
+
+    <a class="bcard" href="learn.html">
+      <div class="ic"><svg class="ico"><use href="#i-book"/></svg></div>
+      <div class="kick">// hands-on</div>
+      <h3>Learn</h3>
+      <p>29 interactive labs &amp; references — from bits to hash cracking.</p>
+      <div class="foot"><span>L-01 → L-29</span><span class="go">Enter <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></span></div>
+    </a>
+
+    <a class="bcard" href="threatmap.html">
+      <div class="ic"><svg class="ico"><use href="#i-globe"/></svg></div>
+      <div class="kick">// live map</div>
+      <h3>Threat Map</h3>
+      <p>Attack arcs across a real, pannable world map.</p>
+      <div class="foot"><span>real tiles</span><span class="go">View <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></span></div>
+    </a>
+
+    <a class="bcard" href="personal.html">
+      <div class="ic"><svg class="ico"><use href="#i-grid"/></svg></div>
+      <div class="kick">// productivity</div>
+      <h3>Personal Hub</h3>
+      <p>Notes, habits, snippets, calendar, calculator &amp; more.</p>
+      <div class="foot"><span>P-01 → P-10</span><span class="go">Open <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></span></div>
+    </a>
+
+    <a class="bcard" href="tools.html">
+      <div class="ic"><svg class="ico"><use href="#i-wrench"/></svg></div>
+      <div class="kick">// hardware</div>
+      <h3>Gear Catalog</h3>
+      <p>Hacker hardware &amp; software, explained at three levels.</p>
+      <div class="foot"><span>Flipper · Ducky · Pineapple</span><span class="go">Browse <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></span></div>
+    </a>
+  </div>
+</section>
+
+<!-- FEATURED TOOLS -->
+<section class="wrap" style="margin-top:44px">
+  <div class="sec-head"><span class="idx">[ 02 ]</span><h2>Fresh tools</h2><a class="more" href="learn.html">See all <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+  <div class="feat">
+    <a class="fcard" href="password.html"><div class="ic"><svg class="ico"><use href="#i-key"/></svg></div><b>Password Lab</b><span>generate · analyze</span></a>
+    <a class="fcard" href="compress.html"><div class="ic"><svg class="ico"><use href="#i-image"/></svg></div><b>Compression Lab</b><span>JPEG · WebP · AVIF</span></a>
+    <a class="fcard" href="fileinspect.html"><div class="ic"><svg class="ico"><use href="#i-hex"/></svg></div><b>File Inspector</b><span>magic · hex · entropy</span></a>
+    <a class="fcard" href="jwt.html"><div class="ic"><svg class="ico"><use href="#i-badge"/></svg></div><b>JWT Inspector</b><span>decode · verify</span></a>
+    <a class="fcard" href="flowchart.html"><div class="ic"><svg class="ico"><use href="#i-grid"/></svg></div><b>Flowchart Editor</b><span>draw · export</span></a>
+    <a class="fcard" href="codeacademy.html"><div class="ic"><svg class="ico"><use href="#i-book"/></svg></div><b>Code Academy</b><span>learn to code</span></a>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="wrap" style="margin-top:44px; padding-bottom:20px">
+  <div class="statband reveal">
+    <div><div class="n">55</div><div class="l">Pages</div></div>
+    <div><div class="n">30+</div><div class="l">OSINT modules</div></div>
+    <div><div class="n">200+</div><div class="l">Glossary terms</div></div>
+    <div><div class="n">0</div><div class="l">Servers required</div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer"><div class="wrap">
+  <div class="footer-grid">
+    <div><a class="brand" href="index.html"><svg class="logo" viewBox="0 0 32 32" role="img" aria-label="NULLBYTE"><path d="M6 14C6 7.4 10.4 3 16 3s10 4.4 10 11v13l-3.3-2.6L19.3 27 16 24.4 12.7 27 9.3 24.4 6 27Z" fill="url(#g1)"/><circle cx="12.2" cy="14" r="2.2" fill="#0b0712"/><circle cx="19.8" cy="14" r="2.2" fill="#0b0712"/><circle cx="12.2" cy="14" r=".7" fill="#fff"/><circle cx="19.8" cy="14" r=".7" fill="#fff"/></svg></a><p class="muted" style="margin-top:16px; max-width:32ch; font-size:.92rem">An IT learning hub — tools explained, jargon decoded, recon made clean.</p></div>
+    <div><h4>Explore</h4><a href="tools.html">Tools</a><a href="abilities.html">Abilities</a><a href="glossary.html">Glossary</a><a href="learn.html">Learn</a><a href="osint.html">OSINT</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+    <div><h4>Tools</h4><a href="password.html">Password Lab</a><a href="compress.html">Compression Lab</a><a href="fileinspect.html">File Inspector</a></div>
+    <div><h4>About</h4><a href="#">Mission</a><a href="#">Disclaimer</a><a href="#">Contact</a></div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 NULLBYTE — layout prototype</span><span>For educational use only</span></div>
+</div></footer>
+
+<script src="js/app.js?v=33"></script>
+<script>
+(function(){
+  const clk = document.getElementById('clock');
+  function tick(){ if (clk) clk.textContent = new Date().toLocaleTimeString('en-GB'); }
+  tick(); setInterval(tick, 1000);
+
+  const term = document.getElementById('term');
+  const LINES = [
+    { t: '$ nullbyte --status', c: 'p' },
+    { t: '[ok] 40+ interactive tools online', c: 'ok' },
+    { t: '[ok] 30 OSINT modules armed', c: 'ok' },
+    { t: '[ok] 200+ glossary terms indexed', c: 'ok' },
+    { t: '[ok] backend: nullbyte-osint.workers.dev', c: 'ok' },
+    { t: '// no accounts. no tracking. no servers.', c: 'dim' },
+    { t: '> ready — pick a tool ↑', c: 'p' }
+  ];
+  let li = 0, ci = 0, rendered = '';
+  function type(){
+    if (!term) return;
+    if (li >= LINES.length){ setTimeout(() => { li = 0; ci = 0; rendered = ''; term.innerHTML = '<span class="term-cursor"></span>'; type(); }, 4200); return; }
+    const line = LINES[li];
+    if (ci <= line.t.length){
+      const partial = line.t.slice(0, ci).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      term.innerHTML = rendered + `<div class="ln ${line.c}">${partial}<span class="term-cursor"></span></div>`;
+      ci++;
+      setTimeout(type, 16 + Math.random()*26);
+    } else {
+      rendered += `<div class="ln ${line.c}">${line.t.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`;
+      li++; ci = 0;
+      setTimeout(type, 260);
+    }
+  }
+  type();
+})();
+</script>
+</body>
+</html>

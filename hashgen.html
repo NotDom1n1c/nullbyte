@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hash Generator — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 56px 18px; }
+.hg-ta { width: 100%; min-height: 120px; resize: vertical; background: rgba(0,0,0,.32); border: 1px solid var(--line-2); border-radius: 12px; color: var(--ink); font-family: var(--mono); font-size: .9rem; padding: 14px 16px; outline: none; line-height: 1.6; }
+.hg-ta:focus { border-color: var(--accent); }
+.hg-meta { font-family: var(--mono); font-size: .74rem; color: var(--faint); margin: 8px 2px 0; }
+.hg-list { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; padding-bottom: 70px; }
+.hg-card { border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 15px 17px; }
+.hg-head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.hg-algo { font-family: var(--mono); font-weight: 700; font-size: .88rem; letter-spacing: .04em; }
+.hg-bits { font-family: var(--mono); font-size: .58rem; color: var(--faint); background: rgba(255,255,255,.06); padding: 2px 7px; border-radius: 5px; }
+.hg-copy { margin-left: auto; font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border: 1px solid var(--line-2); background: transparent; padding: 5px 11px; border-radius: 7px; cursor: pointer; transition: .15s; }
+.hg-copy:hover { border-color: var(--accent); color: var(--accent); }
+.hg-copy.ok { color: #7CFFB2; border-color: #7CFFB2; }
+.hg-val { font-family: var(--mono); font-size: .82rem; color: var(--ink); word-break: break-all; line-height: 1.7; background: rgba(255,255,255,.03); border-radius: 8px; padding: 10px 12px; }
+.hg-opts { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; font-family: var(--mono); font-size: .74rem; color: var(--muted); }
+.hg-opts label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ HASH ]</span><span class="tag">// checksums &amp; digests</span></div>
+  <h1 class="display">Hash generator.</h1>
+  <p class="lead" style="margin-top:14px">Turn any text into MD5, SHA-1, SHA-256 &amp; SHA-512 — computed live as you type, entirely in your browser. Nothing is sent anywhere.</p>
+</section>
+
+<section class="wrap">
+  <textarea class="hg-ta" id="inp" placeholder="Type or paste text to hash…"></textarea>
+  <div class="hg-meta" id="meta">0 characters · 0 bytes</div>
+  <div class="hg-opts"><label><input type="checkbox" id="upper"> uppercase output</label></div>
+  <div class="hg-list" id="list"></div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+/* MD5 (Paul Johnston, BSD) — SHA family uses native crypto.subtle */
+function md5(str){
+  function safe_add(x,y){ const lsw=(x&0xFFFF)+(y&0xFFFF); const msw=(x>>16)+(y>>16)+(lsw>>16); return (msw<<16)|(lsw&0xFFFF); }
+  function rol(n,c){ return (n<<c)|(n>>>(32-c)); }
+  function cmn(q,a,b,x,s,t){ return safe_add(rol(safe_add(safe_add(a,q),safe_add(x,t)),s),b); }
+  function ff(a,b,c,d,x,s,t){ return cmn((b&c)|((~b)&d),a,b,x,s,t); }
+  function gg(a,b,c,d,x,s,t){ return cmn((b&d)|(c&(~d)),a,b,x,s,t); }
+  function hh(a,b,c,d,x,s,t){ return cmn(b^c^d,a,b,x,s,t); }
+  function ii(a,b,c,d,x,s,t){ return cmn(c^(b|(~d)),a,b,x,s,t); }
+  function str2blks(s){
+    const bytes=unescape(encodeURIComponent(s)); const n=bytes.length;
+    const nblk=((n+8)>>6)+1, blks=new Array(nblk*16).fill(0);
+    for(let i=0;i<n;i++) blks[i>>2]|=(bytes.charCodeAt(i)&0xff)<<((i%4)*8);
+    blks[n>>2]|=0x80<<((n%4)*8); blks[nblk*16-2]=n*8;
+    return blks;
+  }
+  const x=str2blks(str);
+  let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(let i=0;i<x.length;i+=16){
+    const oa=a,ob=b,oc=c,od=d;
+    a=ff(a,b,c,d,x[i],7,-680876936); d=ff(d,a,b,c,x[i+1],12,-389564586); c=ff(c,d,a,b,x[i+2],17,606105819); b=ff(b,c,d,a,x[i+3],22,-1044525330);
+    a=ff(a,b,c,d,x[i+4],7,-176418897); d=ff(d,a,b,c,x[i+5],12,1200080426); c=ff(c,d,a,b,x[i+6],17,-1473231341); b=ff(b,c,d,a,x[i+7],22,-45705983);
+    a=ff(a,b,c,d,x[i+8],7,1770035416); d=ff(d,a,b,c,x[i+9],12,-1958414417); c=ff(c,d,a,b,x[i+10],17,-42063); b=ff(b,c,d,a,x[i+11],22,-1990404162);
+    a=ff(a,b,c,d,x[i+12],7,1804603682); d=ff(d,a,b,c,x[i+13],12,-40341101); c=ff(c,d,a,b,x[i+14],17,-1502002290); b=ff(b,c,d,a,x[i+15],22,1236535329);
+    a=gg(a,b,c,d,x[i+1],5,-165796510); d=gg(d,a,b,c,x[i+6],9,-1069501632); c=gg(c,d,a,b,x[i+11],14,643717713); b=gg(b,c,d,a,x[i],20,-373897302);
+    a=gg(a,b,c,d,x[i+5],5,-701558691); d=gg(d,a,b,c,x[i+10],9,38016083); c=gg(c,d,a,b,x[i+15],14,-660478335); b=gg(b,c,d,a,x[i+4],20,-405537848);
+    a=gg(a,b,c,d,x[i+9],5,568446438); d=gg(d,a,b,c,x[i+14],9,-1019803690); c=gg(c,d,a,b,x[i+3],14,-187363961); b=gg(b,c,d,a,x[i+8],20,1163531501);
+    a=gg(a,b,c,d,x[i+13],5,-1444681467); d=gg(d,a,b,c,x[i+2],9,-51403784); c=gg(c,d,a,b,x[i+7],14,1735328473); b=gg(b,c,d,a,x[i+12],20,-1926607734);
+    a=hh(a,b,c,d,x[i+5],4,-378558); d=hh(d,a,b,c,x[i+8],11,-2022574463); c=hh(c,d,a,b,x[i+11],16,1839030562); b=hh(b,c,d,a,x[i+14],23,-35309556);
+    a=hh(a,b,c,d,x[i+1],4,-1530992060); d=hh(d,a,b,c,x[i+4],11,1272893353); c=hh(c,d,a,b,x[i+7],16,-155497632); b=hh(b,c,d,a,x[i+10],23,-1094730640);
+    a=hh(a,b,c,d,x[i+13],4,681279174); d=hh(d,a,b,c,x[i],11,-358537222); c=hh(c,d,a,b,x[i+3],16,-722521979); b=hh(b,c,d,a,x[i+6],23,76029189);
+    a=hh(a,b,c,d,x[i+9],4,-640364487); d=hh(d,a,b,c,x[i+12],11,-421815835); c=hh(c,d,a,b,x[i+15],16,530742520); b=hh(b,c,d,a,x[i+2],23,-995338651);
+    a=ii(a,b,c,d,x[i],6,-198630844); d=ii(d,a,b,c,x[i+7],10,1126891415); c=ii(c,d,a,b,x[i+14],15,-1416354905); b=ii(b,c,d,a,x[i+5],21,-57434055);
+    a=ii(a,b,c,d,x[i+12],6,1700485571); d=ii(d,a,b,c,x[i+3],10,-1894986606); c=ii(c,d,a,b,x[i+10],15,-1051523); b=ii(b,c,d,a,x[i+1],21,-2054922799);
+    a=ii(a,b,c,d,x[i+8],6,1873313359); d=ii(d,a,b,c,x[i+15],10,-30611744); c=ii(c,d,a,b,x[i+6],15,-1560198380); b=ii(b,c,d,a,x[i+13],21,1309151649);
+    a=ii(a,b,c,d,x[i+4],6,-145523070); d=ii(d,a,b,c,x[i+11],10,-1120210379); c=ii(c,d,a,b,x[i+2],15,718787259); b=ii(b,c,d,a,x[i+9],21,-343485551);
+    a=safe_add(a,oa); b=safe_add(b,ob); c=safe_add(c,oc); d=safe_add(d,od);
+  }
+  function hex(n){ let s=''; for(let i=0;i<4;i++) s+=('0'+((n>>(i*8))&0xff).toString(16)).slice(-2); return s; }
+  return hex(a)+hex(b)+hex(c)+hex(d);
+}
+
+async function sha(algo, str){
+  const buf = await crypto.subtle.digest(algo, new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+const ALGOS = [
+  { key:'MD5',     bits:128, fn: s => Promise.resolve(md5(s)) },
+  { key:'SHA-1',   bits:160, fn: s => sha('SHA-1', s) },
+  { key:'SHA-256', bits:256, fn: s => sha('SHA-256', s) },
+  { key:'SHA-512', bits:512, fn: s => sha('SHA-512', s) }
+];
+
+const inp = document.getElementById('inp'), meta = document.getElementById('meta'), list = document.getElementById('list'), upper = document.getElementById('upper');
+
+async function run(){
+  const t = inp.value;
+  meta.textContent = `${t.length} character${t.length!==1?'s':''} · ${new TextEncoder().encode(t).length} bytes`;
+  if (!t){ list.innerHTML = '<div class="hg-card" style="text-align:center;color:var(--faint);font-family:var(--mono);font-size:.85rem;padding:34px">Enter text above — hashes compute in real time.</div>'; return; }
+  const results = await Promise.all(ALGOS.map(async a => ({ a, v: await a.fn(t) })));
+  list.innerHTML = results.map(({a,v}) => {
+    const val = upper.checked ? v.toUpperCase() : v;
+    return `<div class="hg-card">
+      <div class="hg-head"><span class="hg-algo">${a.key}</span><span class="hg-bits">${a.bits} bit</span><button class="hg-copy" data-v="${val}">Copy</button></div>
+      <div class="hg-val">${val}</div>
+    </div>`;
+  }).join('');
+}
+list.addEventListener('click', e => {
+  const b = e.target.closest('.hg-copy'); if (!b) return;
+  navigator.clipboard.writeText(b.dataset.v).then(() => { b.textContent = 'Copied'; b.classList.add('ok'); setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('ok'); }, 1200); });
+});
+inp.addEventListener('input', run);
+upper.addEventListener('change', run);
+run();
+</script>
+</body>
+</html>

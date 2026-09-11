@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Cheatsheet — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 22px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.panel-c { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 28px; }
+.sec-t { font-family: var(--display); font-weight: 600; font-size: 1.5rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; margin-bottom: 4px; }
+.sec-d { color: var(--muted); font-size: .92rem; margin-bottom: 22px; }
+
+/* subnet calc */
+.sub-in { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.sub-in .f { display: flex; flex-direction: column; gap: 7px; }
+.sub-in label { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.sub-in input { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(0,0,0,.3); color: var(--ink); font-family: var(--mono); font-size: .95rem; outline: none; width: 200px; }
+.sub-in input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px color-mix(in srgb,var(--violet) 20%,transparent); }
+.sub-in input.cidr { width: 90px; }
+.sub-out { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 20px; }
+.sub-out > div { background: rgba(10,10,16,.5); padding: 16px 18px; }
+.sub-out .k { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+.sub-out .v { margin-top: 5px; font-family: var(--mono); font-weight: 500; color: var(--ink); }
+
+/* OSI stack */
+.osi { display: grid; gap: 6px; }
+.layer { display: grid; grid-template-columns: 40px 1.3fr 1fr 2fr; gap: 14px; align-items: center; padding: 13px 16px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.02); }
+.layer .ln { font-family: var(--mono); color: var(--violet); font-weight: 700; }
+.layer .nm { font-weight: 600; }
+.layer .pr { font-family: var(--mono); font-size: .78rem; color: var(--violet); }
+.layer .ds { color: var(--muted); font-size: .88rem; }
+.two { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; align-items: start; }
+.tcpip .layer { grid-template-columns: 1.2fr 2fr; }
+
+/* port table */
+.search-box { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg-2); margin-bottom: 16px; max-width: 360px; }
+.search-box input { flex: 1; background: none; border: none; outline: none; color: var(--ink); font-family: var(--mono); font-size: .85rem; }
+.ptable { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.ptable th, .ptable td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+.ptable th { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); }
+.ptable td.port { font-family: var(--mono); color: var(--violet); font-weight: 600; }
+.ptable td.svc { font-weight: 600; }
+.ptable td.pr { font-family: var(--mono); font-size: .76rem; color: var(--muted); }
+.ptable td.ds { color: var(--muted); }
+.cidr-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.cidr-grid > div { background: rgba(10,10,16,.4); padding: 14px 16px; }
+.cidr-grid .c { font-family: var(--mono); color: var(--violet); font-weight: 700; }
+.cidr-grid .m { font-family: var(--mono); font-size: .76rem; color: var(--muted); margin-top: 3px; }
+.cidr-grid .h { font-size: .82rem; color: var(--ink); margin-top: 4px; }
+@media (max-width:760px){ .layer { grid-template-columns: 30px 1fr; } .layer .pr,.layer .ds { display: none; } .two { grid-template-columns: 1fr; } }
+
+/* ---- deep content ---- */
+.toc { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.toc a { font-family: var(--mono); font-size: .72rem; padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 8px; color: var(--muted); }
+.toc a:hover { border-color: var(--violet); color: var(--ink); }
+.dsec { padding-block: 38px 6px; border-top: 1px solid var(--line); margin-top: 30px; }
+.dsec:first-of-type { border-top: none; margin-top: 0; }
+.lead-p { color: var(--ink); font-size: 1.04rem; line-height: 1.7; max-width: 72ch; }
+.body-p { color: var(--muted); font-size: .95rem; line-height: 1.72; max-width: 74ch; margin-top: 12px; }
+.body-p b, .lead-p b { color: var(--ink); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(270px,1fr)); gap: 16px; margin-top: 16px; }
+.dcard { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); padding: 20px; }
+.dcard h4 { font-size: 1.02rem; margin-bottom: 6px; }
+.dcard p { color: var(--muted); font-size: .9rem; line-height: 1.6; } .dcard p b { color: var(--ink); }
+.callout { border-left: 3px solid var(--violet); background: rgba(124,92,255,.06); padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 16px; font-size: .92rem; color: var(--muted); }
+.callout.warn { border-color: #f59e0b; background: rgba(245,158,11,.07); }
+.callout b { color: var(--ink); }
+ul.tick { list-style: none; padding: 0; margin: 12px 0 0; }
+ul.tick li { position: relative; padding: 6px 0 6px 26px; color: var(--muted); font-size: .93rem; line-height: 1.55; }
+ul.tick li::before { content: ""; position: absolute; left: 2px; top: 12px; width: 8px; height: 8px; border-radius: 2px; background: var(--violet); }
+ul.tick li b { color: var(--ink); }
+table.t { width: 100%; border-collapse: collapse; font-size: .86rem; margin-top: 10px; }
+table.t th, table.t td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+table.t th { color: var(--violet); font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; }
+table.t td { color: var(--muted); } table.t td b { color: var(--ink); }
+/* TCP handshake visual */
+.hs { max-width: 540px; margin-top: 12px; border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden; }
+.hs .head { display: grid; grid-template-columns: 1fr 1fr; font-family: var(--mono); font-size: .8rem; }
+.hs .head div { padding: 11px; text-align: center; color: var(--ink); background: rgba(255,255,255,.03); }
+.hs .head div:first-child { border-right: 1px solid var(--line); }
+.hs .step { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center; padding: 14px 16px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: .82rem; opacity: .22; transition: opacity .35s; }
+.hs .step.on { opacity: 1; }
+.hs .step .tag { padding: 5px 0; text-align: center; border-radius: 7px; background: rgba(124,92,255,.16); border: 1px solid var(--violet); color: #d9ccff; }
+.hs .step .desc { color: var(--muted); } .hs .step .desc b { color: var(--ink); }
+.hs .step.r .tag { background: rgba(34,197,94,.14); border-color: #22c55e; color: #b9ffd6; }
+.hs .step .dir { color: var(--violet); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ NET ]</span><span class="tag">// networking cheatsheet</span></div>
+  <h1 class="display">Networking.</h1>
+  <p class="lead" style="margin-top:20px">How machines actually find and talk to each other — from a single packet's journey to subnets, ports and the attacks that target them. Read the theory, then use the live calculators and references below.</p>
+  <div class="toc">
+    <a href="#basics">Basics</a><a href="#addressing">Addresses</a><a href="#journey">A packet's journey</a><a href="#tcpudp">TCP vs UDP</a><a href="#subnetting">Subnetting</a><a href="#services">DNS · DHCP · NAT</a><a href="#attacks">Attacks</a><a href="#tools">Best tools</a><a href="#ref">Reference</a>
+  </div>
+</section>
+
+<!-- DEEP THEORY -->
+<section class="wrap">
+  <div class="dsec" id="basics">
+    <div class="shead"><span class="idx">[ 01 ]</span><span class="tag">// what a network actually is</span></div>
+    <p class="lead-p">A network is just <b>devices connected so they can exchange data</b>. Each device (a <b>host</b>) splits its data into small <b>packets</b> and hands them off to be relayed, hop by hop, until they reach the destination — like posting thousands of tiny numbered postcards that get reassembled at the other end.</p>
+    <div class="grid2">
+      <div class="dcard"><h4>Switch</h4><p>Connects devices <b>within</b> one local network (a LAN) and forwards frames by MAC address. Think: the wiring inside your house.</p></div>
+      <div class="dcard"><h4>Router</h4><p>Connects <b>different</b> networks together and decides where packets go next by IP address. Your home router joins your LAN to the internet (a WAN).</p></div>
+      <div class="dcard"><h4>Packet</h4><p>A small chunk of data wrapped in headers (who it's from, who it's for, what kind). Big transfers are thousands of packets, reassembled in order.</p></div>
+      <div class="dcard"><h4>Protocol</h4><p>An agreed set of rules so two machines understand each other — HTTP, TCP, IP, DNS. The OSI model (below) stacks them into layers.</p></div>
+    </div>
+    <div class="callout">The <b>OSI</b> and <b>TCP/IP</b> models below are maps of these layers — each layer only worries about its own job and hands the rest down. A web request rides Application → Transport → Internet → Link on the way out, and back up the stack on the way in.</div>
+  </div>
+
+  <div class="dsec" id="addressing">
+    <div class="shead"><span class="idx">[ 02 ]</span><span class="tag">// IP &amp; MAC addresses</span></div>
+    <p class="body-p" style="margin-top:0">Every device needs identities at two levels. A <b>MAC address</b> is burned into the network card (e.g. <span style="font-family:var(--mono);color:var(--violet)">02:42:0a:00:00:05</span>) and identifies it on the <i>local</i> link. An <b>IP address</b> is assigned by the network and is used to route <i>between</i> networks. <b>ARP</b> is the protocol that maps "I know the IP, what's the MAC?" on a LAN.</p>
+    <table class="t">
+      <tr><th>Type</th><th>Example</th><th>Range / note</th></tr>
+      <tr><td><b>IPv4</b></td><td>192.168.1.50</td><td>32 bits, ~4.3 billion addresses — now exhausted</td></tr>
+      <tr><td><b>IPv6</b></td><td>2001:db8::7334</td><td>128 bits, effectively unlimited</td></tr>
+      <tr><td><b>Private (LAN)</b></td><td>10.x · 172.16–31.x · 192.168.x</td><td>Not routable on the internet; reused everywhere behind NAT</td></tr>
+      <tr><td><b>Loopback</b></td><td>127.0.0.1</td><td>"localhost" — this machine</td></tr>
+      <tr><td><b>MAC</b></td><td>02:42:0a:00:00:05</td><td>48 bits; first half identifies the vendor (OUI)</td></tr>
+    </table>
+  </div>
+
+  <div class="dsec" id="journey">
+    <div class="shead"><span class="idx">[ 03 ]</span><span class="tag">// the journey of a packet</span></div>
+    <p class="body-p" style="margin-top:0">What happens when you type <span style="font-family:var(--mono);color:var(--violet)">https://example.com</span> and hit enter:</p>
+    <ul class="tick">
+      <li><b>DNS lookup</b> — your machine asks a DNS resolver to turn <i>example.com</i> into an IP address (see DNS below).</li>
+      <li><b>Routing decision</b> — is the IP on my LAN or elsewhere? If elsewhere, send it to the <b>default gateway</b> (your router).</li>
+      <li><b>ARP</b> — to hand the packet to the router, your machine needs the router's MAC; ARP resolves it.</li>
+      <li><b>Hop by hop</b> — each router along the path reads the destination IP and forwards toward it, decrementing the packet's <b>TTL</b>.</li>
+      <li><b>Ports &amp; TCP</b> — the packet arrives at the server's IP on port <b>443</b>; a TCP connection + TLS handshake set up the secure channel.</li>
+      <li><b>Reassembly</b> — packets arrive (maybe out of order), TCP reorders them, and the browser renders the page.</li>
+    </ul>
+    <div class="callout"><b>traceroute</b> / <b>tracert</b> shows you these hops live; <b>ping</b> uses ICMP to test if a host is reachable and how long the round-trip takes.</div>
+  </div>
+
+  <div class="dsec" id="tcpudp">
+    <div class="shead"><span class="idx">[ 04 ]</span><span class="tag">// TCP vs UDP &amp; the 3-way handshake</span></div>
+    <div class="grid2">
+      <div class="dcard"><h4>TCP — reliable</h4><p><b>Connection-oriented.</b> Guarantees every byte arrives, in order, with retransmission. Used for web, email, file transfer, SSH. Slower setup, rock-solid delivery.</p></div>
+      <div class="dcard"><h4>UDP — fast</h4><p><b>Connectionless.</b> Fire-and-forget, no guarantees, no handshake. Used for DNS, video calls, games, streaming — where speed beats perfection.</p></div>
+    </div>
+    <p class="body-p">Before TCP sends data it sets up a connection with a <b>3-way handshake</b>. Watch it:</p>
+    <div class="hs" id="hs">
+      <div class="head"><div>Client</div><div>Server</div></div>
+      <div class="step" data-i="0"><span class="tag">SYN →</span><span class="desc"><b>Client → Server.</b> "I want to talk, my sequence number is x."</span></div>
+      <div class="step r" data-i="1"><span class="tag">← SYN/ACK</span><span class="desc"><b>Server → Client.</b> "OK, I acknowledge x; my sequence number is y."</span></div>
+      <div class="step" data-i="2"><span class="tag">ACK →</span><span class="desc"><b>Client → Server.</b> "Acknowledged y. Connection established." Data flows.</span></div>
+    </div>
+    <button class="btn btn-ghost" id="hsReplay" style="margin-top:14px"><svg class="ico ico-sm"><use href="#i-refresh"/></svg> Replay handshake</button>
+    <div class="callout warn">A <b>SYN flood</b> attack abuses this: the attacker sends thousands of SYNs but never the final ACK, leaving half-open connections that exhaust the server — a classic DoS.</div>
+  </div>
+
+  <div class="dsec" id="subnetting">
+    <div class="shead"><span class="idx">[ 05 ]</span><span class="tag">// subnetting, explained</span></div>
+    <p class="lead-p">An IP address has two parts: the <b>network</b> (which network you're on) and the <b>host</b> (which device). The <b>subnet mask</b> / <b>CIDR prefix</b> draws the line between them.</p>
+    <p class="body-p">A <span style="font-family:var(--mono);color:var(--violet)">/24</span> means the first 24 bits are the network, leaving 8 bits for hosts → 2⁸ = 256 addresses, minus the <b>network address</b> and <b>broadcast address</b> = <b>254 usable hosts</b>. Smaller prefixes = bigger networks; larger prefixes = smaller. The <b>network address</b> is the first (all host-bits 0); the <b>broadcast</b> is the last (all host-bits 1) and reaches every host at once.</p>
+    <ul class="tick">
+      <li><b>Why split networks?</b> Security (isolate departments), performance (smaller broadcast domains), and tidy address management.</li>
+      <li><b>Usable hosts</b> = 2^(host bits) − 2 (network + broadcast). A /30 gives just 2 — perfect for a router-to-router link.</li>
+      <li>Try it: the calculator below turns any IP + CIDR into network, broadcast, range and mask.</li>
+    </ul>
+  </div>
+
+  <div class="dsec" id="services">
+    <div class="shead"><span class="idx">[ 06 ]</span><span class="tag">// the services that glue it together</span></div>
+    <div class="grid2">
+      <div class="dcard"><h4>DNS — the phonebook</h4><p>Translates human names (<i>example.com</i>) into IP addresses. Hierarchical: root → .com → example.com. Poisoning or spoofing it sends victims to attacker servers.</p></div>
+      <div class="dcard"><h4>DHCP — auto-config</h4><p>When you join a network, DHCP hands your device an IP, subnet mask, gateway and DNS server automatically. A rogue DHCP server can hijack clients.</p></div>
+      <div class="dcard"><h4>NAT — sharing one IP</h4><p>Your router rewrites private LAN addresses to its one public IP and back. It's why dozens of home devices share a single internet address (and gives a little inbound protection).</p></div>
+    </div>
+  </div>
+
+  <div class="dsec" id="attacks">
+    <div class="shead"><span class="idx">[ 07 ]</span><span class="tag">// how networks get attacked</span></div>
+    <table class="t">
+      <tr><th>Attack</th><th>What it does</th><th>Defense</th></tr>
+      <tr><td><b>Sniffing</b></td><td>Reading traffic on the wire (easy on open Wi-Fi / hubs)</td><td>Encryption (TLS, VPN)</td></tr>
+      <tr><td><b>ARP spoofing / MITM</b></td><td>Faking ARP replies to sit between victim and gateway</td><td>Dynamic ARP inspection, static ARP, encryption</td></tr>
+      <tr><td><b>DNS spoofing</b></td><td>Forging DNS answers to redirect victims</td><td>DNSSEC, DoH/DoT</td></tr>
+      <tr><td><b>Port scanning</b></td><td>Probing which ports/services are open (recon)</td><td>Firewalls, rate-limiting, IDS</td></tr>
+      <tr><td><b>(D)DoS</b></td><td>Flooding a target so it can't serve real users</td><td>Filtering, rate limits, scrubbing services</td></tr>
+    </table>
+    <div class="callout">See these in motion: read a real capture in the <a class="xlink" href="network-lab.html">Networking Lab</a>, and scan ports safely against your own <a class="xlink" href="vm.html">VM lab</a>.</div>
+  </div>
+
+  <div class="dsec" id="tools">
+    <div class="shead"><span class="idx">[ 08 ]</span><span class="tag">// the tools pros actually use</span></div>
+    <p class="body-p" style="margin-top:0">A small kit covers most networking work. Learn these and you can see, map and test almost any network:</p>
+    <div class="grid2">
+      <div class="dcard"><h4>Wireshark</h4><p>The packet analyzer — capture and dissect every frame on the wire. <b>Must-know.</b> CLI sibling: <b>tshark</b>.</p></div>
+      <div class="dcard"><h4>nmap</h4><p>The network scanner — host discovery, port scanning, service &amp; OS detection. <b>Must-know.</b> GUI: Zenmap.</p></div>
+      <div class="dcard"><h4>tcpdump</h4><p>Lightweight CLI packet capture — perfect on servers with no GUI.</p></div>
+      <div class="dcard"><h4>netcat (nc)</h4><p>The "TCP/IP swiss-army knife" — manual connections, listeners, quick transfers and banner grabbing.</p></div>
+      <div class="dcard"><h4>dig / nslookup</h4><p>Query DNS by hand — resolve names, inspect records, debug resolution.</p></div>
+      <div class="dcard"><h4>ping · traceroute · iperf3</h4><p>Test reachability &amp; latency, map the hops to a host, and measure real throughput.</p></div>
+    </div>
+    <div class="callout"><b>Start with two:</b> <b>Wireshark</b> to see traffic and <b>nmap</b> to map a network. Practice both safely against your own <a class="xlink" href="vm.html">VM lab</a>.</div>
+  </div>
+
+  <div class="dsec" id="ref" style="padding-bottom:4px">
+    <div class="shead"><span class="idx">[ 09 ]</span><span class="tag">// interactive reference</span></div>
+    <p class="body-p" style="margin-top:0">Now the hands-on part — a live subnet calculator, the OSI/TCP-IP models, a searchable port table and a CIDR chart.</p>
+  </div>
+</section>
+
+<section class="wrap" style="padding-bottom:30px">
+  <!-- SUBNET CALC -->
+  <div class="panel-c">
+    <div class="sec-t">Subnet calculator</div>
+    <div class="sec-d">Enter an IP address + CIDR → network, broadcast, usable hosts &amp; mask.</div>
+    <div class="sub-in">
+      <div class="f"><label>IP address</label><input id="ip" value="192.168.1.50"></div>
+      <div class="f"><label>CIDR</label><input id="cidr" class="cidr" value="24"></div>
+      <button class="btn btn-primary" id="calcBtn"><svg class="ico"><use href="#i-server"/></svg> Calculate</button>
+    </div>
+    <div class="sub-out" id="subOut"></div>
+  </div>
+</section>
+
+<section class="wrap" style="padding-block:0 30px">
+  <div class="two">
+    <!-- OSI -->
+    <div class="panel-c">
+      <div class="sec-t">OSI model</div>
+      <div class="sec-d">7 layers — top (programs) to bottom (cables).</div>
+      <div class="osi" id="osi"></div>
+    </div>
+    <!-- TCP/IP -->
+    <div class="panel-c tcpip">
+      <div class="sec-t">TCP/IP model</div>
+      <div class="sec-d">The practical 4-layer variant.</div>
+      <div class="osi" id="tcpip"></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap" style="padding-block:0 30px">
+  <div class="panel-c">
+    <div class="sec-t">Port table</div>
+    <div class="sec-d">Common ports — searchable by number or service.</div>
+    <label class="search-box"><svg class="ico ico-sm"><use href="#i-search"/></svg><input id="portSearch" placeholder="Search port or service…"></label>
+    <div style="overflow:auto"><table class="ptable"><thead><tr><th>Port</th><th>Service</th><th>Protocol</th><th>Description</th></tr></thead><tbody id="portBody"></tbody></table></div>
+  </div>
+</section>
+
+<section class="wrap" style="padding-block:0 70px">
+  <div class="panel-c">
+    <div class="sec-t">CIDR cheatsheet</div>
+    <div class="sec-d">Prefix → subnet mask &amp; usable hosts.</div>
+    <div class="cidr-grid" id="cidrGrid"></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+// ---- subnet calc ----
+function calc(ip, cidr) {
+  const p = ip.trim().split('.').map(Number);
+  if (p.length !== 4 || p.some(x => isNaN(x) || x < 0 || x > 255) || isNaN(cidr) || cidr < 0 || cidr > 32) return null;
+  const ipN = ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]) >>> 0;
+  const mask = cidr === 0 ? 0 : (0xFFFFFFFF << (32 - cidr)) >>> 0;
+  const net = (ipN & mask) >>> 0, bc = (net | (~mask >>> 0)) >>> 0;
+  const toIp = n => [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+  const hosts = cidr >= 31 ? (cidr === 32 ? 1 : 2) : (bc - net - 1);
+  return { mask: toIp(mask), net: toIp(net), bc: toIp(bc),
+    first: cidr >= 31 ? toIp(net) : toIp(net + 1), last: cidr >= 31 ? toIp(bc) : toIp(bc - 1),
+    hosts: Math.max(0, hosts), total: Math.pow(2, 32 - cidr) };
+}
+function runCalc(track) {
+  const r = calc(document.getElementById('ip').value, parseInt(document.getElementById('cidr').value, 10));
+  const out = document.getElementById('subOut');
+  if (!r) { out.innerHTML = '<div><div class="k">Error</div><div class="v" style="color:var(--pink)">Invalid input</div></div>'; return; }
+  out.innerHTML = [
+    ['Network address', r.net], ['Broadcast', r.bc], ['Subnet mask', r.mask],
+    ['First host', r.first], ['Last host', r.last], ['Usable hosts', r.hosts.toLocaleString('en-US')]
+  ].map(x => `<div><div class="k">${x[0]}</div><div class="v">${x[1]}</div></div>`).join('');
+  if (track && window.NB) { if (NB.inc('subnet') >= 5) NB.unlock('subnet-solver'); }
+}
+document.getElementById('calcBtn').addEventListener('click', () => runCalc(true));
+['ip','cidr'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') runCalc(true); }));
+runCalc(false);
+
+// ---- OSI ----
+const OSI = [
+  [7,'Application','HTTP · DNS','Programs &amp; services you work with directly'],
+  [6,'Presentation','TLS · JPEG','Encryption, compression &amp; data formats'],
+  [5,'Session','Sockets · RPC','Set up and tear down sessions'],
+  [4,'Transport','TCP · UDP','Reliable/fast transport, ports'],
+  [3,'Network','IP · ICMP','Routing between networks, IP addresses'],
+  [2,'Data Link','Ethernet · MAC','Transmission on the local network, MAC addresses'],
+  [1,'Physical','Cables · radio','Bits as electricity, light or radio']
+];
+document.getElementById('osi').innerHTML = OSI.map(l =>
+  `<div class="layer"><span class="ln">L${l[0]}</span><span class="nm">${l[1]}</span><span class="pr">${l[2]}</span><span class="ds">${l[3]}</span></div>`).join('');
+const TCP = [['Application','HTTP · DNS · TLS (OSI 5–7)'],['Transport','TCP · UDP'],['Internet','IP · ICMP'],['Link','Ethernet · Wi-Fi']];
+document.getElementById('tcpip').innerHTML = TCP.map(l =>
+  `<div class="layer"><span class="nm">${l[0]}</span><span class="ds">${l[1]}</span></div>`).join('');
+
+// ---- ports ----
+const PORTS = [
+  [20,'FTP-Data','TCP','File transfer (data)'],[21,'FTP','TCP','File transfer (control)'],
+  [22,'SSH','TCP','Encrypted remote access'],[23,'Telnet','TCP','Remote access (unencrypted, legacy)'],
+  [25,'SMTP','TCP','Sending email'],[53,'DNS','TCP/UDP','Name resolution'],
+  [67,'DHCP','UDP','Automatic IP assignment (server)'],[80,'HTTP','TCP','Web (unencrypted)'],
+  [110,'POP3','TCP','Retrieve email'],[123,'NTP','UDP','Time synchronisation'],
+  [143,'IMAP','TCP','Retrieve email (server-side)'],[161,'SNMP','UDP','Device monitoring'],
+  [389,'LDAP','TCP','Directory service'],[443,'HTTPS','TCP','Web (encrypted)'],
+  [445,'SMB','TCP','Windows file sharing'],[3306,'MySQL','TCP','Database'],
+  [3389,'RDP','TCP','Windows remote desktop'],[5432,'PostgreSQL','TCP','Database'],
+  [5900,'VNC','TCP','Remote desktop'],[8080,'HTTP-alt','TCP','Web / proxy']
+];
+function renderPorts(q='') {
+  q = q.toLowerCase().trim();
+  document.getElementById('portBody').innerHTML = PORTS
+    .filter(p => (p[0]+'').includes(q) || p[1].toLowerCase().includes(q) || p[3].toLowerCase().includes(q))
+    .map(p => `<tr><td class="port">${p[0]}</td><td class="svc">${p[1]}</td><td class="pr">${p[2]}</td><td class="ds">${p[3]}</td></tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--faint);padding:24px;font-family:var(--mono)">// no results</td></tr>';
+}
+document.getElementById('portSearch').addEventListener('input', e => renderPorts(e.target.value));
+renderPorts();
+
+// ---- CIDR ----
+const CIDR = [[8,'255.0.0.0',16777214],[16,'255.255.0.0',65534],[24,'255.255.255.0',254],[25,'255.255.255.128',126],[26,'255.255.255.192',62],[27,'255.255.255.224',30],[28,'255.255.255.240',14],[29,'255.255.255.248',6],[30,'255.255.255.252',2],[31,'255.255.255.254',2],[32,'255.255.255.255',1]];
+document.getElementById('cidrGrid').innerHTML = CIDR.map(c =>
+  `<div><div class="c">/${c[0]}</div><div class="m">${c[1]}</div><div class="h">${c[2].toLocaleString('en-US')} Hosts</div></div>`).join('');
+
+// ---- TCP handshake animation ----
+(function(){
+  const steps = [...document.querySelectorAll('#hs .step')];
+  let timers = [];
+  function play(){
+    timers.forEach(clearTimeout); timers = [];
+    steps.forEach(s => s.classList.remove('on'));
+    steps.forEach((s,i) => timers.push(setTimeout(() => s.classList.add('on'), 500 + i*900)));
+  }
+  document.getElementById('hsReplay').addEventListener('click', play);
+  play();
+})();
+</script>
+</body>
+</html>

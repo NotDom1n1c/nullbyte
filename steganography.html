@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steganography — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.2rem,5.5vw,3.8rem); }
+.privacy-pill { display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:#9fe7ff; border:1px solid rgba(34,211,242,.4); background:rgba(34,211,242,.08); padding:6px 12px; border-radius:999px; }
+
+.tabs { display:flex; gap:6px; margin:6px 0 22px; flex-wrap:wrap; }
+.tabs button { font-family:var(--mono); font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; padding:11px 18px; border-radius:var(--r); border:1px solid var(--line-2); background:transparent; color:var(--muted); cursor:pointer; transition:.15s; }
+.tabs button.active, .tabs button:hover { border-color:var(--accent); color:var(--accent); }
+.pane { display:none; } .pane.on { display:block; }
+
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; } @media(max-width:820px){ .cols{grid-template-columns:1fr} }
+.panel { border:1px solid var(--line); border-radius:var(--r); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); padding:22px; }
+.panel h3 { font-size:1.06rem; margin-bottom:12px; }
+label.fld { display:block; font-family:var(--mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); margin:14px 0 6px; }
+textarea.in, input.in { width:100%; background:rgba(0,0,0,.32); border:1px solid var(--line-2); border-radius:10px; color:var(--ink); font-family:var(--mono); font-size:.86rem; padding:12px 14px; outline:none; }
+textarea.in { min-height:120px; resize:vertical; line-height:1.6; }
+textarea.in:focus, input.in:focus { border-color:var(--accent); }
+
+.drop { border:2px dashed var(--line-2); border-radius:var(--r); padding:34px 20px; text-align:center; cursor:pointer; transition:.18s; background:rgba(255,255,255,.015); }
+.drop.over { border-color:#22d3ee; background:rgba(34,211,242,.07); }
+.drop svg { width:38px; height:38px; color:var(--muted); margin-bottom:10px; }
+.drop h3 { font-size:.98rem; } .drop p { color:var(--muted); font-size:.84rem; margin-top:6px; }
+.preview { margin-top:14px; border:1px solid var(--line-2); border-radius:12px; overflow:hidden; background:#07070b; display:none; }
+.preview img { width:100%; display:block; }
+.preview .cap { padding:9px 13px; font-family:var(--mono); font-size:.72rem; color:var(--muted); border-top:1px solid var(--line); }
+
+.meter { height:8px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
+.meter i { display:block; height:100%; background:linear-gradient(90deg,#22c55e,#eab308); transition:width .2s, background .2s; }
+.meter i.full { background:linear-gradient(90deg,#ef4444,#ef4444); }
+.cap-txt { font-family:var(--mono); font-size:.72rem; color:var(--faint); margin-top:6px; }
+.btnrow { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+
+.result { margin-top:16px; border:1px solid #22c55e; border-radius:12px; background:rgba(34,197,94,.08); padding:16px; display:none; }
+.result.show { display:block; }
+.result .lbl { font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:#7CFFB2; margin-bottom:8px; }
+.result .val { font-family:var(--mono); font-size:.9rem; color:var(--ink); line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+.err { color:#ff9b8a; font-family:var(--mono); font-size:.82rem; margin-top:12px; display:none; }
+.hint { font-family:var(--mono); font-size:.72rem; color:var(--faint); margin-top:6px; }
+.grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; margin-top:24px; }
+.grid2 .panel p { color:var(--muted); font-size:.92rem; line-height:1.6; }
+.xlink { color:var(--violet); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ STEG ]</span><span class="tag">// least-significant-bit</span></div>
+  <h1 class="display">Steganography.</h1>
+  <p class="lead" style="margin-top:14px">Hide a secret message inside the pixels of a real image and pull it back out. This is genuine <b>LSB steganography</b> — it flips the least-significant bit of each colour channel, a change your eye can't see. Encoding and decoding happen entirely on the Canvas, in your browser.</p>
+  <div style="margin-top:14px"><span class="privacy-pill"><svg class="ico ico-sm"><use href="#i-lock"/></svg> 100% local · pixels never leave this device</span></div>
+</section>
+
+<section class="wrap" style="padding-bottom:80px">
+  <div class="tabs">
+    <button class="active" data-tab="hide">Hide message</button>
+    <button data-tab="reveal">Reveal message</button>
+  </div>
+
+  <!-- HIDE -->
+  <div class="pane on" id="pane-hide">
+    <div class="cols">
+      <div class="panel">
+        <h3>1 · Carrier image</h3>
+        <div class="drop" id="hDrop">
+          <svg><use href="#i-image"/></svg>
+          <h3>Drop a PNG here, or click to choose</h3>
+          <p>Any image works — it's re-saved as lossless PNG so the hidden bits survive</p>
+          <input type="file" id="hFile" accept="image/*" hidden>
+        </div>
+        <div class="preview" id="hPrev"><img id="hImg" alt="carrier"><div class="cap" id="hCap"></div></div>
+
+        <h3 style="margin-top:20px">2 · Secret</h3>
+        <label class="fld">Message to hide</label>
+        <textarea class="in" id="hMsg" placeholder="Type the secret text…">The quick brown fox jumps over the lazy dog.</textarea>
+        <label class="fld">Passphrase (optional — XOR-obfuscates the payload)</label>
+        <input class="in" id="hPass" type="text" placeholder="leave blank for none" autocomplete="off">
+        <div class="meter"><i id="hMeter" style="width:0%"></i></div>
+        <div class="cap-txt" id="hCapTxt">Load an image to see capacity.</div>
+        <div class="err" id="hErr"></div>
+      </div>
+      <div class="panel">
+        <h3>3 · Result</h3>
+        <div class="preview" id="hOutPrev" style="display:none"><img id="hOut" alt="stego"><div class="cap" id="hOutCap"></div></div>
+        <div id="hOutPh" style="text-align:center; padding:44px 10px; color:var(--faint); font-family:var(--mono); font-size:.82rem">The stego-image appears here once you embed a message.</div>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="hEmbed"><svg class="ico ico-sm"><use href="#i-lock"/></svg> Embed &amp; build image</button>
+          <button class="btn btn-ghost" id="hDownload" style="display:none"><svg class="ico ico-sm"><use href="#i-download"/></svg> Download PNG</button>
+        </div>
+        <div class="hint">Tip: download it, then load it into the <b>Reveal</b> tab to prove the message round-trips.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVEAL -->
+  <div class="pane" id="pane-reveal">
+    <div class="cols">
+      <div class="panel">
+        <h3>Stego-image</h3>
+        <div class="drop" id="rDrop">
+          <svg><use href="#i-image"/></svg>
+          <h3>Drop the encoded PNG, or click to choose</h3>
+          <p>Must be the lossless PNG — JPEG re-compression destroys the hidden bits</p>
+          <input type="file" id="rFile" accept="image/*" hidden>
+        </div>
+        <div class="preview" id="rPrev"><img id="rImg" alt="stego"><div class="cap" id="rCap"></div></div>
+        <label class="fld">Passphrase (if one was used)</label>
+        <input class="in" id="rPass" type="text" placeholder="leave blank if none" autocomplete="off">
+        <div class="btnrow"><button class="btn btn-primary" id="rExtract"><svg class="ico ico-sm"><use href="#i-search"/></svg> Extract hidden message</button></div>
+      </div>
+      <div class="panel">
+        <h3>Recovered payload</h3>
+        <div id="rPh" style="text-align:center; padding:44px 10px; color:var(--faint); font-family:var(--mono); font-size:.82rem">Load an image and hit extract.</div>
+        <div class="result" id="rResult"><div class="lbl">✓ Hidden message</div><div class="val" id="rVal"></div><div class="btnrow"><button class="btn btn-ghost" id="rCopy"><svg class="ico ico-sm"><use href="#i-check"/></svg> Copy</button></div></div>
+        <div class="err" id="rErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel"><h3 style="font-size:1.06rem">How LSB works</h3><p>Every pixel is three bytes — red, green, blue — each 0–255. Changing the <b>lowest bit</b> shifts a value by at most 1 (e.g. 200 → 201), invisible to the eye. We stream your message bit-by-bit into those low bits: a 12-megapixel photo hides ~4.5&nbsp;MB of text with no visible change.</p></div>
+    <div class="panel"><h3 style="font-size:1.06rem">The header</h3><p>The first bytes store a magic marker (<code>NB</code>) plus a 32-bit length, so the decoder knows exactly how many bits to read and can tell "no message" from garbage. It's the same trick CTF forensics challenges use — pair this with the <a class="xlink" href="ctf.html">CTF cheatsheet</a>.</p></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+  var MAGIC0 = 0x4E, MAGIC1 = 0x42; // "NB"
+  var enc = new TextEncoder(), dec = new TextDecoder('utf-8', { fatal:false });
+
+  /* ---- tabs ---- */
+  document.querySelectorAll('.tabs button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.tabs button').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('on'); });
+      b.classList.add('active');
+      document.getElementById('pane-' + b.dataset.tab).classList.add('on');
+    });
+  });
+
+  // channel-byte k -> index into RGBA data (skip alpha)
+  function chIndex(k){ return ((k/3)|0)*4 + (k%3); }
+  function xorPass(bytes, pass){
+    if (!pass) return bytes;
+    var key = enc.encode(pass), out = new Uint8Array(bytes.length);
+    for (var i=0;i<bytes.length;i++) out[i] = bytes[i] ^ key[i % key.length];
+    return out;
+  }
+
+  /* ================= HIDE ================= */
+  var hDrop=document.getElementById('hDrop'), hFile=document.getElementById('hFile'),
+      hImg=document.getElementById('hImg'), hPrev=document.getElementById('hPrev'), hCap=document.getElementById('hCap'),
+      hMsg=document.getElementById('hMsg'), hPass=document.getElementById('hPass'),
+      hMeter=document.getElementById('hMeter'), hCapTxt=document.getElementById('hCapTxt'), hErr=document.getElementById('hErr'),
+      hEmbed=document.getElementById('hEmbed'), hDownload=document.getElementById('hDownload'),
+      hOut=document.getElementById('hOut'), hOutPrev=document.getElementById('hOutPrev'), hOutCap=document.getElementById('hOutCap'), hOutPh=document.getElementById('hOutPh');
+  var carrier = null; // {imageData, w, h, capacityBytes}
+  var work = document.createElement('canvas'), wctx = work.getContext('2d', { willReadFrequently:true });
+
+  function loadCarrier(f){
+    if (!f) return;
+    var url = URL.createObjectURL(f), im = new Image();
+    im.onload = function(){
+      work.width = im.width; work.height = im.height;
+      wctx.drawImage(im, 0, 0);
+      var data = wctx.getImageData(0, 0, im.width, im.height);
+      var capBits = im.width * im.height * 3;
+      carrier = { imageData:data, w:im.width, h:im.height, capacity:(capBits>>3) - 6 }; // minus 2 magic + 4 length
+      hImg.src = url; hPrev.style.display=''; hCap.textContent = f.name + ' · ' + im.width + '×' + im.height + ' · capacity ' + carrier.capacity.toLocaleString() + ' bytes';
+      updateMeter();
+    };
+    im.onerror = function(){ hErr.style.display='block'; hErr.textContent='Could not read that image.'; };
+    im.src = url;
+  }
+  function updateMeter(){
+    hErr.style.display='none';
+    var need = enc.encode(hMsg.value).length;
+    if (!carrier){ hCapTxt.textContent = 'Load an image to see capacity.'; hMeter.style.width='0%'; return; }
+    var pct = Math.min(100, need / carrier.capacity * 100);
+    hMeter.style.width = pct + '%';
+    hMeter.classList.toggle('full', need > carrier.capacity);
+    hCapTxt.textContent = need.toLocaleString() + ' / ' + carrier.capacity.toLocaleString() + ' bytes used' + (need > carrier.capacity ? ' — too big for this image!' : '');
+  }
+  hMsg.addEventListener('input', updateMeter);
+  hDrop.addEventListener('click', function(){ hFile.click(); });
+  hFile.addEventListener('change', function(){ loadCarrier(hFile.files[0]); });
+  ['dragenter','dragover'].forEach(function(ev){ hDrop.addEventListener(ev, function(e){ e.preventDefault(); hDrop.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ hDrop.addEventListener(ev, function(e){ e.preventDefault(); hDrop.classList.remove('over'); }); });
+  hDrop.addEventListener('drop', function(e){ var f=e.dataTransfer.files[0]; if (f) loadCarrier(f); });
+
+  hEmbed.addEventListener('click', function(){
+    hErr.style.display='none';
+    if (!carrier){ hErr.style.display='block'; hErr.textContent='Load a carrier image first.'; return; }
+    var body = xorPass(enc.encode(hMsg.value), hPass.value.trim());
+    if (body.length > carrier.capacity){ hErr.style.display='block'; hErr.textContent='Message is larger than the image can hold. Shorten it or use a bigger image.'; return; }
+    // payload = [MAGIC0][MAGIC1][len 32-bit BE][body...]
+    var payload = new Uint8Array(6 + body.length);
+    payload[0]=MAGIC0; payload[1]=MAGIC1;
+    payload[2]=(body.length>>>24)&255; payload[3]=(body.length>>>16)&255; payload[4]=(body.length>>>8)&255; payload[5]=body.length&255;
+    payload.set(body, 6);
+
+    // clone pixels so re-embedding on the same carrier stays clean
+    var src = carrier.imageData.data;
+    var out = new ImageData(new Uint8ClampedArray(src), carrier.w, carrier.h);
+    var d = out.data, totalBits = payload.length * 8;
+    for (var bit=0; bit<totalBits; bit++){
+      var byteVal = payload[bit>>3];
+      var b = (byteVal >> (7 - (bit & 7))) & 1;
+      var idx = chIndex(bit);
+      d[idx] = (d[idx] & 0xFE) | b;
+    }
+    work.width = carrier.w; work.height = carrier.h;
+    wctx.putImageData(out, 0, 0);
+    var dataUrl = work.toDataURL('image/png');
+    hOut.src = dataUrl; hOutPrev.style.display=''; hOutPh.style.display='none';
+    hOutCap.textContent = carrier.w + '×' + carrier.h + ' PNG · ' + payload.length.toLocaleString() + ' bytes embedded' + (hPass.value.trim() ? ' · passphrase-locked' : '');
+    hDownload.style.display=''; hDownload.dataset.url = dataUrl;
+    if (window.NB) NB.unlock('steg-agent');
+  });
+  hDownload.addEventListener('click', function(){
+    var a=document.createElement('a'); a.download='stego.png'; a.href=hDownload.dataset.url; a.click();
+  });
+
+  /* ================= REVEAL ================= */
+  var rDrop=document.getElementById('rDrop'), rFile=document.getElementById('rFile'),
+      rImg=document.getElementById('rImg'), rPrev=document.getElementById('rPrev'), rCap=document.getElementById('rCap'),
+      rPass=document.getElementById('rPass'), rExtract=document.getElementById('rExtract'),
+      rResult=document.getElementById('rResult'), rVal=document.getElementById('rVal'), rErr=document.getElementById('rErr'), rPh=document.getElementById('rPh');
+  var rWork=document.createElement('canvas'), rctx=rWork.getContext('2d', { willReadFrequently:true }), rData=null;
+
+  function loadStego(f){
+    if (!f) return;
+    var url=URL.createObjectURL(f), im=new Image();
+    im.onload=function(){
+      rWork.width=im.width; rWork.height=im.height; rctx.drawImage(im,0,0);
+      rData=rctx.getImageData(0,0,im.width,im.height);
+      rImg.src=url; rPrev.style.display=''; rCap.textContent=f.name+' · '+im.width+'×'+im.height;
+      rErr.style.display='none'; rResult.classList.remove('show'); rPh.style.display='';
+    };
+    im.onerror=function(){ rErr.style.display='block'; rErr.textContent='Could not read that image.'; };
+    im.src=url;
+  }
+  rDrop.addEventListener('click', function(){ rFile.click(); });
+  rFile.addEventListener('change', function(){ loadStego(rFile.files[0]); });
+  ['dragenter','dragover'].forEach(function(ev){ rDrop.addEventListener(ev, function(e){ e.preventDefault(); rDrop.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ rDrop.addEventListener(ev, function(e){ e.preventDefault(); rDrop.classList.remove('over'); }); });
+  rDrop.addEventListener('drop', function(e){ var f=e.dataTransfer.files[0]; if (f) loadStego(f); });
+
+  function readBits(nBits, startBit){
+    var bytes=new Uint8Array(nBits>>3), d=rData.data;
+    for (var i=0;i<nBits;i++){
+      var idx=chIndex(startBit+i);
+      var b=d[idx]&1;
+      bytes[i>>3]|= b<<(7-(i&7));
+    }
+    return bytes;
+  }
+  rExtract.addEventListener('click', function(){
+    rErr.style.display='none'; rResult.classList.remove('show');
+    if (!rData){ rErr.style.display='block'; rErr.textContent='Load a stego-image first.'; rPh.style.display=''; return; }
+    var cap = rData.width*rData.height*3;
+    if (cap < 48){ rErr.style.display='block'; rErr.textContent='Image is too small to hold a header.'; return; }
+    var header = readBits(48, 0); // 6 bytes
+    if (header[0]!==MAGIC0 || header[1]!==MAGIC1){
+      rErr.style.display='block'; rErr.textContent='No NULLBYTE payload found — this image has no hidden message (or was re-compressed / not made here).'; rPh.style.display=''; return;
+    }
+    var len = (header[2]<<24)|(header[3]<<16)|(header[4]<<8)|header[5];
+    if (len<0 || (48 + len*8) > cap){
+      rErr.style.display='block'; rErr.textContent='Header says '+len+' bytes but the image can\'t hold that — data looks corrupt.'; return;
+    }
+    var body = readBits(len*8, 48);
+    body = xorPass(body, rPass.value.trim());
+    var text = dec.decode(body);
+    rVal.textContent = text; rResult.classList.add('show'); rPh.style.display='none';
+    if (window.NB) NB.unlock('steg-agent');
+  });
+  document.getElementById('rCopy').addEventListener('click', function(){
+    navigator.clipboard.writeText(rVal.textContent);
+    var b=document.getElementById('rCopy'), t=b.innerHTML; b.textContent='Copied'; setTimeout(function(){ b.innerHTML=t; },1200);
+  });
+})();
+</script>
+</body>
+</html>

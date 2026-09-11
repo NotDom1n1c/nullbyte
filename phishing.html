@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phishing — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 22px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 0; }
+.legend span { font-family: var(--mono); font-size: .72rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 12px; }
+.ex { display: grid; grid-template-columns: 1.3fr .9fr; gap: 18px; margin-bottom: 24px; align-items: start; }
+.mail { border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; background: #0f0f14; }
+.mail-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .7rem; color: var(--faint); }
+.mail-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); }
+.mail-head { padding: 16px 20px; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.mail-head .r { display: flex; gap: 10px; padding: 3px 0; }
+.mail-head .lbl { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; color: var(--faint); width: 56px; flex: none; padding-top: 2px; }
+.mail-body { padding: 20px; font-size: .94rem; color: #d7d5e0; line-height: 1.7; }
+.mail-body p { margin-bottom: 12px; }
+.mail-btn { display: inline-block; margin-top: 8px; padding: 11px 20px; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 600; font-size: .9rem; cursor: pointer; }
+.flag { cursor: pointer; border-bottom: 1px dashed var(--faint); transition: .15s; position: relative; }
+.flag:hover { background: rgba(255,255,255,.05); }
+.flag.spotted { background: rgba(255,77,157,.18); border-bottom: 1px solid var(--pink); color: #fff; }
+.flag.spotted::after { content: "!"; position: absolute; top: -8px; right: -8px; width: 16px; height: 16px; background: var(--pink); color: #fff; border-radius: 50%; font-family: var(--mono); font-size: .6rem; display: grid; place-items: center; }
+.mail-btn.flag { border-bottom: none; }
+.ex-side { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); padding: 22px; position: sticky; top: 90px; }
+.ex-side h4 { display: flex; justify-content: space-between; align-items: center; font-family: var(--display); font-style: italic; transform: skewX(-3deg); transform-origin: left; font-size: 1.2rem; }
+.ex-side .cnt { font-family: var(--mono); font-size: .78rem; color: var(--violet); transform: none; }
+.fnote { padding: 11px 0; border-bottom: 1px dashed var(--line); display: none; }
+.fnote.show { display: block; animation: rise .3s ease; }
+.fnote .ft { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--pink); }
+.fnote p { color: var(--muted); font-size: .86rem; margin-top: 3px; }
+.ex-side .hint { color: var(--faint); font-family: var(--mono); font-size: .76rem; }
+.ex-done { color: #5ce0a0; font-family: var(--mono); font-size: .8rem; margin-top: 12px; display: none; }
+.ex-done.show { display: block; }
+@media (max-width:860px){ .ex { grid-template-columns: 1fr; } .ex-side { position: static; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ PHISH ]</span><span class="tag">// spot the fake</span></div>
+  <h1 class="display">Phishing.</h1>
+  <p class="lead" style="margin-top:20px">Rebuilt (not real!) phishing emails. Click the suspicious parts — each is a red flag.</p>
+  <div class="legend">
+    <span>Sender address</span><span>Urgency</span><span>Generic greeting</span><span>Spelling mistakes</span><span>Fake link</span><span>Suspicious attachment</span><span>Data harvesting</span>
+  </div>
+</section>
+
+<section class="wrap" id="exHost" style="padding-bottom:70px"></section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+const NOTES = {
+  sender:'Sender address — looks real but is a fake domain (e.g. paypa1.com instead of paypal.com).',
+  urgency:'Urgency — artificial time pressure pushes you to act fast and carelessly.',
+  greeting:'Generic greeting — "Dear customer" instead of your real name.',
+  spelling:'Spelling mistakes / odd wording — rare at real companies.',
+  link:'Falscher Link — der angezeigte Text passt nicht zur echten Ziel-URL (hier: __URL__).',
+  attachment:'Suspicious attachment — a double extension like .pdf.exe is almost always malware.',
+  data:'Data harvesting — no legitimate company asks for your PIN/password by email.'
+};
+const EX = [
+  { title:'Example 1 · Fake bank',
+    bar:'Inbox',
+    from:'<span class="flag" data-f="sender">Security &lt;service@spark-asse.com&gt;</span>',
+    subj:'<span class="flag" data-f="urgency">URGENT: your account will be locked in 24h</span>',
+    body:`<p><span class="flag" data-f="greeting">Dear customer</span>,</p>
+      <p>we detected an unusual login on your <span class="flag" data-f="spelling">accont</span>. For security reasons you must <span class="flag" data-f="data">confirm your PIN and password</span>.</p>
+      <a class="mail-btn flag" data-f="link" data-url="http://spark-asse-verify.ru/login">Verify now</a>` },
+  { title:'Example 2 · Fake PayPal',
+    bar:'Inbox',
+    from:'<span class="flag" data-f="sender">PayPal &lt;support@paypa1.com&gt;</span>',
+    subj:'<span class="flag" data-f="urgency">Your account has been limited — act now</span>',
+    body:`<p><span class="flag" data-f="greeting">Hello user</span>,</p>
+      <p>Your account has been temporarily suspended. Open the attachment <span class="flag" data-f="attachment">Invoice.pdf.exe</span> to lift the suspension, or click here:</p>
+      <a class="mail-btn flag" data-f="link" data-url="http://paypal-secure-login.tk">Unlock account</a>` }
+];
+
+const host = document.getElementById('exHost');
+host.innerHTML = EX.map((e, idx) => `
+  <div class="ex" data-ex="${idx}">
+    <div class="mail">
+      <div class="mail-bar"><i></i><i></i><i></i><span style="margin-left:auto">${e.bar}</span></div>
+      <div class="mail-head"><div class="r"><span class="lbl">From</span><span>${e.from}</span></div><div class="r"><span class="lbl">Subject</span><span>${e.subj}</span></div></div>
+      <div class="mail-body">${e.body}</div>
+    </div>
+    <div class="ex-side">
+      <h4>${e.title.split('·')[0]}<span class="cnt">0/<span class="tot"></span></span></h4>
+      <p class="hint">Click the suspicious parts in the email.</p>
+      <div class="notes"></div>
+      <div class="ex-done"><svg class="ico ico-sm" style="vertical-align:-3px"><use href="#i-check"/></svg> All red flags found!</div>
+    </div>
+  </div>`).join('');
+
+let totalFlags = 0, foundFlags = 0;
+document.querySelectorAll('.ex').forEach(ex => {
+  const flags = ex.querySelectorAll('.flag');
+  const tot = flags.length; totalFlags += tot;
+  ex.querySelector('.tot').textContent = tot;
+  const notes = ex.querySelector('.notes');
+  const cnt = ex.querySelector('.cnt');
+  let found = 0;
+  flags.forEach(f => f.addEventListener('click', () => {
+    if (f.classList.contains('spotted')) return;
+    f.classList.add('spotted');
+    found++; foundFlags++;
+    cnt.firstChild.textContent = found + '/';
+    const key = f.dataset.f;
+    const note = document.createElement('div');
+    note.className = 'fnote show';
+    note.innerHTML = `<div class="ft">${key}</div><p>${(NOTES[key] || '').replace('__URL__', f.dataset.url || '')}</p>`;
+    notes.appendChild(note);
+    if (found === tot) ex.querySelector('.ex-done').classList.add('show');
+    if (foundFlags === totalFlags && window.NB) NB.unlock('phish-spotter');
+  }));
+});
+</script>
+</body>
+</html>

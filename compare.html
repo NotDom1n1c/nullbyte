@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compare — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 22px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.filters-bar { border: 1px solid var(--line); border-radius: var(--r); background: rgba(255,255,255,0.025); backdrop-filter: blur(14px); padding: 18px 22px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 13px; }
+.filters-bar .frow { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.flabel { font-family: var(--mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); min-width: 66px; }
+.cap-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.cap-chip { font-family: var(--mono); font-size: .74rem; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line-2); background: rgba(255,255,255,.02); color: var(--muted); cursor: pointer; transition: .15s; user-select: none; }
+.cap-chip:hover { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.cap-chip.on { border-color: var(--accent); color: var(--accent-ink); background: var(--accent); box-shadow: var(--glow-sm); }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.seg button { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; padding: 8px 14px; border: none; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button.active { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-weight: 700; }
+.f-reset { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--muted); background: none; border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.f-reset:hover { border-color: var(--accent); color: var(--accent); }
+.f-count { font-family: var(--mono); font-size: .72rem; color: var(--accent); }
+
+/* ---- card gallery ---- */
+.dev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.dev-card { position: relative; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); overflow: hidden; display: flex; flex-direction: column; transition: transform .18s, border-color .18s, box-shadow .18s; }
+.dev-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--accent) 45%, transparent); box-shadow: 0 18px 46px -20px color-mix(in srgb, var(--accent) 55%, transparent); }
+.dev-pic { position: relative; aspect-ratio: 4 / 3; background: radial-gradient(120% 120% at 50% 12%, color-mix(in srgb, var(--accent) 14%, transparent), #0a0a0f 68%); overflow: hidden; }
+.dev-pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 10px; z-index: 1; }
+.dev-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--accent); }
+.dev-ph .ico { width: 54px; height: 54px; stroke-width: 1.3; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 55%, transparent)); opacity: .85; }
+.dev-ph span { font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.dev-realtag { position: absolute; top: 8px; right: 8px; z-index: 2; font-family: var(--mono); font-size: .54rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: rgba(0,0,0,.55); border: 1px solid color-mix(in srgb,var(--accent) 40%,transparent); border-radius: 999px; padding: 2px 7px; }
+.dev-body { padding: 13px 15px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.dev-top { display: flex; align-items: center; gap: 8px; }
+.dev-cat { font-family: var(--mono); font-size: .58rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.dev-top .ty { margin-left: auto; font-family: var(--mono); font-size: .58rem; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); }
+.dev-top .ty.ready { color: #5ce0a0; border-color: rgba(92,224,160,.4); }
+.dev-top .ty.diy { color: #f59e0b; border-color: rgba(245,158,11,.4); }
+.dev-card h3 { font-size: 1.02rem; line-height: 1.2; }
+.dev-price { font-family: var(--mono); font-size: .84rem; color: var(--accent); }
+.dev-caps { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; padding-top: 4px; }
+.dev-caps span { font-family: var(--mono); font-size: .58rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 5px; padding: 2px 6px; }
+
+/* ---- spec table (toggle) ---- */
+.cmp-wrap { border: 1px solid var(--line); border-radius: var(--r); overflow: auto; background: rgba(10,10,16,.4); backdrop-filter: blur(14px); }
+table.cmp { width: 100%; border-collapse: collapse; font-size: .86rem; min-width: 940px; }
+.cmp th, .cmp td { padding: 11px 12px; text-align: center; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.cmp thead th { position: sticky; top: 0; background: rgba(12,11,20,.96); backdrop-filter: blur(10px); font-family: var(--mono); font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); z-index: 2; }
+.cmp td.name, .cmp th.name { text-align: left; position: sticky; left: 0; background: rgba(12,11,20,.96); }
+.cmp td.name { font-weight: 600; color: var(--ink); }
+.cmp td.name img, .cmp td.name .thmb { width: 30px; height: 30px; border-radius: 6px; object-fit: contain; background: rgba(255,255,255,.04); vertical-align: middle; margin-right: 9px; display: inline-flex; align-items: center; justify-content: center; }
+.cmp td.name .thmb { color: var(--accent); }
+.cmp td.name .thmb .ico { width: 17px; height: 17px; }
+.cmp .price { font-family: var(--mono); color: var(--muted); }
+.cmp .ty { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); }
+.cmp .ty.ready { color: #5ce0a0; border-color: rgba(92,224,160,.4); }
+.cmp .ty.diy { color: #f59e0b; border-color: rgba(245,158,11,.4); }
+.cmp .yes { color: var(--accent); }
+.cmp .no { color: var(--faint); }
+.cmp tbody tr:hover td { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.cmp tbody tr:hover td.name { background: rgba(20,16,30,.98); }
+.flash { font-family: var(--mono); font-size: .66rem; color: var(--muted); }
+.no-rows { text-align: center; padding: 40px; font-family: var(--mono); color: var(--faint); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ COMPARE ]</span><span class="tag">// device comparison</span></div>
+  <h1 class="display">Compare gear.</h1>
+  <p class="lead" style="margin-top:20px">Browse the hacker-gear lineup by category, feature and flashing effort. Prices are approximate street prices. <span class="muted">Photos marked <b style="color:var(--accent)">real</b> are actual product shots; the rest use category placeholders.</span></p>
+</section>
+
+<section class="wrap" style="padding-bottom:70px">
+  <div class="filters-bar reveal">
+    <div class="frow">
+      <span class="flabel">Category</span>
+      <div class="cap-chips" id="catChips"></div>
+    </div>
+    <div class="frow">
+      <span class="flabel">Features</span>
+      <div class="cap-chips" id="capChips"></div>
+    </div>
+    <div class="frow">
+      <span class="flabel">Type</span>
+      <div class="seg" id="typeSeg">
+        <button data-type="all" class="active">All</button>
+        <button data-type="ready">Ready</button>
+        <button data-type="diy">DIY</button>
+      </div>
+      <div class="seg" id="viewSeg">
+        <button data-view="grid" class="active">Grid</button>
+        <button data-view="table">Table</button>
+      </div>
+      <span class="f-count" id="cmpCount"></span>
+      <button class="f-reset" id="cmpReset">Reset</button>
+    </div>
+  </div>
+
+  <div id="gridView"><div class="dev-grid" id="devGrid"></div></div>
+
+  <div id="tableView" class="hidden">
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <thead><tr id="cmpHead"></tr></thead>
+        <tbody id="cmpBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+const CAPS = [['nfc','NFC/RFID'],['subghz','Sub-GHz'],['wifi','WiFi'],['bt','Bluetooth'],['ir','IR'],['badusb','BadUSB'],['gps','GPS'],['display','Display'],['akku','Battery']];
+const CATS = { multi:['Multi-tool','i-cpu'], wifi:['Wi-Fi Audit','i-antenna'], nfc:['RFID / NFC','i-badge'], badusb:['BadUSB','i-terminal'], rf:['RF Research','i-radar'] };
+
+// pic = filename in images/devices/ for REAL product photos; null = category placeholder
+const DEVICES = [
+  // ---- Multi-tools & add-ons ----
+  { n:'Flipper Zero',              cat:'multi', pic:'flipper-zero.jpg', price:170, pl:'~170€',    type:'ready', flash:'none', nfc:1,subghz:1,wifi:0,bt:1,ir:1,badusb:1,gps:0,display:1,akku:1 },
+  { n:'KIISU',                     cat:'multi', pic:'kiisu.jpg',               price:73,  pl:'~73 CHF',  type:'diy',   flash:'once', nfc:1,subghz:1,wifi:1,bt:1,ir:1,badusb:1,gps:0,display:1,akku:1 },
+  { n:'ESP32 Bruce CYD 2432S028',  cat:'multi', pic:'esp32-bruce-cyd.png',               price:97,  pl:'~$97',     type:'ready', flash:'none', nfc:1,subghz:0,wifi:1,bt:1,ir:1,badusb:1,gps:0,display:1,akku:0 },
+  { n:'LilyGO T-Embed CC1101',     cat:'multi', pic:'lilygo-t-embed.jpg',               price:60,  pl:'~$55–66',  type:'ready', flash:'none', nfc:0,subghz:1,wifi:1,bt:1,ir:1,badusb:0,gps:0,display:1,akku:1 },
+  { n:'M5Shark Device',            cat:'multi', pic:'m5shark-device.jpg',               price:130, pl:'~$130',    type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:1 },
+  { n:'SharkDeck AI Handheld',     cat:'multi', pic:'sharkdeck.png',               price:35,  pl:'~$35',     type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:1,gps:0,display:1,akku:1 },
+  { n:'HaleHound CYD',             cat:'multi', pic:'halehound-cyd.jpg',               price:20,  pl:'~20 CHF',  type:'ready', flash:'once', nfc:0,subghz:0,wifi:1,bt:1,ir:1,badusb:1,gps:0,display:1,akku:0 },
+  { n:'M5StickC Plus/Plus2/S3',    cat:'multi', pic:'m5stickc.png',               price:19,  pl:'~18–20 CHF',type:'diy',  flash:'once', nfc:0,subghz:0,wifi:1,bt:1,ir:1,badusb:1,gps:0,display:1,akku:1 },
+
+  // ---- Wi-Fi scanning & auditing ----
+  { n:'BW16 Network Commander',    cat:'wifi', pic:'bw16-network-commander.jpg',                price:110, pl:'~$110',    type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:0 },
+  { n:'ESP32 Marauder (family)',   cat:'wifi', pic:'esp32-marauder.jpg',                price:65,  pl:'~$65',     type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:0 },
+  { n:'Mini ESP32 Marauder',       cat:'wifi', pic:'mini-esp32-marauder.jpg',                price:48,  pl:'~$48',     type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:1 },
+  { n:'ESP32-C5 Marauder (dual)',  cat:'wifi', pic:'esp32-c5-marauder.jpg',                price:102, pl:'~$102',    type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:0 },
+  { n:'M5Shark Marauder v8 (2.4/5G)',cat:'wifi', pic:'m5shark-marauder-v8.png',             price:120, pl:'~$120',    type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:1 },
+  { n:'Wi-Fi Pineapple (Hak5)',    cat:'wifi', pic:'wifi-pineapple.jpg',                price:120, pl:'reference', type:'ready',flash:'none', nfc:0,subghz:0,wifi:1,bt:0,ir:0,badusb:0,gps:0,display:0,akku:0 },
+
+  // ---- RFID & NFC ----
+  { n:'Chameleon Ultra V2',        cat:'nfc', pic:'chameleon-ultra.jpg',                 price:90,  pl:'~$45–130', type:'ready', flash:'none', nfc:1,subghz:0,wifi:0,bt:1,ir:0,badusb:0,gps:0,display:0,akku:1 },
+  { n:'Proxmark3 RDV4',            cat:'nfc', pic:'proxmark3.png',      price:300, pl:'~$300+',   type:'ready', flash:'none', nfc:1,subghz:0,wifi:0,bt:0,ir:0,badusb:0,gps:0,display:0,akku:1 },
+
+  // ---- BadUSB / keystroke injection ----
+  { n:'Digispark ATtiny85',        cat:'badusb', pic:'digispark.jpg',             price:3,   pl:'~$1–5',    type:'diy',   flash:'once', nfc:0,subghz:0,wifi:0,bt:0,ir:0,badusb:1,gps:0,display:0,akku:0 },
+  { n:'USB Rubber Ducky (Hak5)',   cat:'badusb', pic:'rubber-ducky.png',price:70, pl:'~$60–80',  type:'ready', flash:'none', nfc:0,subghz:0,wifi:0,bt:0,ir:0,badusb:1,gps:0,display:0,akku:0 },
+  { n:'O.MG Cable',                cat:'badusb', pic:'omg-cable.jpg',             price:150, pl:'~$120–180', type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:0,ir:0,badusb:1,gps:0,display:0,akku:0 },
+
+  // ---- Multi-band RF research ----
+  { n:'PortaPack H4M + HackRF',    cat:'rf', pic:'hackrf.jpg',         price:265, pl:'~265 CHF', type:'ready', flash:'none', nfc:0,subghz:1,wifi:0,bt:0,ir:0,badusb:0,gps:1,display:1,akku:1 },
+  { n:'RF CLOWN V2.0',             cat:'rf', pic:'rf-clown.jpg',                 price:78,  pl:'~$78',     type:'ready', flash:'none', nfc:0,subghz:1,wifi:0,bt:1,ir:0,badusb:0,gps:0,display:0,akku:0 },
+  { n:'nRFBox-v3',                 cat:'rf', pic:'nrfbox-v3.jpg',                 price:68,  pl:'~$68',     type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:0 },
+  { n:'ESP32-DIV',                 cat:'rf', pic:'esp32-div.jpg',                 price:55,  pl:'~50–60 CHF',type:'ready', flash:'none', nfc:0,subghz:0,wifi:1,bt:1,ir:0,badusb:0,gps:0,display:1,akku:0 }
+];
+
+let active = new Set(), typeFilter = 'all', catFilter = 'all', view = 'grid';
+
+/* filter chips */
+const catChips = document.getElementById('catChips');
+catChips.innerHTML = '<span class="cap-chip on" data-cat="all">All</span>' +
+  Object.entries(CATS).map(([k, v]) => `<span class="cap-chip" data-cat="${k}">${v[0]}</span>`).join('');
+const chips = document.getElementById('capChips');
+chips.innerHTML = CAPS.map(c => `<span class="cap-chip" data-cap="${c[0]}">${c[1]}</span>`).join('');
+document.getElementById('cmpHead').innerHTML =
+  '<th class="name">Device</th><th>Price</th><th>Type</th>' + CAPS.map(c => `<th>${c[1]}</th>`).join('') + '<th>Flash</th>';
+
+const phSVG = cat => `<div class="dev-ph"><svg class="ico"><use href="#${CATS[cat][1]}"/></svg><span>${CATS[cat][0]}</span></div>`;
+const picMarkup = d => phSVG(d.cat) + (d.pic
+  ? `<span class="dev-realtag">real</span><img src="images/devices/${d.pic}" alt="${d.n}" loading="lazy" onerror="this.remove(); const t=this.parentNode.querySelector('.dev-realtag'); if(t) t.remove();">`
+  : '');
+
+function match(d){
+  return (typeFilter === 'all' || d.type === typeFilter)
+    && (catFilter === 'all' || d.cat === catFilter)
+    && [...active].every(c => d[c]);
+}
+
+function renderGrid(rows){
+  const g = document.getElementById('devGrid');
+  if (!rows.length){ g.innerHTML = `<div class="no-rows" style="grid-column:1/-1">// no device matches all criteria</div>`; return; }
+  g.innerHTML = rows.map(d => {
+    const caps = CAPS.filter(c => d[c[0]]).map(c => `<span>${c[1]}</span>`).join('');
+    return `<div class="dev-card"><div class="dev-pic">${picMarkup(d)}</div>` +
+      `<div class="dev-body"><div class="dev-top"><span class="dev-cat">${CATS[d.cat][0]}</span><span class="ty ${d.type}">${d.type}</span></div>` +
+      `<h3>${d.n}</h3><div class="dev-price">${d.pl}</div><div class="dev-caps">${caps}</div></div></div>`;
+  }).join('');
+}
+function renderTable(rows){
+  const body = document.getElementById('cmpBody');
+  if (!rows.length){ body.innerHTML = `<tr><td colspan="${CAPS.length + 4}" class="no-rows">// no device matches all criteria</td></tr>`; return; }
+  body.innerHTML = rows.map(d => {
+    const thumb = d.pic ? `<img src="images/devices/${d.pic}" alt="" loading="lazy" onerror="this.outerHTML='<span class=\\'thmb\\'><svg class=\\'ico\\'><use href=&quot;#${CATS[d.cat][1]}&quot;/></svg></span>'">`
+                        : `<span class="thmb"><svg class="ico"><use href="#${CATS[d.cat][1]}"/></svg></span>`;
+    return `<tr><td class="name">${thumb}${d.n}</td><td class="price">${d.pl}</td><td><span class="ty ${d.type}">${d.type}</span></td>` +
+      CAPS.map(c => d[c[0]] ? '<td><span class="yes">✔</span></td>' : '<td><span class="no">·</span></td>').join('') +
+      `<td class="flash">${d.flash}</td></tr>`;
+  }).join('');
+}
+function render(){
+  const rows = DEVICES.filter(match);
+  renderGrid(rows); renderTable(rows);
+  document.getElementById('gridView').classList.toggle('hidden', view !== 'grid');
+  document.getElementById('tableView').classList.toggle('hidden', view !== 'table');
+  document.getElementById('cmpCount').textContent = rows.length + ' / ' + DEVICES.length + ' devices';
+}
+
+catChips.addEventListener('click', e => {
+  const c = e.target.closest('[data-cat]'); if (!c) return;
+  catFilter = c.dataset.cat;
+  catChips.querySelectorAll('.cap-chip').forEach(x => x.classList.toggle('on', x === c));
+  render();
+});
+chips.addEventListener('click', e => {
+  const c = e.target.closest('[data-cap]'); if (!c) return;
+  const cap = c.dataset.cap;
+  if (active.has(cap)) active.delete(cap); else active.add(cap);
+  c.classList.toggle('on'); render();
+  if (window.NB) NB.unlock('compare-pro');
+});
+document.getElementById('typeSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-type]'); if (!b) return;
+  document.querySelectorAll('#typeSeg button').forEach(x => x.classList.toggle('active', x === b));
+  typeFilter = b.dataset.type; render();
+});
+document.getElementById('viewSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-view]'); if (!b) return;
+  document.querySelectorAll('#viewSeg button').forEach(x => x.classList.toggle('active', x === b));
+  view = b.dataset.view; render();
+});
+document.getElementById('cmpReset').addEventListener('click', () => {
+  active.clear(); typeFilter = 'all'; catFilter = 'all';
+  document.querySelectorAll('#capChips .cap-chip').forEach(c => c.classList.remove('on'));
+  document.querySelectorAll('#catChips .cap-chip').forEach((c, i) => c.classList.toggle('on', i === 0));
+  document.querySelectorAll('#typeSeg button').forEach((x, i) => x.classList.toggle('active', i === 0));
+  render();
+});
+render();
+</script>
+</body>
+</html>

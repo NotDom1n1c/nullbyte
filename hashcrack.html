@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hash Cracker — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.panel { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); backdrop-filter: blur(12px); padding: 24px; margin-bottom: 18px; }
+.panel h3 { font-size: 1.18rem; margin-bottom: 8px; } .panel p { color: var(--muted); font-size: .94rem; line-height: 1.6; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 18px; }
+.xlink { color: var(--violet); }
+.hash-in { width: 100%; background: #07070b; color: var(--ink); font-family: var(--mono); font-size: .92rem; border: 1px solid var(--line-2); border-radius: 10px; padding: 14px 16px; outline: none; }
+.hash-in:focus { border-color: var(--violet); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.chip { font-family: var(--mono); font-size: .72rem; padding: 6px 11px; border: 1px solid var(--line-2); border-radius: 7px; color: var(--muted); cursor: pointer; background: transparent; }
+.chip:hover { border-color: var(--violet); color: var(--ink); }
+.typebadge { font-family: var(--mono); font-size: .72rem; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--line-2); color: var(--muted); }
+
+/* cracking console */
+.cracker { margin-top: 18px; border: 1px solid var(--line-2); border-radius: 12px; background: #060a07; overflow: hidden; display: none; }
+.cracker.show { display: block; }
+.cracker .top { display: flex; justify-content: space-between; padding: 9px 14px; font-family: var(--mono); font-size: .74rem; color: #7CFFB2; background: rgba(34,197,94,.08); border-bottom: 1px solid rgba(34,197,94,.2); }
+.cracker .scan { font-family: var(--mono); font-size: .84rem; padding: 16px; min-height: 120px; color: #44e08a; line-height: 1.7; }
+.cracker .scan .cur { color: #b9ffd6; }
+.cracker .scan .dim { color: #2f7a52; }
+.crackbar { height: 6px; background: rgba(34,197,94,.12); margin: 0 16px 14px; border-radius: 3px; overflow: hidden; }
+.crackbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#16a34a,#4ade80); transition: width .1s linear; }
+.result { margin: 0 16px 18px; padding: 16px; border-radius: 10px; display: none; }
+.result.ok { display: block; background: rgba(34,197,94,.12); border: 1px solid #22c55e; }
+.result.no { display: block; background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.5); }
+.result .big { font-family: var(--display); font-size: 2rem; font-weight: 700; }
+.result.ok .big { color: #7CFFB2; } .result.no .big { color: #ff8da3; }
+.result .meta { font-family: var(--mono); font-size: .8rem; color: var(--muted); margin-top: 6px; }
+
+/* salt demo */
+.salt-demo { font-family: var(--mono); font-size: .82rem; line-height: 1.9; }
+.salt-demo .k { color: var(--faint); } .salt-demo .h1c { color: #ff8da3; } .salt-demo .h2c { color: #7CFFB2; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ CRACK ]</span><span class="tag">// hash cracker simulator</span></div>
+  <h1 class="display">Hash cracker.</h1>
+  <p class="lead" style="margin-top:14px">Paste an unsalted hash and watch a dictionary attack tear through a wordlist to recover the original password — then see exactly why <b>salting</b> kills this attack dead.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:30px">
+  <div class="panel">
+    <h3>Crack a hash</h3>
+    <p>Enter an MD5, SHA-1 or SHA-256 hash (or click a sample). This runs a real dictionary attack against a small built-in wordlist — entirely in your browser.</p>
+    <div style="margin-top:14px"><input class="hash-in" id="hashIn" spellcheck="false" placeholder="e.g. 5f4dcc3b5aa765d61d8327deb882cf99"></div>
+    <div class="row">
+      <button class="btn btn-primary" id="crackBtn"><svg class="ico"><use href="#i-key"/></svg> Crack it</button>
+      <span class="typebadge" id="typeBadge">type: —</span>
+      <span style="color:var(--faint);font-family:var(--mono);font-size:.72rem">Samples:</span>
+      <button class="chip" data-h="5f4dcc3b5aa765d61d8327deb882cf99">md5 · password</button>
+      <button class="chip" data-h="d033e22ae348aeb5660fc2140aec35850c4da997">sha1 · admin</button>
+      <button class="chip" data-h="65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5">sha256 · qwerty</button>
+      <button class="chip" data-h="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">md5 · not in list</button>
+    </div>
+
+    <div class="cracker" id="cracker">
+      <div class="top"><span id="crkStatus">● dictionary attack running…</span><span id="crkCount">0 hashes/s</span></div>
+      <div class="scan" id="crkScan"></div>
+      <div class="crackbar"><i id="crkBar"></i></div>
+      <div class="result" id="crkResult"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Why the dictionary worked</h3>
+      <p>An unsalted hash is <b>deterministic</b>: <span class="xlink">md5("password")</span> is always the same string. Attackers precompute hashes for millions of common passwords (a <b>rainbow table</b>) and just look yours up — billions of guesses per second on a GPU. Any password in the list falls instantly.</p>
+    </div>
+    <div class="panel">
+      <h3>How salting stops it</h3>
+      <p>A <b>salt</b> is random data added before hashing, unique per user. Now the same password hashes differently for everyone, so precomputed tables are useless — each guess must be recomputed per salt.</p>
+      <div class="salt-demo" style="margin-top:10px">
+        <div><span class="k">md5("password")        = </span><span class="h1c" id="sNo"></span></div>
+        <div><span class="k">md5("password" + salt) = </span><span class="h2c" id="sYes"></span></div>
+      </div>
+      <p style="margin-top:10px">Use <b>bcrypt</b>, <b>scrypt</b> or <b>Argon2</b> — they're salted and deliberately slow. See raw digests in the <a class="xlink" href="crypto.html">crypto tools</a>.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const DICT = [
+  ["password","5f4dcc3b5aa765d61d8327deb882cf99","5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8","5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"],
+  ["123456","e10adc3949ba59abbe56e057f20f883e","7c4a8d09ca3762af61e59520943dc26494f8941b","8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"],
+  ["qwerty","d8578edf8458ce06fbc5bb76a58c5ca4","b1b3773a05c0ed0176787a4f1574ff0075f7521e","65e84be33532fb784c48129675f9eff3a682b27168c0ea744b2cf58ee02337c5"],
+  ["admin","21232f297a57a5a743894a0e4a801fc3","d033e22ae348aeb5660fc2140aec35850c4da997","8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"],
+  ["letmein","0d107d09f5bbe40cade3de5c71e9e9b7","b7a875fc1ea228b9061041b7cec4bd3c52ab3ce3","1c8bfe8f801d79745c4631d09fff36c82aa37fc4cce4fc946683d7b336b63032"],
+  ["welcome","40be4e59b9a2a2b5dffb918c0e86b3d7","c0b137fe2d792459f26ff763cce44574a5b5ab03","280d44ab1e9f79b5cce2dd4f58f5fe91f0fbacdac9f7447dffc318ceb79f2d02"],
+  ["monkey","d0763edaa9d9bd2a9516280e9044d885","ab87d24bdc7452e55738deb5f868e1f16dea5ace","000c285457fc971f862a79b786476c78812c8897063c6fa9c045f579a3b2d63f"],
+  ["dragon","8621ffdbc5698829397d97767ac13db3","af8978b1797b72acfff9595a5a2a373ec3d9106d","a9c43be948c5cabd56ef2bacffb77cdaa5eec49dd5eb0cc4129cf3eda5f0e74c"],
+  ["football","37b4e2d82900d5e94b8da524fbeb33c0","2d27b62c597ec858f6e7b54e7e58525e6a95e6d8","6382deaf1f5dc6e792b76db4a4a7bf2ba468884e000b25e7928e621e27fb23cb"],
+  ["iloveyou","f25a2fc72690b780b2a14e140ef6a9e0","ee8d8728f435fd550f83852aabab5234ce1da528","e4ad93ca07acb8d908a3aa41e920ea4f4ef4f26e7f86cf8291c5db289780a5ae"],
+  ["abc123","e99a18c428cb38d5f260853678922e03","6367c48dd193d56ea7b0baad25b19455e529f5ee","6ca13d52ca70c883e0f0bb101e425a89e8624de51db2d2392593af6a84118090"],
+  ["password1","7c6a180b36896a0a8c02787eeafb0e4c","e38ad214943daad1d64c102faec29de4afe9da3d","0b14d501a594442a01c6859541bcb3e8164d183d32937b851835442f69d5c94e"],
+  ["root","63a9f0ea7bb98050796b649e85481845","dc76e9f0c0006e8f919e0c515c66dbba3982f785","4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2"],
+  ["hunter2","2ab96390c7dbe3439de74d0c9b0b1767","f3bbbd66a63d4bf1747940578ec3d0103530e21d","f52fbd32b2b3b86ff88ef6c490628285f482af15ddcb29541f94bcf526a3f6c7"],
+  ["superman","84d961568a65073a3bcf0eb216b2a576","18c28604dd31094a8d69dae60f1bcd347f1afc5a","73cd1b16c4fb83061ad18a0b29b9643a68d4640075a466dc9e51682f84a847f5"],
+  ["trustno1","5fcfd41e547a12215b173ff47fdd3739","e68e11be8b70e435c65aef8ba9798ff7775c361e","203b70b5ae883932161bbd0bded9357e763e63afce98b16230be33f0b94c2cc5"],
+  ["master","eb0a191797624dd3a48fa681d3061212","4f26aeafdb2367620a393c973eddbe8f8b846ebd","fc613b4dfd6736a7bd268c8a0e74ed0d1c04a959f59dd74ef2874983fd443fc9"],
+  ["shadow","3bf1114a986ba87ed28fc1b5884fc2f8","ed9d3d832af899035363a69fd53cd3be8f71501c","0bb09d80600eec3eb9d7793a6f859bedde2a2d83899b70bd78e961ed674b32f4"],
+  ["batman","ec0e2603172c73a8b644bb9456c1ff6e","5c6d9edc3a951cda763f650235cfc41a3fc23fe8","1532e76dbe9d43d0dea98c331ca5ae8a65c5e8e8b99d3e2a42ae989356f6242a"],
+  ["flipper","d22778374cd88052bf19282a2a698eba","e67534f95684bc4ffe6cc5875b11cffd65e33f0e","1c22f26ac4d48e559798c29665ef2eeea067b849eabc4e6c609de04294c5e348"],
+  ["hacker","d6a6bc0db10694a2d90e3a69648f3a03","4dcc4173d80a2817206e196a38f0dbf7850188ff","e7d3685715939842749cc27b38d0ccb9706d4d14a5304ef9eee093780eab5df9"],
+  ["nullbyte","5f804b61f8dcf70044ad8c1385e946a8","32c0ced56f1fe08583bdb079d85a35a81995018c","1bbb234c81ef04a1c2f441253952a556276669d7fc9d1ee765bd4b18f796699d"],
+  ["matrix","21b72c0b7adc5c7b4a50ffcb90d92dd6","bf2f749e80c970f50552e9d5f3e8434e78b88d35","6e00cd562cc2d88e238dfb81d9439de7ec843ee9d0c9879d549cb1436786f975"],
+  ["secret","5ebe2294ecd0e0f08eab7690d2a6ee69","e5e9fa1ba31ecd1ae84f75caaa474f3a663f05f4","2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b"],
+  ["passw0rd","bed128365216c019988915ed3add75fb","7c6a61c68ef8b9b6b061b28c348bc1ed7921cb53","8f0e2f76e22b43e2855189877e7dc1e1e7d98c226c95db247cd1d547928334a9"]
+];
+const COLIDX = { 32:1, 40:2, 64:3 }, TYPENAME = { 32:'MD5', 40:'SHA-1', 64:'SHA-256' };
+
+const hashIn = document.getElementById('hashIn'), typeBadge = document.getElementById('typeBadge');
+const cracker = document.getElementById('cracker'), scan = document.getElementById('crkScan');
+const bar = document.getElementById('crkBar'), result = document.getElementById('crkResult');
+const crkStatus = document.getElementById('crkStatus'), crkCount = document.getElementById('crkCount');
+let timer = null;
+
+document.getElementById('sNo').textContent = '5f4dcc3b5aa765d61d8327deb882cf99';
+document.getElementById('sYes').textContent = 'b30bf6b1f3e2a4d5...c7 (salt=9f3a)';
+
+function detect(h){ return COLIDX[h.length] ? TYPENAME[h.length] : null; }
+hashIn.addEventListener('input', () => { const t = detect(hashIn.value.trim().toLowerCase()); typeBadge.textContent = 'type: ' + (t || '—'); });
+
+function crack(){
+  const h = hashIn.value.trim().toLowerCase();
+  clearInterval(timer);
+  result.className = 'result'; scan.innerHTML = ''; bar.style.width = '0';
+  cracker.classList.add('show'); crkStatus.textContent = '● dictionary attack running…';
+  const col = COLIDX[h.length];
+  if (!col) { cracker.classList.remove('show'); typeBadge.textContent = 'type: invalid'; return; }
+  const type = TYPENAME[h.length];
+  let i = 0, fakeCount = 0;
+  const lines = [];
+  timer = setInterval(() => {
+    if (i >= DICT.length) { clearInterval(timer); fail(type); return; }
+    const w = DICT[i], cand = w[col];
+    fakeCount += Math.floor(40000 + Math.random()*120000);
+    crkCount.textContent = fakeCount.toLocaleString() + ' hashes/s';
+    bar.style.width = ((i+1)/DICT.length*100) + '%';
+    const hit = cand === h;
+    lines.unshift(`<span class="${hit?'cur':'dim'}">${type.toLowerCase()}("${w[0]}")</span> → ${cand.slice(0,24)}…${hit?'  <b style="color:#7CFFB2">MATCH</b>':''}`);
+    scan.innerHTML = lines.slice(0,6).join('<br>');
+    if (hit) { clearInterval(timer); success(w[0], type, i+1); }
+    i++;
+  }, 90);
+}
+function success(word, type, tries){
+  crkStatus.textContent = '● cracked';
+  result.className = 'result ok';
+  result.innerHTML = `<div class="big">✓ ${word}</div><div class="meta">Recovered ${type} plaintext after ${tries} wordlist attempt${tries>1?'s':''}. An unsalted ${type} of a common password offers near-zero protection.</div>`;
+  if (window.NB) NB.unlock('hash-cracked');
+}
+function fail(type){
+  crkStatus.textContent = '● exhausted';
+  bar.style.width = '100%';
+  result.className = 'result no';
+  result.innerHTML = `<div class="big">✗ not in wordlist</div><div class="meta">This ${type} didn't match any password in the dictionary. A real attacker would escalate to brute-force or a larger list — slow, but unsalted hashes still fall eventually. A strong, unique, <i>salted</i> password is what stops them.</div>`;
+}
+
+document.getElementById('crackBtn').addEventListener('click', crack);
+hashIn.addEventListener('keydown', e => { if (e.key === 'Enter') crack(); });
+document.querySelectorAll('.chip[data-h]').forEach(c => c.addEventListener('click', () => { hashIn.value = c.dataset.h; typeBadge.textContent = 'type: ' + (detect(c.dataset.h) || '—'); crack(); }));
+</script>
+</body>
+</html>

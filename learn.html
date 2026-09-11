@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<style>
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 16px; padding-bottom: 20px; }
+.hub-card { display: flex; flex-direction: column; min-height: 168px; }
+.hub-card .tag { font-family: var(--mono); font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.hub-card h3 { font-family: var(--display); font-weight: 700; font-size: 1.12rem; margin: 8px 0 6px; }
+.hub-card p { color: var(--muted); font-size: .9rem; font-weight: 300; flex: 1; }
+.hub-card .go { margin-top: 14px; font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--cyan); display: inline-flex; gap: 6px; align-items: center; }
+.hub-card:hover .go { transform: translateX(3px); } .hub-card .go { transition: transform .18s; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span>
+    <a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a>
+  </nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+<main class="wrap">
+  <div class="page-head rv">
+    <span class="kick"><i class="pip"></i>Learn · Study &amp; reference</span>
+    <h1>Learn <em>the craft.</em></h1>
+    <p>Every tool, attack and concept — decoded from beginner to pro, all interactive and in the open.</p>
+  </div>
+  <div class="hub-grid">
+    <a class="pane hub-card rv" href="tools.html"><span class="tag">G-01</span><h3>Toolkit</h3><p>The full hacker-gear library — every device explained at 3 levels.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="abilities.html"><span class="tag">G-02</span><h3>Abilities</h3><p>What the gear can actually do — capabilities by radio type.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="compare.html"><span class="tag">G-03</span><h3>Compare</h3><p>Compare 23 devices side-by-side with photos &amp; live filters.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="labs.html"><span class="tag">L-02</span><h3>Labs</h3><p>Challenges: payloads, tools, secure/insecure, terms.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="network.html"><span class="tag">L-03</span><h3>Network</h3><p>Subnet calculator, OSI/TCP-IP, ports &amp; CIDR.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="linux.html"><span class="tag">L-04</span><h3>Linux</h3><p>Command reference with examples, searchable.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="privacy.html"><span class="tag">L-05</span><h3>Privacy</h3><p>Checklist + a solid VPN comparison.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="phishing.html"><span class="tag">L-06</span><h3>Phishing</h3><p>Rebuilt emails — spot the red flags.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="payload-builder.html"><span class="tag">L-07</span><h3>Payload Builder</h3><p>Build DuckyScript from blocks.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="crypto.html"><span class="tag">L-08</span><h3>Crypto Tools</h3><p>Base64, ROT13, Hex, Hash-ID — live.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="ctf.html"><span class="tag">L-09</span><h3>CTF Cheatsheet</h3><p>Steg, crypto, web, RE, forensics, OSINT.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="frequencies.html"><span class="tag">L-10</span><h3>Frequencies</h3><p>Radio frequency reference with a dial.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="roadmap.html"><span class="tag">L-11</span><h3>Roadmap</h3><p>Learning paths — beginner to pro.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="threatmap.html"><span class="tag">L-12</span><h3>Threat Map</h3><p>Animated (simulated) attack map.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="changelog.html"><span class="tag">L-13</span><h3>Changelog</h3><p>How the site has grown.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="databases.html"><span class="tag">L-14</span><h3>Databases</h3><p>SQL &amp; DB theory + a live SQL sandbox.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="bits.html"><span class="tag">L-15</span><h3>Bits</h3><p>Binary, bytes &amp; logic — flip the bits yourself.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="clickfix.html"><span class="tag">L-16</span><h3>Fake CAPTCHAs</h3><p>The ClickFix attack + a safe sandboxed demo.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="network-lab.html"><span class="tag">L-17</span><h3>Networking Lab</h3><p>Inspect a packet capture like an analyst.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="regex.html"><span class="tag">L-18</span><h3>Regex Tester</h3><p>Live pattern sandbox with hacker presets.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="hashcrack.html"><span class="tag">L-19</span><h3>Hash Cracker</h3><p>Watch a dictionary attack — and beat it with salt.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="vm.html"><span class="tag">L-20</span><h3>Virtual Machines</h3><p>Virtualization deep dive + an interactive lab manager.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="achievements.html"><span class="tag">L-21</span><h3>Achievements</h3><p>Your XP &amp; progress across the site.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="codeacademy.html"><span class="tag">L-22</span><h3>Code Academy</h3><p>Learn to program — interactive lessons, quizzes &amp; a live sandbox.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="compress.html"><span class="tag">L-23</span><h3>Compression Lab</h3><p>Re-encode an image to JPEG/WebP/AVIF/PNG &amp; compare real sizes.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="hashgen.html"><span class="tag">L-24</span><h3>Hash Generator</h3><p>MD5, SHA-1, SHA-256 &amp; SHA-512 — computed live as you type.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="useragent.html"><span class="tag">L-25</span><h3>User-Agent Parser</h3><p>Browser, engine, OS &amp; device from any User-Agent string.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="emailheader.html"><span class="tag">L-26</span><h3>Email Header Analyzer</h3><p>Trace delivery hops &amp; read SPF/DKIM/DMARC to spot spoofing.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="password.html"><span class="tag">L-27</span><h3>Password Lab</h3><p>Generate strong passwords &amp; measure entropy, crack time &amp; weak patterns.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="jwt.html"><span class="tag">L-28</span><h3>JWT Inspector</h3><p>Decode JSON Web Tokens, read claims &amp; verify HS256 signatures.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="fileinspect.html"><span class="tag">L-29</span><h3>File Inspector</h3><p>Drop a file — real type from magic bytes, hex dump, entropy &amp; hashes.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="qrtool.html"><span class="tag">L-30</span><h3>QR Studio</h3><p>Encode text into real QR codes &amp; decode them from camera or image.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="steganography.html"><span class="tag">L-31</span><h3>Steganography</h3><p>Hide &amp; extract real messages in image pixels via LSB.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="filediff.html"><span class="tag">L-32</span><h3>File / Hex Diff</h3><p>Byte-level compare of two files with changed bytes highlighted.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="duckyscript.html"><span class="tag">L-33</span><h3>DuckyScript Studio</h3><p>Write, syntax-check &amp; compile DuckyScript payloads for BadUSB.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="pane hub-card rv" href="flipper3d.html"><span class="tag">L-34</span><h3>Flipper 3D Explorer</h3><p>Spin an interactive 3D model of the Flipper Zero — three.js in the browser.</p><span class="go">Open <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </div>
+</main>
+<footer class="wrap"><div class="foot-pill rv"><span>NULLBYTE · LEARN HUB</span><span>STUDY &middot; REFERENCE &middot; INTERACTIVE</span></div></footer>
+<script src="assets/shared.js"></script>
+</body>
+</html>

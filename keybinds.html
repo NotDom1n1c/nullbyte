@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keybind Trainer — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; margin: 26px 0 8px; flex-wrap: wrap; }
+.seg button { font-family: var(--mono); font-size: .76rem; padding: 10px 16px; border: none; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button.active { background: var(--grad); color: #fff; font-weight: 700; }
+.deck-meta { font-family: var(--mono); font-size: .78rem; color: var(--faint); margin-bottom: 16px; }
+
+.card { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.012)); padding: 38px 32px; text-align: center; }
+.card .prompt { font-family: var(--mono); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--violet); }
+.card .action { font-family: var(--display); font-size: 1.9rem; font-weight: 700; margin: 12px 0 6px; }
+.card .ctx { color: var(--muted); font-size: .9rem; }
+.pad { margin: 26px auto 8px; max-width: 440px; border: 1px dashed var(--line-2); border-radius: 12px; padding: 22px; outline: none; cursor: text; transition: .15s; background: #07070b; }
+.pad:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124,92,255,.12); }
+.pad .hint { font-family: var(--mono); font-size: .76rem; color: var(--faint); }
+.pad .keys { display: flex; gap: 8px; justify-content: center; margin-top: 12px; min-height: 44px; align-items: center; flex-wrap: wrap; }
+.keycap { font-family: var(--mono); font-size: 1rem; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line-2); border-bottom-width: 3px; background: rgba(255,255,255,.05); color: var(--ink); }
+.pad.correct { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.16); }
+.pad.wrong { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(244,63,94,.16); }
+.feedback { font-family: var(--mono); font-size: .86rem; min-height: 1.4em; margin-top: 10px; }
+.feedback.ok { color: #4ade80; } .feedback.no { color: #ff8da3; }
+.bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.06); overflow: hidden; margin: 18px 0; }
+.bar i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .3s; }
+.scoreline { display: flex; gap: 24px; font-family: var(--mono); font-size: .82rem; color: var(--muted); justify-content: center; }
+.scoreline b { color: var(--violet); }
+.done { text-align: center; padding: 40px; } .done .big { font-family: var(--display); font-size: 3rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.skip { font-family: var(--mono); font-size: .76rem; color: var(--faint); background: none; border: none; cursor: pointer; margin-top: 12px; }
+.skip:hover { color: var(--violet); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ KEYS ]</span><span class="tag">// shortcut trainer</span></div>
+  <h1 class="display">Keybind trainer.</h1>
+  <p class="lead" style="margin-top:14px">Build muscle memory for the shortcuts that make you fast. Pick a deck, read the action, and <b>actually press the keys</b> — the pad checks you live.</p>
+
+  <div class="seg" id="deckSeg">
+    <button data-d="vscode" class="active">VS Code</button>
+    <button data-d="terminal">Terminal / Bash</button>
+    <button data-d="vim">Vim</button>
+  </div>
+  <div class="deck-meta" id="deckMeta"></div>
+</section>
+
+<section class="wrap" style="padding-bottom:80px">
+  <div class="bar"><i id="bar"></i></div>
+  <div id="host"></div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+/* combo cards: {action, ctx, combo:'ctrl+shift+p', show:'Ctrl Shift P'}
+   seq cards:   {action, ctx, seq:'dd', show:'d d'} */
+const DECKS = {
+  vscode: { name:'VS Code', cards:[
+    { action:'Quick Open file', ctx:'jump to any file by name', combo:'ctrl+p', show:'Ctrl P' },
+    { action:'Command Palette', ctx:'run any command', combo:'ctrl+shift+p', show:'Ctrl Shift P' },
+    { action:'Toggle line comment', ctx:'comment / uncomment', combo:'ctrl+/', show:'Ctrl /' },
+    { action:'Toggle sidebar', ctx:'show / hide explorer', combo:'ctrl+b', show:'Ctrl B' },
+    { action:'Find in all files', ctx:'project-wide search', combo:'ctrl+shift+f', show:'Ctrl Shift F' },
+    { action:'Add next match to selection', ctx:'multi-cursor', combo:'ctrl+d', show:'Ctrl D' },
+    { action:'Rename symbol', ctx:'refactor rename', combo:'f2', show:'F2' }
+  ]},
+  terminal: { name:'Terminal / Bash', cards:[
+    { action:'Move to start of line', ctx:'jump cursor home', combo:'ctrl+a', show:'Ctrl A' },
+    { action:'Move to end of line', ctx:'jump cursor end', combo:'ctrl+e', show:'Ctrl E' },
+    { action:'Cut to end of line', ctx:'kill after cursor', combo:'ctrl+k', show:'Ctrl K' },
+    { action:'Cut to start of line', ctx:'kill before cursor', combo:'ctrl+u', show:'Ctrl U' },
+    { action:'Interrupt running process', ctx:'send SIGINT', combo:'ctrl+c', show:'Ctrl C' },
+    { action:'Send EOF / logout', ctx:'end of input', combo:'ctrl+d', show:'Ctrl D' }
+  ]},
+  vim: { name:'Vim', cards:[
+    { action:'Delete current line', ctx:'normal mode', seq:'dd', show:'d d' },
+    { action:'Yank (copy) current line', ctx:'normal mode', seq:'yy', show:'y y' },
+    { action:'Go to first line', ctx:'top of file', seq:'gg', show:'g g' },
+    { action:'Paste after cursor', ctx:'put register', seq:'p', show:'p' },
+    { action:'Delete character under cursor', ctx:'normal mode', seq:'x', show:'x' },
+    { action:'Open new line below & insert', ctx:'enter insert mode', seq:'o', show:'o' },
+    { action:'Undo', ctx:'normal mode', seq:'u', show:'u' }
+  ]}
+};
+
+let deck = 'vscode', cards = [], idx = 0, score = 0, seqBuf = '', locked = false;
+const host = document.getElementById('host'), bar = document.getElementById('bar');
+
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function load(d){
+  deck = d; cards = shuffle(DECKS[d].cards); idx = 0; score = 0; seqBuf = '';
+  document.querySelectorAll('#deckSeg button').forEach(b => b.classList.toggle('active', b.dataset.d === d));
+  document.getElementById('deckMeta').textContent = `${DECKS[d].name} deck · ${cards.length} shortcuts · press the keys on the pad`;
+  render();
+}
+function render(){
+  if (idx >= cards.length) return finish();
+  locked = false; seqBuf = '';
+  const c = cards[idx];
+  bar.style.width = (idx/cards.length*100) + '%';
+  host.innerHTML = `<div class="card">
+    <div class="prompt">Shortcut ${idx+1} / ${cards.length}</div>
+    <div class="action">${c.action}</div>
+    <div class="ctx">${c.ctx}</div>
+    <div class="pad" id="pad" tabindex="0"><div class="hint">click here &amp; press the shortcut</div><div class="keys" id="keys"></div></div>
+    <div class="feedback" id="fb"></div>
+    <div class="scoreline"><span>score <b>${score}</b></span><span>deck <b>${DECKS[deck].name}</b></span></div>
+    <button class="skip" id="skip">skip / show answer ›</button>
+  </div>`;
+  const pad = document.getElementById('pad');
+  pad.focus();
+  pad.addEventListener('keydown', onKey);
+  document.getElementById('skip').addEventListener('click', () => reveal(false));
+}
+function showKeys(parts){ document.getElementById('keys').innerHTML = parts.map(p=>`<span class="keycap">${p}</span>`).join(''); }
+
+function onKey(e){
+  if (locked) return;
+  const c = cards[idx];
+  const k = e.key;
+  if (['Shift','Control','Alt','Meta'].includes(k)) return;
+  e.preventDefault();
+  const mods = [];
+  if (e.ctrlKey) mods.push('ctrl'); if (e.altKey) mods.push('alt'); if (e.shiftKey) mods.push('shift'); if (e.metaKey) mods.push('meta');
+  const key = k.toLowerCase();
+  if (c.combo) {
+    const pressed = [...mods, key].join('+');
+    showKeys([...mods.map(m=>m[0].toUpperCase()+m.slice(1)), key.toUpperCase()]);
+    if (pressed === c.combo) grade(true);
+    else if (!mods.length) { /* wait for modifier */ } else grade(false);
+  } else { // sequence
+    if (mods.length) { seqBuf = ''; return; }
+    seqBuf += key;
+    showKeys(seqBuf.split(''));
+    if (seqBuf.endsWith(c.seq)) grade(true);
+    else if (seqBuf.length >= c.seq.length) grade(false);
+  }
+}
+function grade(ok){
+  locked = true;
+  const pad = document.getElementById('pad'), fb = document.getElementById('fb'), c = cards[idx];
+  pad.classList.add(ok ? 'correct' : 'wrong');
+  if (ok) { score++; fb.className = 'feedback ok'; fb.textContent = '✓ correct'; }
+  else { fb.className = 'feedback no'; fb.textContent = '✗ that was ' + (c.show); }
+  setTimeout(() => { idx++; render(); }, ok ? 600 : 1300);
+}
+function reveal(){
+  locked = true;
+  const c = cards[idx]; showKeys(c.show.split(' '));
+  const fb = document.getElementById('fb'); fb.className = 'feedback no'; fb.textContent = 'answer: ' + c.show;
+  document.getElementById('pad').classList.add('wrong');
+  setTimeout(() => { idx++; render(); }, 1200);
+}
+function finish(){
+  bar.style.width = '100%';
+  host.innerHTML = `<div class="card done"><div class="prompt">${DECKS[deck].name} deck complete</div>
+    <div class="big">${score}/${cards.length}</div>
+    <p class="muted" style="margin:12px 0 22px">${score===cards.length?'Flawless — that deck is muscle memory now.':score>=cards.length/2?'Good — run it again to lock them in.':'Keep practicing, you will get there.'}</p>
+    <button class="btn btn-primary" id="again"><svg class="ico"><use href="#i-refresh"/></svg> Run deck again</button></div>`;
+  document.getElementById('again').addEventListener('click', () => load(deck));
+  if (score === cards.length && window.NB) NB.unlock('keybind-ace');
+}
+
+document.getElementById('deckSeg').addEventListener('click', e => { const b = e.target.closest('[data-d]'); if (b) load(b.dataset.d); });
+load('vscode');
+</script>
+</body>
+</html>

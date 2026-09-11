@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.cache/
+.DS_Store
+Thumbs.db
+*.log
+
+# echte Firebase-Config nicht ins Repo
+assets/firebase.js

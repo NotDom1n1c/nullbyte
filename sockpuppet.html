@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sock Puppet Builder — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.2rem,5.5vw,3.8rem); }
+.warn-pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: #ffd9a0; border: 1px solid rgba(245,158,11,.4); background: rgba(245,158,11,.08); padding: 6px 12px; border-radius: 999px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; } @media(max-width:880px){ .cols{grid-template-columns:1fr} }
+.panel { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); padding: 22px; }
+.panel h3 { font-size: 1.15rem; margin-bottom: 4px; } .panel p.sub { color: var(--muted); font-size: .88rem; margin-bottom: 14px; }
+.xlink { color: var(--violet); }
+
+/* persona card */
+.persona { border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; }
+.persona .head { display: flex; gap: 16px; align-items: center; padding: 20px; background: linear-gradient(135deg, rgba(124,92,255,.16), rgba(34,211,242,.08)); }
+.avatar { width: 72px; height: 72px; border-radius: 16px; flex: none; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 1.7rem; color: #fff; }
+.persona .name { font-family: var(--display); font-weight: 700; font-size: 1.5rem; }
+.persona .tagline { font-family: var(--mono); font-size: .78rem; color: var(--muted); margin-top: 4px; }
+.pfields { padding: 6px 20px 18px; }
+.pf { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: .9rem; }
+.pf:last-child { border-bottom: none; }
+.pf .k { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); width: 110px; flex: none; padding-top: 2px; }
+.pf .v { color: var(--ink); } .pf .v b { color: var(--violet); }
+.prow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+/* checklist */
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
+.check:last-child { border-bottom: none; }
+.check .box { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line-2); flex: none; display: grid; place-items: center; margin-top: 1px; transition: .15s; }
+.check.on .box { background: #22c55e; border-color: #22c55e; }
+.check .box svg { width: 13px; height: 13px; color: #fff; opacity: 0; } .check.on .box svg { opacity: 1; }
+.check .tx b { font-size: .94rem; } .check.on .tx b { color: #7CFFB2; }
+.check .tx p { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+.prog { height: 8px; border-radius: 4px; background: rgba(255,255,255,.06); overflow: hidden; margin: 4px 0 18px; }
+.prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#22c55e,#4ade80); transition: width .3s; }
+.rules { font-family: var(--mono); font-size: .82rem; color: var(--muted); line-height: 1.9; }
+.rules b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html" class="active">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html" class="active">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ PERSONA ]</span><span class="tag">// sock puppet builder</span></div>
+  <h1 class="display">Sock puppet builder.</h1>
+  <p class="lead" style="margin-top:14px">A “sock puppet” is a disposable fake identity investigators use to research without exposing themselves. This is a framework + checklist — generate a consistent persona and learn the operational-security rules that keep it from unravelling.</p>
+  <div style="margin-top:14px"><span class="warn-pill"><svg class="ico ico-sm"><use href="#i-shield"/></svg> Educational · randomly generated · use only for lawful, authorized research</span></div>
+</section>
+
+<section class="wrap" style="padding-bottom:80px">
+  <div class="cols">
+    <div class="panel">
+      <h3>Generated persona</h3>
+      <p class="sub">A coherent backstory beats a random one. Regenerate until it fits your target community.</p>
+      <div class="persona">
+        <div class="head"><div class="avatar" id="pAvatar">--</div><div><div class="name" id="pName">—</div><div class="tagline" id="pTag">—</div></div></div>
+        <div class="pfields" id="pFields"></div>
+      </div>
+      <div class="prow">
+        <button class="btn btn-primary" id="genBtn"><svg class="ico"><use href="#i-refresh"/></svg> Generate persona</button>
+        <button class="btn btn-ghost" id="copyBtn"><svg class="ico"><use href="#i-folder"/></svg> Copy</button>
+      </div>
+      <p style="font-family:var(--mono);font-size:.74rem;color:var(--faint);margin-top:12px">Never pair a fake name with a real or AI-generated face — both are reverse-image searchable. Use an illustrated avatar or none.</p>
+    </div>
+
+    <div class="panel">
+      <h3>OPSEC checklist</h3>
+      <p class="sub">Tick each control as you set it up. One slip links the puppet to you.</p>
+      <div class="prog"><i id="prog"></i></div>
+      <div id="checklist"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <h3>The golden rules</h3>
+    <div class="rules" style="margin-top:10px">
+      <b>1. Separation.</b> A puppet lives in its own browser profile / VM — never your real session.<br>
+      <b>2. Consistency.</b> Name, age, timezone, writing style and interests must never contradict each other.<br>
+      <b>3. No crossover.</b> Never log into a real account from the puppet, or vice-versa — shared cookies, IPs and devices deanonymize you.<br>
+      <b>4. Age it.</b> Brand-new accounts look fake. Let it sit and post mundane things before you engage.<br>
+      <b>5. Stay legal.</b> A sock puppet is for observation, not entrapment, harassment or fraud. Know the rules of your engagement.
+    </div>
+    <p style="margin-top:12px;font-family:var(--mono);font-size:.8rem">Next: run lookups from the <a class="xlink" href="osint.html">OSINT console</a> · scrub your own photos in the <a class="xlink" href="metadata.html">metadata viewer</a>.</p>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+const FIRST = ['Emma','Liam','Noah','Olivia','Mia','Lukas','Sara','Jonas','Elena','Tim','Nina','Felix','Lea','Jan','Maya','Ben','Clara','Finn','Ava','Leon'];
+const LAST = ['Berger','Keller','Frei','Moser','Brunner','Vogel','Roth','Schmid','Graf','Meier','Steiner','Kunz','Baumann','Lang','Hofer','Weiss'];
+const CITY = ['Zürich, CH','Vienna, AT','Lyon, FR','Porto, PT','Tallinn, EE','Leeds, UK','Malmö, SE','Ghent, BE','Graz, AT','Bristol, UK'];
+const JOB = ['junior UX designer','logistics coordinator','freelance copywriter','barista & art student','data-entry temp','community-college student','warehouse shift lead','indie game hobbyist','amateur photographer','bookshop clerk'];
+const INTEREST = ['indie music','trail running','vintage cameras','houseplants','tabletop RPGs','street food','cycling','sci-fi novels','thrifting','lo-fi beats','birdwatching','home baking'];
+const TONE = ['friendly and a bit shy','dry, sarcastic humour','enthusiastic oversharer','terse, lowercase typer','polite and formal'];
+const AV = ['#7c5cff','#22d3ee','#f59e0b','#22c55e','#ec4899','#3b82f6','#a855f7'];
+
+const pick = a => a[Math.floor(Math.random()*a.length)];
+let firstGen = false;
+
+function gen(){
+  const f = pick(FIRST), l = pick(LAST), age = 19 + Math.floor(Math.random()*16);
+  const city = pick(CITY), job = pick(JOB);
+  const i1 = pick(INTEREST); let i2 = pick(INTEREST); while (i2===i1) i2 = pick(INTEREST);
+  const tone = pick(TONE);
+  const handle = (f.toLowerCase() + '.' + l.toLowerCase() + (Math.floor(Math.random()*90)+10)).replace(/ä|ö|ü/g,'');
+  const year = 2026 - age;
+  document.getElementById('pAvatar').textContent = f[0] + l[0];
+  document.getElementById('pAvatar').style.background = `linear-gradient(135deg, ${pick(AV)}, ${pick(AV)})`;
+  document.getElementById('pName').textContent = `${f} ${l}`;
+  document.getElementById('pTag').textContent = `@${handle} · ${age} · ${city}`;
+  const story = `A ${age}-year-old ${job} from ${city.split(',')[0]} who is into ${i1} and ${i2}. Writes ${tone}. Moved cities after school, fairly online but not influential — believable and forgettable.`;
+  document.getElementById('pFields').innerHTML = `
+    <div class="pf"><span class="k">Username</span><span class="v"><b>${handle}</b></span></div>
+    <div class="pf"><span class="k">Born</span><span class="v">${year} (age ${age})</span></div>
+    <div class="pf"><span class="k">Location</span><span class="v">${city}</span></div>
+    <div class="pf"><span class="k">Occupation</span><span class="v">${job}</span></div>
+    <div class="pf"><span class="k">Interests</span><span class="v">${i1}, ${i2}</span></div>
+    <div class="pf"><span class="k">Voice</span><span class="v">${tone}</span></div>
+    <div class="pf"><span class="k">Backstory</span><span class="v">${story}</span></div>`;
+  if (!firstGen && window.NB) { firstGen = true; NB.unlock('sock-puppet'); }
+}
+document.getElementById('genBtn').addEventListener('click', gen);
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const txt = [...document.querySelectorAll('#pFields .pf')].map(r=>r.querySelector('.k').textContent+': '+r.querySelector('.v').textContent).join('\n');
+  navigator.clipboard && navigator.clipboard.writeText(document.getElementById('pName').textContent + '\n' + txt).catch(()=>{});
+});
+gen();
+
+/* checklist */
+const RULES = [
+  ['Dedicated browser profile or VM','Isolate cookies, history and fingerprint from your real identity.'],
+  ['Burner email (not your provider)','A fresh ProtonMail/Tutanota, never reused or recovery-linked to you.'],
+  ['VoIP / no real phone number','Use a number that can\'t be tied back to your SIM.'],
+  ['Unique username','Not reused anywhere — check it isn\'t already linked to a real you.'],
+  ['Consistent timezone & language','Posting at 3am local for your persona breaks the illusion.'],
+  ['No real photos or AI faces','Both are reverse-image searchable. Use an illustration or none.'],
+  ['Aged before use','Let the account sit and post filler before engaging a target.'],
+  ['No payment trail','Never attach a card, real address, or anything that links to you.']
+];
+const cl = document.getElementById('checklist');
+cl.innerHTML = RULES.map((r,i)=>`<div class="check" data-i="${i}"><span class="box"><svg class="ico"><use href="#i-check"/></svg></span><span class="tx"><b>${r[0]}</b><p>${r[1]}</p></span></div>`).join('');
+cl.addEventListener('click', e => {
+  const c = e.target.closest('.check'); if (!c) return; c.classList.toggle('on');
+  const done = cl.querySelectorAll('.check.on').length;
+  document.getElementById('prog').style.width = (done/RULES.length*100)+'%';
+});
+</script>
+</body>
+</html>

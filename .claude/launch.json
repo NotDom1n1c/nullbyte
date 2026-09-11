@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "nullbyte", "runtimeExecutable": "npx", "runtimeArgs": ["--yes", "http-server", "-p", "8099", "-c-1"], "port": 8099 }
+  ]
+}

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fake CAPTCHAs (ClickFix) — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.2rem,5.5vw,3.8rem); }
+.warn-pill { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: #ffb4c2; border: 1px solid rgba(244,63,94,.4); background: rgba(244,63,94,.08); padding: 6px 12px; border-radius: 999px; }
+.panel { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); backdrop-filter: blur(12px); padding: 24px; margin-bottom: 18px; }
+.panel h3 { font-size: 1.18rem; margin-bottom: 8px; } .panel p { color: var(--muted); font-size: .94rem; line-height: 1.6; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 18px; }
+.xlink { color: var(--rose, var(--violet)); }
+
+/* attack flow */
+.flow { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.flow .step { display: flex; gap: 14px; align-items: flex-start; }
+.flow .n { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px; background: var(--grad); color: #fff; font-family: var(--mono); font-weight: 700; font-size: .82rem; display: grid; place-items: center; }
+.flow .tx { font-size: .92rem; color: var(--muted); } .flow .tx b { color: var(--ink); }
+
+.kbd { font-family: var(--mono); font-size: .8rem; background: rgba(255,255,255,.06); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 6px; padding: 2px 8px; color: var(--ink); }
+
+/* ---- DEMO ---- */
+.demo-stage { position: relative; border: 1px dashed rgba(244,63,94,.4); border-radius: var(--r); background: repeating-linear-gradient(45deg, rgba(244,63,94,.03) 0 12px, transparent 12px 24px); padding: 34px; min-height: 320px; display: grid; place-items: center; }
+.demo-tag { position: absolute; top: 10px; left: 14px; font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: #ffb4c2; }
+
+/* fake captcha card */
+.cap { width: 320px; background: #fff; border-radius: 10px; box-shadow: 0 24px 60px -20px rgba(0,0,0,.7); overflow: hidden; font-family: Arial, sans-serif; color: #202124; }
+.cap .top { padding: 16px 18px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #eee; }
+.cap .body { padding: 18px; }
+.cap .check { display: flex; align-items: center; gap: 12px; border: 1px solid #c8ccd0; border-radius: 6px; padding: 14px; cursor: pointer; }
+.cap .box { width: 26px; height: 26px; border: 2px solid #c8ccd0; border-radius: 3px; flex: 0 0 auto; position: relative; }
+.cap .check.on .box { background: #1a73e8; border-color: #1a73e8; }
+.cap .check.on .box::after { content: '✓'; color: #fff; position: absolute; inset: 0; display: grid; place-items: center; font-size: 18px; }
+.cap .lbl { font-size: 15px; } .cap .robot { margin-left: auto; font-size: 10px; color: #9aa0a6; text-align: center; line-height: 1.3; }
+.cap .robot svg { width: 26px; height: 26px; display: block; margin: 0 auto 2px; }
+.cap .steps { margin-top: 14px; font-size: 13px; display: none; }
+.cap.failed .steps { display: block; }
+.cap .steps .fail { color: #d93025; font-weight: 600; margin-bottom: 10px; }
+.cap .steps ol { margin: 0; padding-left: 18px; color: #3c4043; line-height: 1.9; }
+.cap .steps .kk { background: #f1f3f4; border: 1px solid #dadce0; border-radius: 4px; padding: 1px 6px; font-family: monospace; }
+
+/* simulate buttons */
+.simbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; justify-content: center; }
+.simbtn { font-family: var(--mono); font-size: .8rem; padding: 10px 16px; border: 1px solid var(--line-2); border-radius: 9px; background: rgba(255,255,255,.03); color: var(--muted); cursor: pointer; }
+.simbtn.next { border-color: var(--violet); color: #fff; background: rgba(124,92,255,.18); animation: pulse 1.4s infinite; }
+.simbtn.done { opacity: .4; cursor: default; }
+.simbtn:disabled { opacity: .3; cursor: not-allowed; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 4px rgba(124,92,255,.18); } }
+
+/* fake run dialog */
+.rundlg { width: 360px; background: #f0f0f0; border: 1px solid #888; border-radius: 6px; overflow: hidden; box-shadow: 0 24px 60px -20px rgba(0,0,0,.7); font-family: 'Segoe UI', Arial, sans-serif; color: #111; display: none; }
+.rundlg.show { display: block; animation: rise .3s ease; }
+.rundlg .bar { background: linear-gradient(#0a64c2,#0a4d99); color: #fff; font-size: 12px; padding: 6px 10px; }
+.rundlg .in { padding: 14px; font-size: 12px; }
+.rundlg .field { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.rundlg .field input { flex: 1; font-family: monospace; font-size: 12px; padding: 5px 7px; border: 1px solid #7a9bc0; background: #fff; }
+.rundlg .btns { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
+.rundlg .btns span { font-size: 12px; border: 1px solid #adadad; background: #e1e1e1; padding: 4px 14px; border-radius: 3px; }
+
+/* terminal result */
+.fakem { width: 100%; max-width: 460px; background: #0b0a12; border: 1px solid var(--line-2); border-radius: 10px; font-family: var(--mono); font-size: .82rem; overflow: hidden; display: none; }
+.fakem.show { display: block; animation: rise .3s ease; }
+.fakem .h { background: rgba(255,255,255,.04); padding: 6px 12px; color: var(--muted); font-size: .72rem; }
+.fakem .b { padding: 14px; color: #5cc8ff; line-height: 1.7; white-space: pre-wrap; }
+
+/* breakdown */
+.breakdown { border: 1px solid var(--violet); border-radius: var(--r); background: rgba(124,92,255,.06); padding: 24px; margin-top: 18px; display: none; }
+.breakdown.show { display: block; animation: rise .4s ease; }
+.breakdown h3 { font-size: 1.2rem; margin-bottom: 12px; }
+.breakdown .row { display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); }
+.breakdown .row:first-of-type { border-top: none; }
+.breakdown .row .s { font-family: var(--mono); color: var(--violet); flex: 0 0 132px; font-size: .82rem; }
+.breakdown .row .e { color: var(--muted); font-size: .9rem; line-height: 1.55; } .breakdown .row .e b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ THREAT ]</span><span class="tag">// fake captcha · clickfix</span></div>
+  <h1 class="display">Fake CAPTCHAs.</h1>
+  <p class="lead" style="margin-top:14px">“ClickFix” turns the most trusted box on the web — <i>I'm not a robot</i> — into a way to make <b>you</b> run malware by hand. Learn how it works, then survive a fully sandboxed demo.</p>
+  <div style="margin-top:14px"><span class="warn-pill"><svg class="ico ico-sm"><use href="#i-shield"/></svg> Educational · no code is ever executed on this page</span></div>
+</section>
+
+<!-- EDUCATIONAL -->
+<section class="wrap" style="padding-bottom:20px">
+  <div class="panel">
+    <h3>What is ClickFix?</h3>
+    <p>A malicious or compromised site shows a convincing CAPTCHA. But the “checkbox” doesn't verify anything — it tells you the check <i>failed</i> and that you must complete a quick “human verification”: press <span class="kbd">Win + R</span>, then <span class="kbd">Ctrl + V</span>, then <span class="kbd">Enter</span>. What you don't see: the page already copied a hidden command to your clipboard with JavaScript. You paste and run it yourself — straight into the Windows <b>Run</b> box — so no download warning, no attachment, no obvious red flag.</p>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>How the clipboard hijack works</h3>
+      <div class="flow">
+        <div class="step"><span class="n">1</span><span class="tx">Page JS calls <b>navigator.clipboard.writeText()</b> with a hidden PowerShell one-liner the moment you click.</span></div>
+        <div class="step"><span class="n">2</span><span class="tx"><b>Win + R</b> opens the Run dialog — a trusted OS prompt, not the browser.</span></div>
+        <div class="step"><span class="n">3</span><span class="tx"><b>Ctrl + V</b> pastes the payload. The visible text is often padded with spaces so the real command scrolls off-screen.</span></div>
+        <div class="step"><span class="n">4</span><span class="tx"><b>Enter</b> executes it. PowerShell quietly downloads and runs the next stage.</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>What the payloads do &amp; who uses it</h3>
+      <p>Typical second stages: install a <b>RAT</b> (remote access trojan), drop an <b>infostealer</b> that harvests browser passwords, cookies and crypto wallets, or join the machine to a botnet.</p>
+      <p style="margin-top:10px">Documented 2024–2025 campaigns used fake Google/Cloudflare CAPTCHAs, bogus “fix this document” pages, and fake browser-update prompts to spread <b>Lumma</b>, <b>StealC</b> and <b>DarkGate</b>. The technique is tracked as <b>ClickFix</b> / “paste-and-run.”</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="wrap" style="padding-bottom:30px">
+  <div class="shead"><span class="idx">[ DEMO ]</span><span class="tag">// sandboxed — follow the steps, get clickfixed (safely)</span></div>
+  <div class="demo-stage" style="margin-top:18px">
+    <span class="demo-tag">● sandbox · nothing runs</span>
+
+    <!-- stage 1: captcha -->
+    <div class="cap" id="cap">
+      <div class="top">Verify you are human</div>
+      <div class="body">
+        <div class="check" id="capCheck">
+          <div class="box"></div>
+          <div class="lbl">I'm not a robot</div>
+          <div class="robot"><svg viewBox="0 0 24 24" fill="none" stroke="#4285f4" stroke-width="2"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V4M8 13h.01M16 13h.01"/></svg>nullCAPTCHA<br>Privacy · Terms</div>
+        </div>
+        <div class="steps">
+          <div class="fail">⚠ Verification failed. Complete these steps to confirm you're human:</div>
+          <ol>
+            <li>Press <span class="kk">Win + R</span></li>
+            <li>Press <span class="kk">Ctrl + V</span></li>
+            <li>Press <span class="kk">Enter</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- stage 2: run dialog -->
+    <div class="rundlg" id="runDlg">
+      <div class="bar">Run</div>
+      <div class="in">
+        <div>Type the name of a program, and Windows will open it for you.</div>
+        <div class="field"><span>Open:</span><input id="runInput" readonly value=""></div>
+        <div class="btns"><span>OK</span><span>Cancel</span><span>Browse…</span></div>
+      </div>
+    </div>
+
+    <!-- stage 3: fake result -->
+    <div class="fakem" id="fakeOut">
+      <div class="h">Windows PowerShell</div>
+      <div class="b" id="fakeBody"></div>
+    </div>
+  </div>
+
+  <div class="simbar" id="simBar">
+    <button class="simbtn" id="bWin" disabled>⊞ Win + R</button>
+    <button class="simbtn" id="bPaste" disabled>Ctrl + V</button>
+    <button class="simbtn" id="bEnter" disabled>Enter ↵</button>
+    <button class="simbtn" id="bReset" style="margin-left:auto">↺ Reset demo</button>
+  </div>
+
+  <!-- breakdown -->
+  <div class="breakdown" id="breakdown">
+    <h3>💀 You just got ClickFixed — here's exactly what happened</h3>
+    <div class="row"><div class="s">The checkbox</div><div class="e">It never verified anything. Clicking it ran JavaScript that <b>silently wrote a command to your clipboard</b> and swapped the box for fake “failure” instructions.</div></div>
+    <div class="row"><div class="s">Win + R</div><div class="e">Moved you <b>out of the browser sandbox</b> into a trusted OS dialog that can launch anything — no security prompt.</div></div>
+    <div class="row"><div class="s">Ctrl + V</div><div class="e">Pasted the hidden payload. In a real attack the command starts with lots of spaces so you only see something harmless like <span class="kk">✅ I am not a robot</span> while <span class="kk">powershell -w hidden -enc …</span> hides off-screen.</div></div>
+    <div class="row"><div class="s">Enter</div><div class="e">You executed it yourself. Because <b>you</b> typed it, there's no download, no attachment scan, and you're far less suspicious than if a file had appeared.</div></div>
+    <div class="row"><div class="s">Why it works</div><div class="e">It hijacks a <b>trusted ritual</b> (CAPTCHAs), creates mild urgency (“verification failed”), and makes the action <b>self-inflicted</b> — the strongest social-engineering lever there is.</div></div>
+    <div class="row"><div class="s">Defend yourself</div><div class="e">A real CAPTCHA <b>never</b> asks you to press Win+R or paste anything. If a “human check” wants keyboard shortcuts, close the tab. Compare with <a class="xlink" href="phishing.html">other phishing red flags</a>, and see what these payloads look like in the <a class="xlink" href="console.html">PowerShell console</a>.</div></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+  const cap = document.getElementById('cap'), check = document.getElementById('capCheck');
+  const bWin = document.getElementById('bWin'), bPaste = document.getElementById('bPaste'), bEnter = document.getElementById('bEnter');
+  const runDlg = document.getElementById('runDlg'), runInput = document.getElementById('runInput');
+  const fakeOut = document.getElementById('fakeOut'), fakeBody = document.getElementById('fakeBody');
+  const breakdown = document.getElementById('breakdown');
+  const FAKE_VISIBLE = '✅  "I am not a robot - reCAPTCHA Verification ID: 8841"';
+  const FAKE_REAL = '   ' + FAKE_VISIBLE + '   ;  echo "YOU JUST GOT CLICKFIXED :)"   #(in a real attack: powershell -w hidden -enc <base64 stealer>)';
+
+  function setNext(btn){ [bWin,bPaste,bEnter].forEach(b => b.classList.remove('next')); if (btn){ btn.disabled = false; btn.classList.add('next'); } }
+
+  check.addEventListener('click', () => {
+    if (cap.classList.contains('failed')) return;
+    check.classList.add('on');
+    setTimeout(() => { cap.classList.add('failed'); check.classList.remove('on'); setNext(bWin); }, 650);
+  });
+
+  bWin.addEventListener('click', () => {
+    if (bWin.disabled) return;
+    runDlg.classList.add('show'); runInput.value = '';
+    bWin.classList.add('done'); bWin.disabled = true; setNext(bPaste);
+  });
+  bPaste.addEventListener('click', () => {
+    if (bPaste.disabled) return;
+    // show what the victim "sees" — the real command is padded off to the right
+    runInput.value = FAKE_REAL; runInput.scrollLeft = 0;
+    bPaste.classList.add('done'); bPaste.disabled = true; setNext(bEnter);
+  });
+  bEnter.addEventListener('click', () => {
+    if (bEnter.disabled) return;
+    runDlg.classList.remove('show');
+    fakeOut.classList.add('show');
+    bEnter.classList.add('done'); bEnter.disabled = true; setNext(null);
+    const lines = ['PS C:\\Users\\you> ' + FAKE_VISIBLE, '', 'YOU JUST GOT CLICKFIXED :)', '', '> No payload ran. In the real world, a hidden stealer would now', '  be exfiltrating your passwords. This was a safe simulation.'];
+    fakeBody.textContent = '';
+    let i = 0; (function type(){ if (i < lines.length){ fakeBody.textContent += lines[i] + '\n'; i++; setTimeout(type, 220); } else { breakdown.classList.add('show'); if (window.NB) NB.unlock('clickfix-survivor'); breakdown.scrollIntoView({behavior:'smooth', block:'nearest'}); } })();
+  });
+
+  document.getElementById('bReset').addEventListener('click', () => {
+    cap.classList.remove('failed'); check.classList.remove('on');
+    runDlg.classList.remove('show'); fakeOut.classList.remove('show'); breakdown.classList.remove('show');
+    [bWin,bPaste,bEnter].forEach(b => { b.classList.remove('done','next'); b.disabled = true; });
+    runInput.value = '';
+  });
+})();
+</script>
+</body>
+</html>

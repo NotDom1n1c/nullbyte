@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labs — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 22px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.quiz { max-width: 720px; border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012)); backdrop-filter: blur(16px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); overflow: hidden; }
+.q-bar { height: 4px; background: rgba(255,255,255,.06); }
+.q-bar i { display: block; height: 100%; background: var(--grad); transition: width .3s; }
+.q-body { padding: 32px; }
+.q-meta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: .72rem; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
+.q-type { color: var(--violet); }
+.q-text { font-family: var(--display); font-size: 1.5rem; font-weight: 600; letter-spacing: -.01em; }
+.q-code { font-family: var(--mono); font-size: .86rem; background: #07070b; border: 1px solid var(--line-2); border-radius: 10px; padding: 16px 18px; margin: 18px 0; white-space: pre-wrap; color: var(--ink); border-left: 3px solid var(--violet); }
+.q-opts { display: grid; gap: 10px; margin-top: 22px; }
+.q-opt { text-align: left; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 10px; background: rgba(255,255,255,.02); color: var(--ink); font-family: var(--body); font-size: .98rem; cursor: pointer; transition: .15s; display: flex; align-items: center; gap: 12px; }
+.q-opt:hover:not(:disabled) { border-color: var(--violet); }
+.q-opt .k { font-family: var(--mono); font-size: .74rem; color: var(--faint); width: 18px; }
+.q-opt.correct { border-color: #5ce0a0; background: rgba(92,224,160,.1); color: #fff; }
+.q-opt.wrong { border-color: var(--pink); background: rgba(255,77,157,.1); }
+.q-opt:disabled { cursor: default; }
+.q-explain { margin-top: 18px; padding: 16px 18px; border-radius: 10px; border: 1px solid var(--line); background: rgba(168,85,247,.07); font-size: .92rem; color: var(--muted); display: none; }
+.q-explain.show { display: block; }
+.q-explain b { color: var(--ink); }
+.q-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; }
+.score { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+.q-done { text-align: center; padding: 50px 32px; }
+.q-done .big { font-family: var(--display); font-size: 3.4rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ LABS ]</span><span class="tag">// challenges</span></div>
+  <h1 class="display">Labs.</h1>
+  <p class="lead" style="margin-top:20px">Small challenges on everything across the site — read payloads, pick the right tool, secure vs. insecure, recognise terms.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:70px">
+  <div class="quiz reveal" id="quiz"><div class="q-bar"><i id="qBar"></i></div><div id="qHost"></div></div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+const QUIZ = [
+  { type:'Read the payload', q:'What does this DuckyScript payload do?', code:'GUI r\nDELAY 200\nSTRING notepad\nENTER',
+    opts:['Opens the text editor (Notepad)','Downloads malware from the internet','Changes the Wi-Fi password'], a:0,
+    ex:'<b>GUI r</b> opens "Run", then "notepad" is typed and launched with Enter. Harmless — but shows how fast a BadUSB types.' },
+  { type:'Which tool?', q:'You want to open an old RF garage door without the remote. Which device?',
+    opts:['Wireshark','Flipper Zero','USB Rubber Ducky','Proxmark3'], a:1,
+    ex:'The garage door transmits on <b>Sub-GHz</b>. The Flipper can record and replay such (fixed-code) signals. Rolling code won\'t work this way.' },
+  { type:'Secure or insecure?', q:'A public Wi-Fi with no password at all. How do you rate it?',
+    opts:['Secure','Insecure'], a:1,
+    ex:'Without encryption the traffic can be read in plain text. A <b>VPN</b> helps here — see the Privacy section.' },
+  { type:'Recognise the term', q:'"Deliberately flooding a radio frequency with noise so real signals can\'t get through." Which term?',
+    opts:['Spoofing','Jamming','Phishing','Replay'], a:1,
+    ex:'That\'s <b>Jamming</b>. Illegal in most countries.' },
+  { type:'Subnetting', q:'How many usable hosts does a /29 network have?',
+    opts:['6','8','14','30'], a:0,
+    ex:'/29 → 32 − 29 = 3 host bits → 2³ = 8 addresses, minus network and broadcast = <b>6 usable hosts</b>.' },
+  { type:'Which tool?', q:'You want to see exactly which network packets your PC sends and receives.',
+    opts:['Kali Linux','Wireshark','HackRF One','LAN Turtle'], a:1,
+    ex:'<b>Wireshark</b> is the packet analyzer — it shows every single packet\'s contents.' },
+  { type:'Secure or insecure?', q:'A Wi-Fi with WPA3 and a long, random password.',
+    opts:['Secure','Insecure'], a:0,
+    ex:'<b>WPA3</b> + a strong password is currently considered secure. WEP or open would be insecure.' }
+];
+
+let qi = 0, score = 0, firstHit = false;
+const host = document.getElementById('qHost'), bar = document.getElementById('qBar');
+function show() {
+  if (qi >= QUIZ.length) return done();
+  const Q = QUIZ[qi];
+  bar.style.width = (qi / QUIZ.length * 100) + '%';
+  host.innerHTML = `<div class="q-body">
+    <div class="q-meta"><span class="q-type">${Q.type}</span><span>Question ${qi+1} / ${QUIZ.length}</span></div>
+    <div class="q-text">${Q.q}</div>
+    ${Q.code ? '<div class="q-code">' + Q.code + '</div>' : ''}
+    <div class="q-opts">${Q.opts.map((o,i)=>`<button class="q-opt" data-i="${i}"><span class="k">${String.fromCharCode(65+i)}</span>${o}</button>`).join('')}</div>
+    <div class="q-explain" id="qEx">${Q.ex}</div>
+    <div class="q-foot"><span class="score">Score · ${score}</span><button class="btn btn-primary" id="qNext" style="display:none">${qi === QUIZ.length-1 ? 'Result' : 'Next'} <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></button></div>
+  </div>`;
+  host.querySelectorAll('.q-opt').forEach(b => b.addEventListener('click', () => pick(+b.dataset.i)));
+  document.getElementById('qNext').addEventListener('click', () => { qi++; show(); });
+}
+function pick(i) {
+  const Q = QUIZ[qi];
+  host.querySelectorAll('.q-opt').forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === Q.a) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+  });
+  if (i === Q.a) {
+    score++;
+    if (!firstHit && window.NB) { firstHit = true; NB.unlock('quiz-rookie'); }
+    if (Q.type === 'Subnetting' && window.NB) { if (NB.inc('subnet') >= 5) NB.unlock('subnet-solver'); }
+  }
+  document.getElementById('qEx').classList.add('show');
+  document.getElementById('qNext').style.display = '';
+  document.querySelector('.score').textContent = 'Score · ' + score;
+}
+function done() {
+  bar.style.width = '100%';
+  host.innerHTML = `<div class="q-done">
+    <div class="q-meta" style="justify-content:center"><span class="q-type">Complete</span></div>
+    <div class="big">${score}/${QUIZ.length}</div>
+    <p class="muted" style="margin:14px 0 24px">${score === QUIZ.length ? 'Perfect! All correct.' : score >= QUIZ.length/2 ? 'Solid — review the explanations.' : 'Practice helps — go through the Tools & Glossary.'}</p>
+    <button class="btn btn-ghost" onclick="qi=0;score=0;show()"><svg class="ico"><use href="#i-refresh"/></svg> Again</button>
+  </div>`;
+}
+show();
+</script>
+</body>
+</html>

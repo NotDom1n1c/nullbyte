@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DuckyScript Studio — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 48px 20px; }
+.appframe-wrap { padding-bottom: 70px; }
+.app-tools { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; font-family: var(--mono); font-size: .7rem; letter-spacing: .1em; color: var(--faint); }
+.app-tools a { color: var(--muted); border: 1px solid var(--line); padding: 7px 13px; border-radius: 10px; transition: .2s; display: inline-flex; gap: 8px; align-items: center; }
+.app-tools a:hover { color: #fff; border-color: rgba(34,224,255,.5); box-shadow: 0 0 24px -10px rgba(34,224,255,.6); }
+.appframe { display: block; width: 100%; height: calc(100vh - 160px); min-height: 560px; border: 1px solid var(--line); border-radius: 16px; background: #000; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 22px 60px -28px rgba(34,224,255,.4); }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ DUCKYSCRIPT ]</span><span class="tag">// payload compiler</span></div>
+  <h1 class="display">DuckyScript Studio.</h1>
+  <p class="lead" style="margin-top:14px">Write, syntax-check &amp; compile DuckyScript payloads for USB Rubber Ducky &amp; BadUSB devices — the code side of the <a href="payload-builder.html" style="color:var(--accent)">Payload Builder</a>. Educational; runs entirely in your browser.</p>
+</section>
+
+<section class="wrap appframe-wrap reveal">
+  <div class="app-tools">
+    <a href="quill/index.html" target="_blank" rel="noopener"><svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg> Open fullscreen</a>
+    <span>100% client-side · for authorised testing &amp; learning only</span>
+  </div>
+  <iframe class="appframe" src="quill/index.html" title="DuckyScript Studio"></iframe>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+</body>
+</html>

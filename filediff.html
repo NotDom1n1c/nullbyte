@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File / Hex Diff — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.2rem,5.5vw,3.8rem); }
+.privacy-pill { display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:#9fe7ff; border:1px solid rgba(34,211,242,.4); background:rgba(34,211,242,.08); padding:6px 12px; border-radius:999px; }
+
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:18px; } @media(max-width:640px){ .cols{grid-template-columns:1fr} }
+.drop { border:2px dashed var(--line-2); border-radius:var(--r); padding:30px 18px; text-align:center; cursor:pointer; transition:.18s; background:rgba(255,255,255,.015); }
+.drop.over { border-color:#22d3ee; background:rgba(34,211,242,.07); }
+.drop.loaded { border-style:solid; border-color:var(--line-2); }
+.drop svg { width:34px; height:34px; color:var(--muted); margin-bottom:8px; }
+.drop h3 { font-size:.94rem; } .drop p { color:var(--muted); font-size:.8rem; margin-top:5px; word-break:break-all; }
+.drop .a-tag { color:#8ab4ff; } .drop .b-tag { color:#ffb38a; }
+
+.controls { display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin:22px 0 14px; font-family:var(--mono); font-size:.76rem; color:var(--muted); }
+.controls label { display:inline-flex; align-items:center; gap:7px; cursor:pointer; }
+.controls .btn { margin-left:auto; }
+
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
+.stat { border:1px solid var(--line); border-radius:10px; background:linear-gradient(180deg,#0c0c0e,#08080a); padding:14px 16px; }
+.stat .k { font-family:var(--mono); font-size:.64rem; text-transform:uppercase; letter-spacing:.06em; color:var(--faint); }
+.stat .v { font-family:var(--mono); font-size:1.15rem; color:var(--ink); margin-top:5px; }
+.stat .v.diff { color:#ff9b8a; } .stat .v.same { color:#7CFFB2; }
+
+.legend { display:flex; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:.7rem; color:var(--faint); margin-bottom:10px; }
+.legend span { display:inline-flex; align-items:center; gap:6px; }
+.legend i { width:11px; height:11px; border-radius:3px; display:inline-block; }
+.sw-diff { background:rgba(239,68,68,.5); } .sw-add { background:rgba(34,197,94,.45); } .sw-del { background:rgba(234,179,8,.45); }
+
+.hexwrap { border:1px solid var(--line); border-radius:12px; background:#07070b; overflow:auto; max-height:620px; }
+.hexhead { position:sticky; top:0; display:grid; grid-template-columns:92px 1fr 1fr; background:#0d0d12; border-bottom:1px solid var(--line-2); font-family:var(--mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--faint); z-index:1; }
+.hexhead > div { padding:9px 12px; } .hexhead .col-b { border-left:1px solid var(--line-2); }
+.hex { font-family:var(--mono); font-size:.76rem; line-height:1.55; min-width:640px; }
+.hrow { display:grid; grid-template-columns:92px 1fr 1fr; border-bottom:1px solid rgba(255,255,255,.03); }
+.hrow.changed { background:rgba(239,68,68,.045); }
+.hrow .off { padding:3px 12px; color:var(--faint); background:rgba(255,255,255,.02); }
+.hrow .side { padding:3px 12px; white-space:nowrap; display:flex; gap:16px; }
+.hrow .side.col-b { border-left:1px solid rgba(255,255,255,.05); }
+.hx { color:#c9c9d4; } .asc { color:var(--muted); }
+.hx b, .asc b { font-weight:400; border-radius:3px; padding:0 1px; }
+.hx b.d, .asc b.d { background:rgba(239,68,68,.42); color:#fff; }
+.hx b.miss, .asc b.miss { background:rgba(234,179,8,.30); color:#ffe9a8; }
+.byte-pad { color:#33333c; }
+.empty { padding:40px; text-align:center; font-family:var(--mono); color:var(--faint); font-size:.86rem; }
+.err { color:#ff9b8a; font-family:var(--mono); font-size:.82rem; margin-top:10px; display:none; }
+.note { font-family:var(--mono); font-size:.72rem; color:var(--faint); padding:10px 12px; border-top:1px solid var(--line); }
+.grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; margin-top:24px; }
+.grid2 .panel { border:1px solid var(--line); border-radius:var(--r); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); padding:22px; }
+.grid2 .panel h3 { font-size:1.06rem; margin-bottom:8px; } .grid2 .panel p { color:var(--muted); font-size:.92rem; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ DIFF ]</span><span class="tag">// byte-level comparison</span></div>
+  <h1 class="display">File / Hex Diff.</h1>
+  <p class="lead" style="margin-top:14px">Drop two files and get a real <b>byte-for-byte</b> comparison — a side-by-side hex view with every changed byte highlighted. Built for malware sample analysis, config drift, patch inspection and CTF forensics. Reads the raw bytes; nothing is uploaded.</p>
+  <div style="margin-top:14px"><span class="privacy-pill"><svg class="ico ico-sm"><use href="#i-lock"/></svg> 100% local · files stay on this device</span></div>
+</section>
+
+<section class="wrap" style="padding-bottom:80px">
+  <div class="cols">
+    <div class="drop" id="dropA" data-side="A">
+      <svg><use href="#i-hex"/></svg>
+      <h3><span class="a-tag">File A</span> — original</h3>
+      <p id="pA">Drop a file, or click to choose</p>
+      <input type="file" id="fileA" hidden>
+    </div>
+    <div class="drop" id="dropB" data-side="B">
+      <svg><use href="#i-hex"/></svg>
+      <h3><span class="b-tag">File B</span> — compare against</h3>
+      <p id="pB">Drop a file, or click to choose</p>
+      <input type="file" id="fileB" hidden>
+    </div>
+  </div>
+  <div class="err" id="err"></div>
+
+  <div id="report" style="display:none">
+    <div class="controls">
+      <label><input type="checkbox" id="onlyChanged"> Show only changed rows</label>
+      <label><input type="checkbox" id="wrapAscii" checked> ASCII column</label>
+      <button class="btn btn-ghost" id="jumpFirst"><svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg> Jump to first change</button>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="legend">
+      <span><i class="sw-diff"></i> changed byte</span>
+      <span><i class="sw-add"></i> only in B (added)</span>
+      <span><i class="sw-del"></i> only in A (removed)</span>
+    </div>
+
+    <div class="hexwrap" id="hexwrap">
+      <div class="hexhead"><div>offset</div><div class="col-a"><span class="a-tag">File A</span></div><div class="col-b"><span class="b-tag">File B</span></div></div>
+      <div class="hex" id="hex"></div>
+      <div class="note" id="note" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel"><h3>Why byte-level?</h3><p>Two files can look identical yet differ by a single flipped bit — a patched jump instruction, a changed config flag, a swapped C2 domain. A text diff misses binary changes entirely. Comparing raw bytes and rendering them as hex shows exactly <b>what</b> changed and <b>where</b>, down to the offset.</p></div>
+    <div class="panel"><h3>Reading the view</h3><p>Each row is 16 bytes. The offset column is the hex address into the file. Bytes that differ between A and B are boxed in red; bytes that exist in only one file (because the files are different lengths) are amber. Pair this with the <a class="xlink" style="color:var(--violet)" href="fileinspect.html">File Inspector</a> for magic bytes &amp; entropy.</p></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+  var bytesA=null, bytesB=null, nameA='', nameB='';
+  var MAX_ROWS = 12000; // safety cap on rendered rows (~192 KB span)
+  var HEX = []; for (var i=0;i<256;i++) HEX[i] = i.toString(16).padStart(2,'0');
+
+  var err=document.getElementById('err'), report=document.getElementById('report'),
+      hex=document.getElementById('hex'), stats=document.getElementById('stats'),
+      note=document.getElementById('note'), onlyChanged=document.getElementById('onlyChanged'),
+      wrapAscii=document.getElementById('wrapAscii');
+
+  function readFile(f, side){
+    var r=new FileReader();
+    r.onload=function(e){
+      var arr=new Uint8Array(e.target.result);
+      if (side==='A'){ bytesA=arr; nameA=f.name; document.getElementById('pA').innerHTML='<b>'+esc(f.name)+'</b> · '+arr.length.toLocaleString()+' bytes'; document.getElementById('dropA').classList.add('loaded'); }
+      else { bytesB=arr; nameB=f.name; document.getElementById('pB').innerHTML='<b>'+esc(f.name)+'</b> · '+arr.length.toLocaleString()+' bytes'; document.getElementById('dropB').classList.add('loaded'); }
+      if (bytesA && bytesB) render();
+    };
+    r.readAsArrayBuffer(f);
+  }
+  function esc(s){ return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function asciiChar(b){ return (b>=32 && b<127) ? String.fromCharCode(b) : '.'; }
+
+  function analyze(){
+    var la=bytesA.length, lb=bytesB.length, min=Math.min(la,lb), max=Math.max(la,lb);
+    var changed=0, first=-1;
+    for (var i=0;i<min;i++){ if (bytesA[i]!==bytesB[i]){ changed++; if (first<0) first=i; } }
+    var extra=max-min; if (extra>0 && first<0) first=min;
+    return { la:la, lb:lb, min:min, max:max, changed:changed, extra:extra, first:first, totalDiff:changed+extra, identical:(la===lb && changed===0) };
+  }
+
+  function renderStats(a){
+    function box(k,v,cls){ return '<div class="stat"><div class="k">'+k+'</div><div class="v '+(cls||'')+'">'+v+'</div></div>'; }
+    var pctSame = a.max ? ((a.max - a.totalDiff)/a.max*100) : 100;
+    stats.innerHTML =
+      box('File A size', a.la.toLocaleString()+' B') +
+      box('File B size', a.lb.toLocaleString()+' B') +
+      box('Changed bytes', a.changed.toLocaleString(), a.changed?'diff':'same') +
+      box('Length delta', (a.lb-a.la>=0?'+':'')+(a.lb-a.la).toLocaleString()+' B', a.extra?'diff':'') +
+      box('First difference', a.first<0?'—':('0x'+a.first.toString(16)), a.first>=0?'diff':'same') +
+      box('Identical', a.identical?'yes':'no', a.identical?'same':'diff') +
+      box('Similarity', pctSame.toFixed(a.totalDiff?2:0)+'%', a.identical?'same':'');
+  }
+
+  var lastFirstRow = 0;
+  function renderHex(a){
+    var only=onlyChanged.checked, showAscii=wrapAscii.checked;
+    var totalRows=Math.ceil(a.max/16), out=[], rendered=0, truncated=false, firstRowEl=-1;
+    for (var row=0; row<totalRows; row++){
+      var base=row*16, rowChanged=false;
+      // pre-scan row for changes
+      for (var j=0;j<16;j++){ var o=base+j; if (o>=a.max) break; var ina=o<a.la, inb=o<a.lb; if (!ina||!inb|| bytesA[o]!==bytesB[o]){ rowChanged=true; break; } }
+      if (only && !rowChanged) continue;
+      if (rendered>=MAX_ROWS){ truncated=true; break; }
+      if (rowChanged && firstRowEl<0) firstRowEl=rendered;
+
+      var off=base.toString(16).padStart(8,'0');
+      var aHex='', aAsc='', bHex='', bAsc='';
+      for (var j2=0;j2<16;j2++){
+        var o2=base+j2;
+        if (o2>=a.max){ aHex+='<span class="byte-pad">  </span> '; bHex+='<span class="byte-pad">  </span> '; continue; }
+        var ina2=o2<a.la, inb2=o2<a.lb;
+        var va=ina2?bytesA[o2]:-1, vb=inb2?bytesB[o2]:-1;
+        var diff = va!==vb;
+        var cls = !diff ? '' : (!ina2 ? 'miss' : (!inb2 ? 'miss' : 'd'));
+        // A side
+        if (ina2){ aHex+= diff?('<b class="'+cls+'">'+HEX[va]+'</b> '):(HEX[va]+' '); aAsc+= diff?('<b class="'+cls+'">'+esc(asciiChar(va))+'</b>'):esc(asciiChar(va)); }
+        else { aHex+='<span class="byte-pad">··</span> '; aAsc+='<span class="byte-pad"> </span>'; }
+        // B side
+        if (inb2){ bHex+= diff?('<b class="'+cls+'">'+HEX[vb]+'</b> '):(HEX[vb]+' '); bAsc+= diff?('<b class="'+cls+'">'+esc(asciiChar(vb))+'</b>'):esc(asciiChar(vb)); }
+        else { bHex+='<span class="byte-pad">··</span> '; bAsc+='<span class="byte-pad"> </span>'; }
+      }
+      var aSide='<span class="hx">'+aHex+'</span>'+(showAscii?'<span class="asc">'+aAsc+'</span>':'');
+      var bSide='<span class="hx">'+bHex+'</span>'+(showAscii?'<span class="asc">'+bAsc+'</span>':'');
+      out.push('<div class="hrow'+(rowChanged?' changed':'')+'" data-row="'+rendered+'"><span class="off">'+off+'</span><span class="side col-a">'+aSide+'</span><span class="side col-b">'+bSide+'</span></div>');
+      rendered++;
+    }
+    hex.innerHTML = out.length ? out.join('') : '<div class="empty">'+(only?'No changed rows — the files are identical over their shared length.':'Both files are empty.')+'</div>';
+    lastFirstRow = firstRowEl<0?0:firstRowEl;
+    if (truncated){ note.style.display=''; note.textContent='Showing the first '+MAX_ROWS.toLocaleString()+' rows ('+(MAX_ROWS*16).toLocaleString()+' bytes). Tick "show only changed rows" to focus on the differences in large files.'; }
+    else note.style.display='none';
+  }
+
+  function render(){
+    err.style.display='none';
+    var a=analyze();
+    report.style.display='';
+    // auto-enable changed-only for big, mostly-identical files
+    if (a.max>16*MAX_ROWS && !onlyChanged.dataset.touched) onlyChanged.checked=true;
+    renderStats(a);
+    renderHex(a);
+    if (window.NB) NB.unlock('byte-differ');
+  }
+
+  ['A','B'].forEach(function(side){
+    var drop=document.getElementById('drop'+side), input=document.getElementById('file'+side);
+    drop.addEventListener('click', function(){ input.click(); });
+    input.addEventListener('change', function(){ if (input.files[0]) readFile(input.files[0], side); });
+    ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); }); });
+    ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); }); });
+    drop.addEventListener('drop', function(e){ var f=e.dataTransfer.files[0]; if (f) readFile(f, side); });
+  });
+
+  onlyChanged.addEventListener('change', function(){ onlyChanged.dataset.touched='1'; if (bytesA&&bytesB) renderHex(analyze()); });
+  wrapAscii.addEventListener('change', function(){ if (bytesA&&bytesB) renderHex(analyze()); });
+  document.getElementById('jumpFirst').addEventListener('click', function(){
+    var el=hex.querySelector('.hrow[data-row="'+lastFirstRow+'"]');
+    if (el) el.scrollIntoView({ block:'center', behavior:'smooth' });
+  });
+})();
+</script>
+</body>
+</html>

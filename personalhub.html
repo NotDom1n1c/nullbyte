@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Hub — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 48px 20px; }
+.appframe-wrap { padding-bottom: 70px; }
+.app-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; font-family: var(--mono); font-size: .7rem; letter-spacing: .06em; color: var(--faint); }
+.app-tools a { color: var(--muted); border: 1px solid var(--line); padding: 7px 13px; border-radius: 9px; transition: .18s; display: inline-flex; gap: 7px; align-items: center; }
+.app-tools a:hover, .app-tools a.on { color: var(--accent); border-color: rgba(34,224,255,.5); }
+.app-tools .spacer { margin-left: auto; }
+.appframe { display: block; width: 100%; height: calc(100vh - 190px); min-height: 560px; border: 1px solid var(--line); border-radius: 14px; background: #0b0b10; box-shadow: inset 0 1px 0 rgba(255,255,255,.05); }
+/* shown instead of the iframe when the site is opened straight off disk (file://) */
+.filewarn { display: none; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 34px 32px; }
+.filewarn h2 { font-size: 1.24rem; margin-bottom: 12px; }
+.filewarn p { color: var(--muted); font-size: .93rem; line-height: 1.65; margin-bottom: 14px; max-width: 68ch; }
+.filewarn code { font-family: var(--mono); font-size: .84rem; background: rgba(255,255,255,.07); border: 1px solid var(--line-2); border-radius: 6px; padding: 3px 7px; color: var(--ink); }
+.filewarn pre { background: rgba(0,0,0,.45); border: 1px solid var(--line-2); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin-bottom: 14px; }
+.filewarn pre code { background: none; border: none; padding: 0; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ PERSONAL HUB ]</span><span class="tag">// notes · habits · snippets &amp; more</span></div>
+  <h1 class="display">Personal hub.</h1>
+  <p class="lead" style="margin-top:14px">A markdown note editor, a habit tracker and a code-snippet vault — plus a calendar, typing test and calculator, all in one workspace. Everything is saved locally in your browser.</p>
+</section>
+
+<section class="wrap appframe-wrap reveal">
+  <div class="app-tools" id="tabs">
+    <a data-r="#/notes"><svg class="ico ico-sm"><use href="#i-book"/></svg> Notes</a>
+    <a data-r="#/habits"><svg class="ico ico-sm"><use href="#i-check"/></svg> Habits</a>
+    <a data-r="#/snippets"><svg class="ico ico-sm"><use href="#i-terminal"/></svg> Snippets</a>
+    <a data-r="#/"><svg class="ico ico-sm"><use href="#i-grid"/></svg> All tools</a>
+    <a class="spacer" id="full" target="_blank" rel="noopener"><svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg> Open fullscreen</a>
+  </div>
+  <iframe class="appframe" id="frame" title="Personal Hub"></iframe>
+
+  <div class="filewarn" id="filewarn">
+    <h2>Personal Hub needs a local server</h2>
+    <p>You've opened this site directly from disk (<code>file://</code>). Browsers block ES-module scripts on <code>file://</code>, so Personal Hub can't start — the other tools on this site work fine, but this one is a bundled app and needs to be served over HTTP.</p>
+    <p>Double-click <code>start-server.cmd</code> in the <code>nullbyte</code> folder, or run this from that folder:</p>
+    <pre><code>npx --yes http-server -p 8099 -c-1</code></pre>
+    <p>Then open <code>http://localhost:8099/personalhub.html</code>.</p>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+  const frame = document.getElementById('frame'), tabs = document.getElementById('tabs'), full = document.getElementById('full');
+
+  // A bundled ES-module app can't boot from file:// — show the fix instead of a blank frame.
+  if (location.protocol === 'file:'){
+    frame.style.display = 'none';
+    tabs.style.display = 'none';
+    document.getElementById('filewarn').style.display = 'block';
+    return;
+  }
+
+  function route(){ return location.hash || '#/notes'; }
+  function apply(){
+    const r = route();
+    frame.src = 'personalhub/index.html' + r;
+    full.href = 'personalhub/index.html' + r;
+    [...tabs.querySelectorAll('a[data-r]')].forEach(a => a.classList.toggle('on', a.dataset.r === r));
+  }
+  tabs.addEventListener('click', e => { const a = e.target.closest('a[data-r]'); if (!a) return; e.preventDefault(); if (location.hash !== a.dataset.r) location.hash = a.dataset.r; else apply(); });
+  window.addEventListener('hashchange', apply);
+  apply();
+})();
+</script>
+</body>
+</html>

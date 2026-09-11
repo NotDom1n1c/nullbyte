@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerShell Console — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 20px; }
+.console-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; padding-bottom: 20px; }
+.console-grid h1 { font-size: clamp(2.4rem,5vw,4rem); }
+.console-grid .lead { margin: 22px 0 28px; }
+.dl-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.dl-meta { display: flex; gap: 22px; margin-top: 26px; font-family: var(--mono); font-size: .72rem; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
+.dl-meta b { color: var(--ink); display: block; font-size: .95rem; text-transform: none; letter-spacing: 0; margin-top: 2px; }
+
+/* terminal preview */
+.term { border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden; background: #07070b; box-shadow: 0 40px 90px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05); }
+.term-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .7rem; color: var(--faint); }
+.term-bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--line-2); }
+.term-bar i:nth-child(1){ background:#ff5f57 } .term-bar i:nth-child(2){ background:#febc2e } .term-bar i:nth-child(3){ background:#28c840 }
+.term-bar span { margin-left: auto; }
+.term-body { padding: 20px 22px 24px; font-family: var(--mono); font-size: .78rem; line-height: 1.5; }
+.term-logo { font-family: var(--display); font-weight: 700; font-size: 2.2rem; letter-spacing: -.03em; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
+.term-sub { color: var(--faint); margin: 4px 0 16px; }
+.term-row { display: flex; gap: 12px; align-items: center; color: var(--muted); }
+.term-row .lab { width: 120px; color: var(--faint); }
+.term-row .bar { flex: 1; height: 0; border-top: 2px solid var(--violet); }
+.term-row .pct { color: var(--fuchsia); }
+.term-ok { color: var(--violet); font-weight: 700; margin: 14px 0 6px; }
+.term-mods { margin-top: 12px; }
+.term-mods .h { color: var(--faint); }
+.term-mods .m { color: var(--muted); } .term-mods .m b { color: var(--fuchsia); } .term-mods .m i { color: var(--faint); font-style: normal; }
+.term-prompt { margin-top: 14px; color: var(--violet); }
+.term-prompt .cur { display: inline-block; width: 8px; height: 1em; background: var(--fuchsia); vertical-align: -2px; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* steps + commands */
+.steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.step { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); padding: 24px; }
+.step .n { font-family: var(--mono); font-size: .72rem; color: var(--violet); letter-spacing: .12em; }
+.step h3 { margin: 12px 0 8px; font-size: 1.1rem; }
+.step p { color: var(--muted); font-size: .9rem; }
+.cmd-block { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 11px 12px; border: 1px solid var(--line-2); border-radius: 9px; background: #07070b; }
+.cmd-block code { flex: 1; font-family: var(--mono); font-size: .76rem; color: var(--ink); white-space: nowrap; overflow-x: auto; }
+.cmd-copy { font-family: var(--mono); font-size: .64rem; text-transform: uppercase; letter-spacing: .06em; padding: 5px 9px; border: 1px solid var(--line-2); border-radius: 6px; background: transparent; color: var(--muted); transition: .15s; flex: none; }
+.cmd-copy:hover { border-color: var(--violet); color: var(--violet); }
+
+.reqs { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.reqs > div { background: rgba(10,10,16,.4); backdrop-filter: blur(14px); padding: 20px 22px; }
+.reqs .k { font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.reqs .v { margin-top: 6px; font-weight: 500; }
+.reqs .v small { color: var(--muted); font-weight: 400; font-size: .85rem; }
+
+.note { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; border: 1px solid rgba(245,158,11,.4); border-radius: var(--r); background: rgba(245,158,11,.07); font-size: .9rem; color: #fcd9a0; }
+.note .ico { color: #f59e0b; flex: none; margin-top: 2px; }
+
+@media (max-width: 900px){ .console-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr; } .reqs { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ CLI ]</span><span class="tag">// powershell console</span></div>
+  <div class="console-grid">
+    <div>
+      <h1 class="display" style="font-size:clamp(2.4rem,5vw,4rem)">Run it in<br>your terminal.</h1>
+      <p class="lead">The NULLBYTE OSINT console as a PowerShell script — boot splash, init sequence and the full module overview, right in your shell. Layout prototype: looks the part, lookups aren't live yet.</p>
+      <div class="dl-actions">
+        <button class="btn btn-primary" data-dl><svg class="ico"><use href="#i-download"/></svg> Download .ps1</button>
+        <a class="btn btn-ghost" href="osint.html"><svg class="ico"><use href="#i-scope"/></svg> Or use the web app</a>
+      </div>
+      <div class="dl-meta">
+        <div>File<b>NullByte-OSINT.ps1</b></div>
+        <div>Size<b>~6 KB</b></div>
+        <div>Shell<b>PowerShell 5.1 / 7</b></div>
+      </div>
+    </div>
+
+    <!-- terminal preview -->
+    <div class="term reveal" style="animation-delay:.1s">
+      <div class="term-bar"><i></i><i></i><i></i><span>powershell — nullbyte</span></div>
+      <div class="term-body">
+        <div class="term-logo">NULLBYTE</div>
+        <div class="term-sub">NULLBYTE // OSINT CONSOLE</div>
+        <div class="term-row"><span class="lab">KERNEL LOAD</span><span class="bar"></span><span class="pct">100.0%</span></div>
+        <div class="term-row"><span class="lab">CRYPTO ENGINE</span><span class="bar"></span><span class="pct">100.0%</span></div>
+        <div class="term-row"><span class="lab">OSINT MODULE</span><span class="bar"></span><span class="pct">100.0%</span></div>
+        <div class="term-row"><span class="lab">DATA LAYER</span><span class="bar"></span><span class="pct">100.0%</span></div>
+        <div class="term-ok">[ ALL SYSTEMS ONLINE ]</div>
+        <div class="term-mods">
+          <div class="h">INTELLIGENCE</div>
+          <div class="m"><b>[01]</b> Web Databases <i>· 2 cr</i></div>
+          <div class="m"><b>[02]</b> Reverse Face Search <i>· 2 cr</i></div>
+          <div class="h" style="margin-top:8px">PEOPLE SEARCH</div>
+          <div class="m"><b>[07]</b> Phone Search <i>· 1 cr</i></div>
+        </div>
+        <div class="term-prompt">nullbyte/osint &gt; <span class="cur"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO RUN -->
+<section class="wrap section-sm" style="padding-block:30px">
+  <div class="shead"><span class="idx">[ 01 ]</span><h2>How to run.</h2><span class="meta">// three steps</span></div>
+  <div class="steps">
+    <div class="step">
+      <span class="n">STEP 01</span>
+      <h3>Download</h3>
+      <p>Grab the script with the button above. It saves to your Downloads folder.</p>
+      <button class="btn btn-ghost btn-block" style="margin-top:14px" data-dl><svg class="ico ico-sm"><use href="#i-download"/></svg> Download .ps1</button>
+    </div>
+    <div class="step">
+      <span class="n">STEP 02</span>
+      <h3>Open PowerShell</h3>
+      <p>Open Windows Terminal (recommended) or PowerShell in your Downloads folder.</p>
+      <div class="cmd-block"><code>cd $HOME\Downloads</code><button class="cmd-copy" data-copy>copy</button></div>
+    </div>
+    <div class="step">
+      <span class="n">STEP 03</span>
+      <h3>Run it</h3>
+      <p>Unblock the downloaded file, then launch the console.</p>
+      <div class="cmd-block"><code>Unblock-File .\NullByte-OSINT.ps1</code><button class="cmd-copy" data-copy>copy</button></div>
+      <div class="cmd-block"><code>powershell -ExecutionPolicy Bypass -File .\NullByte-OSINT.ps1</code><button class="cmd-copy" data-copy>copy</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- REQUIREMENTS -->
+<section class="wrap section-sm" style="padding-block:20px 30px">
+  <div class="shead"><span class="idx">[ 02 ]</span><h2>Requirements.</h2><span class="meta">// what you need</span></div>
+  <div class="reqs">
+    <div><div class="k">OS</div><div class="v">Windows 10 / 11</div></div>
+    <div><div class="k">Shell</div><div class="v">PowerShell 5.1<small> or 7 (pwsh)</small></div></div>
+    <div><div class="k">Best in</div><div class="v">Windows Terminal<small> — truecolor + UTF-8</small></div></div>
+  </div>
+  <div class="note" style="margin-top:18px"><svg class="ico"><use href="#i-shield"/></svg> <span>This is a layout prototype — it only draws the interface, it doesn't perform any lookups or network activity. As with any script, only run downloads from sources you trust.</span></div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/nbcli.js"></script>
+<script>
+  document.querySelectorAll('.cmd-copy').forEach((b) => b.addEventListener('click', () => {
+    const code = b.previousElementSibling?.innerText || '';
+    const done = () => { const o = b.textContent; b.textContent = 'copied'; setTimeout(() => b.textContent = o, 1200); };
+    if (navigator.clipboard) { navigator.clipboard.writeText(code).then(done).catch(() => fallback(code, done)); }
+    else fallback(code, done);
+  }));
+  function fallback(text, done) {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glossary — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 64px 30px; }
+.page-head h1 { font-size: clamp(2.6rem,7vw,5rem); }
+.g-search { display:flex; align-items:center; gap:12px; padding:16px 20px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--bg-2); max-width:560px; }
+.g-search input { flex:1; background:none; border:none; outline:none; color:var(--ink); font-family:var(--mono); font-size:.95rem; }
+.g-search .ico { color: var(--muted); }
+.alpha { display:flex; flex-wrap:wrap; gap:5px; margin:28px 0 0; }
+.alpha a { width:34px; height:34px; display:grid; place-items:center; border:1px solid var(--line); border-radius:var(--r); font-family:var(--mono); font-size:.78rem; color:var(--faint); transition:.15s; }
+.alpha a:hover { border-color:var(--accent); color:var(--accent); }
+
+.term-cell { background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); border: 1px solid var(--line); border-radius: var(--r); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); padding:26px; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.term-cell:hover { transform: translateY(-4px); border-color: var(--line-2); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), var(--glow-sm); }
+.term-cell .top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; }
+.term-cell h3 { font-size:1.3rem; }
+.term-cell .cat { font-family:var(--mono); font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); border:1px solid var(--line-2); padding:4px 9px; border-radius:var(--r); }
+.term-cell p { color:var(--muted); font-size:.94rem; }
+.term-cell .more { font-family:var(--mono); font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); margin-top:16px; display:inline-flex; gap:8px; align-items:center; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ M-02 ]</span><span class="tag">// word explainer</span></div>
+  <h1 class="display">The glossary.</h1>
+  <p class="lead" style="margin-top:20px">Every bit of IT jargon, decoded in plain language. Type to filter the index.</p>
+  <div class="g-search" style="margin-top:26px"><svg class="ico ico-sm"><use href="#i-search"/></svg><input type="text" placeholder="Search a term — try &quot;jamming&quot;…" data-glossary-search></div>
+  <div class="alpha">
+    <a href="#">A</a><a href="#">B</a><a href="#">C</a><a href="#">D</a><a href="#">E</a><a href="#">F</a><a href="#">G</a><a href="#">H</a><a href="#">I</a><a href="#">J</a><a href="#">K</a><a href="#">L</a><a href="#">M</a><a href="#">N</a><a href="#">O</a><a href="#">P</a><a href="#">R</a><a href="#">S</a><a href="#">T</a><a href="#">U</a><a href="#">V</a><a href="#">W</a>
+  </div>
+</section>
+
+<section class="wrap" style="padding-bottom:80px">
+  <div class="grid grid-3" data-grid>
+    <div class="term-cell" data-term="jamming"><div class="top"><h3>Jamming</h3><span class="cat">Wireless</span></div><p>Deliberately flooding a radio frequency with noise so legitimate signals can't get through — like shouting over someone so they can't be heard.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="spoofing"><div class="top"><h3>Spoofing</h3><span class="cat">Network</span></div><p>Pretending to be someone or something else — faking an email address, phone number, IP or GPS location to trick a system or person.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="payload"><div class="top"><h3>Payload</h3><span class="cat">Exploitation</span></div><p>The part of an attack that actually does the work — the code or commands that run once a way in has been found.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="brute force"><div class="top"><h3>Brute Force</h3><span class="cat">Access</span></div><p>Trying every possible password or key, one after another, until the right one works. Slow but simple.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="rfid"><div class="top"><h3>RFID</h3><span class="cat">Hardware</span></div><p>Radio-Frequency Identification — tiny chips read wirelessly at short range, used in access cards, tags and pet microchips.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="phishing"><div class="top"><h3>Phishing</h3><span class="cat">Social</span></div><p>Tricking people into giving up passwords or data by pretending to be a trusted message, site or person.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="replay attack"><div class="top"><h3>Replay Attack</h3><span class="cat">Wireless</span></div><p>Capturing a valid signal (like a door remote) and sending it again later to repeat the action.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="osint"><div class="top"><h3>OSINT</h3><span class="cat">Recon</span></div><p>Open-Source Intelligence — gathering information from publicly available sources like websites, records and social media.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="firmware"><div class="top"><h3>Firmware</h3><span class="cat">Hardware</span></div><p>The low-level software baked into a device that tells the hardware how to behave — updatable, but more permanent than an app.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="man in the middle mitm"><div class="top"><h3>Man-in-the-Middle</h3><span class="cat">Network</span></div><p>Secretly sitting between two parties, reading or altering their messages while both think they talk directly.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="keystroke injection badusb"><div class="top"><h3>Keystroke Injection</h3><span class="cat">Payload</span></div><p>A USB device that pretends to be a keyboard and types commands far faster than a human could.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+    <div class="term-cell" data-term="rolling code"><div class="top"><h3>Rolling Code</h3><span class="cat">Wireless</span></div><p>A security trick where a remote uses a new, unpredictable code each time — so a captured signal can't simply be replayed.</p><a class="more" href="#">Full entry <svg class="ico ico-sm"><use href="#i-arrow-ur"/></svg></a></div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+(function(){
+  if(!window.NB) return;
+  const cells = document.querySelectorAll('.term-cell'), total = cells.length;
+  cells.forEach(c => c.addEventListener('click', () => {
+    const n = NB.seen('terms', c.dataset.term);
+    if (n >= 10) NB.unlock('glossary-novice');
+    if (n >= total) NB.unlock('glossary-master');
+  }));
+})();
+</script>
+</body>
+</html>

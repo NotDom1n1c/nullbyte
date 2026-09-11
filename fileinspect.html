@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Inspector — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 56px 18px; }
+.fi-drop { border: 1.5px dashed var(--line-2); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 34px; text-align: center; cursor: pointer; transition: .18s; }
+.fi-drop:hover, .fi-drop.drag { border-color: var(--accent); box-shadow: 0 16px 44px -24px var(--accent); }
+.fi-drop .ico { width: 34px; height: 34px; color: var(--accent); }
+.fi-drop h3 { margin: 10px 0 4px; font-size: 1.05rem; }
+.fi-drop p { color: var(--muted); font-size: .88rem; }
+.fi-head { display: flex; align-items: center; gap: 16px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 18px 20px; margin: 20px 0 16px; flex-wrap: wrap; }
+.fi-type { width: 60px; height: 60px; border-radius: 13px; background: rgba(34,224,255,.10); border: 1px solid rgba(34,224,255,.28); display: grid; place-items: center; color: var(--accent); font-family: var(--mono); font-weight: 700; font-size: .8rem; flex: none; }
+.fi-head .big { font-family: var(--display); font-weight: 700; font-size: 1.25rem; word-break: break-all; }
+.fi-head .sub { color: var(--muted); font-family: var(--mono); font-size: .78rem; margin-top: 3px; }
+.fi-stats { display: grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap: 12px; margin-bottom: 16px; }
+.fi-stat { border: 1px solid var(--line); border-radius: 11px; background: linear-gradient(180deg,#0c0c0e,#08080a); padding: 13px 15px; }
+.fi-stat .k { font-family: var(--mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.fi-stat .v { font-family: var(--display); font-weight: 700; font-size: 1.15rem; margin-top: 3px; word-break: break-all; }
+.fi-stat .v.mono { font-family: var(--mono); font-size: .78rem; font-weight: 400; }
+.fi-ent { height: 6px; border-radius: 4px; background: rgba(255,255,255,.07); overflow: hidden; margin-top: 8px; }
+.fi-ent i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.fi-hex-wrap { border: 1px solid var(--line); border-radius: 12px; background: #08080a; overflow: hidden; margin-bottom: 70px; }
+.fi-hex-wrap h3 { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
+.fi-hex { margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: .78rem; line-height: 1.55; white-space: pre; }
+.fi-hex .off { color: var(--faint); } .fi-hex .hx { color: var(--ink); } .fi-hex .as { color: var(--accent); }
+.fi-hex .z { color: #46464e; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ FILE ]</span><span class="tag">// forensic inspector</span></div>
+  <h1 class="display">File inspector.</h1>
+  <p class="lead" style="margin-top:14px">Drop any file to see what it really is — the true type from its magic bytes (not the extension), a live hex/ASCII dump, its Shannon entropy (a fingerprint of encryption or compression), and SHA hashes. Reads locally; the file never leaves your machine.</p>
+</section>
+
+<section class="wrap">
+  <div class="fi-drop" id="drop">
+    <svg class="ico"><use href="#i-hex"/></svg>
+    <h3>Drop a file here</h3>
+    <p>or click to choose — any type, any size (only the first 4 KB is dumped)</p>
+    <input type="file" id="file" hidden>
+  </div>
+  <div id="out" hidden>
+    <div class="fi-head">
+      <div class="fi-type" id="typeIco">?</div>
+      <div style="flex:1;min-width:0"><div class="big" id="fname">—</div><div class="sub" id="fsub">—</div></div>
+    </div>
+    <div class="fi-stats">
+      <div class="fi-stat"><div class="k">Detected type</div><div class="v" id="detType">—</div></div>
+      <div class="fi-stat"><div class="k">Reported MIME</div><div class="v mono" id="mime">—</div></div>
+      <div class="fi-stat"><div class="k">Size</div><div class="v" id="size">—</div></div>
+      <div class="fi-stat"><div class="k">Entropy (0–8 bits/byte)</div><div class="v" id="ent">—</div><div class="fi-ent"><i id="entBar" style="width:0%"></i></div></div>
+      <div class="fi-stat"><div class="k">SHA-1</div><div class="v mono" id="sha1">…</div></div>
+      <div class="fi-stat"><div class="k">SHA-256</div><div class="v mono" id="sha256">…</div></div>
+    </div>
+    <div class="fi-hex-wrap">
+      <h3>Hex dump <span id="hexNote"></span></h3>
+      <pre class="fi-hex" id="hex"></pre>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+  const drop = document.getElementById('drop'), fileInp = document.getElementById('file'), out = document.getElementById('out');
+  const fmtBytes = b => b < 1024 ? b + ' B' : b < 1048576 ? (b/1024).toFixed(1) + ' KB' : (b/1048576).toFixed(2) + ' MB';
+
+  // magic-byte signatures: [name, short, [bytes...], offset]
+  const SIGS = [
+    ['PNG image','PNG',[0x89,0x50,0x4E,0x47],0],
+    ['JPEG image','JPG',[0xFF,0xD8,0xFF],0],
+    ['GIF image','GIF',[0x47,0x49,0x46,0x38],0],
+    ['BMP image','BMP',[0x42,0x4D],0],
+    ['WebP image','WEBP',[0x57,0x45,0x42,0x50],8],
+    ['PDF document','PDF',[0x25,0x50,0x44,0x46],0],
+    ['ZIP / Office / JAR','ZIP',[0x50,0x4B,0x03,0x04],0],
+    ['GZIP archive','GZ',[0x1F,0x8B],0],
+    ['RAR archive','RAR',[0x52,0x61,0x72,0x21],0],
+    ['7-Zip archive','7Z',[0x37,0x7A,0xBC,0xAF],0],
+    ['Windows executable (PE)','EXE',[0x4D,0x5A],0],
+    ['Linux executable (ELF)','ELF',[0x7F,0x45,0x4C,0x46],0],
+    ['Mach-O binary','MACH',[0xCF,0xFA,0xED,0xFE],0],
+    ['Java class','CLASS',[0xCA,0xFE,0xBA,0xBE],0],
+    ['SQLite database','SQLITE',[0x53,0x51,0x4C,0x69,0x74,0x65],0],
+    ['MP3 audio (ID3)','MP3',[0x49,0x44,0x33],0],
+    ['MP4 / MOV video','MP4',[0x66,0x74,0x79,0x70],4],
+    ['OGG media','OGG',[0x4F,0x67,0x67,0x53],0],
+    ['WAV audio','WAV',[0x57,0x41,0x56,0x45],8],
+    ['Windows icon','ICO',[0x00,0x00,0x01,0x00],0],
+    ['UTF-8 BOM text','TXT',[0xEF,0xBB,0xBF],0]
+  ];
+  function detect(bytes){
+    for (const [name, short, sig, off] of SIGS){
+      let ok = true;
+      for (let i = 0; i < sig.length; i++) if (bytes[off + i] !== sig[i]){ ok = false; break; }
+      if (ok) return { name, short };
+    }
+    // heuristic: printable ASCII → text
+    let printable = 0, n = Math.min(bytes.length, 512);
+    for (let i = 0; i < n; i++){ const b = bytes[i]; if (b === 9 || b === 10 || b === 13 || (b >= 32 && b < 127)) printable++; }
+    if (n && printable / n > 0.95) return { name: 'Plain text', short: 'TXT' };
+    return { name: 'Unknown / binary', short: 'BIN' };
+  }
+  function entropy(bytes){
+    if (!bytes.length) return 0;
+    const freq = new Array(256).fill(0);
+    for (let i = 0; i < bytes.length; i++) freq[bytes[i]]++;
+    let e = 0;
+    for (let i = 0; i < 256; i++){ if (!freq[i]) continue; const p = freq[i] / bytes.length; e -= p * Math.log2(p); }
+    return e;
+  }
+  function hexDump(bytes, max){
+    const n = Math.min(bytes.length, max);
+    let rows = '';
+    for (let i = 0; i < n; i += 16){
+      let hx = '', as = '';
+      for (let j = 0; j < 16; j++){
+        if (i + j < n){
+          const b = bytes[i + j];
+          const h = b.toString(16).padStart(2,'0');
+          hx += (b === 0 ? `<span class="z">${h}</span>` : h) + ' ';
+          as += (b >= 32 && b < 127) ? String.fromCharCode(b).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '<span class="z">.</span>';
+        } else { hx += '   '; }
+        if (j === 7) hx += ' ';
+      }
+      rows += `<span class="off">${i.toString(16).padStart(8,'0')}</span>  <span class="hx">${hx}</span> <span class="as">${as}</span>\n`;
+    }
+    return rows;
+  }
+  async function sha(algo, buf){
+    const d = await crypto.subtle.digest(algo, buf);
+    return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function load(file){
+    const buf = await file.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    const det = detect(bytes);
+    out.hidden = false;
+    document.getElementById('typeIco').textContent = det.short;
+    document.getElementById('fname').textContent = file.name || '(no name)';
+    document.getElementById('fsub').textContent = `${fmtBytes(file.size)} · ${file.type || 'unknown MIME'}`;
+    document.getElementById('detType').textContent = det.name;
+    document.getElementById('mime').textContent = file.type || '—';
+    document.getElementById('size').textContent = fmtBytes(file.size) + ' (' + file.size.toLocaleString() + ' bytes)';
+    const e = entropy(bytes);
+    document.getElementById('ent').textContent = e.toFixed(2) + ' bits';
+    document.getElementById('entBar').style.width = (e / 8 * 100).toFixed(0) + '%';
+    const cap = 4096;
+    document.getElementById('hexNote').textContent = file.size > cap ? `first ${cap} of ${file.size.toLocaleString()} bytes` : `${file.size} bytes`;
+    document.getElementById('hex').innerHTML = hexDump(bytes, cap) || '(empty file)';
+    document.getElementById('sha1').textContent = '…'; document.getElementById('sha256').textContent = '…';
+    sha('SHA-1', buf).then(h => document.getElementById('sha1').textContent = h);
+    sha('SHA-256', buf).then(h => document.getElementById('sha256').textContent = h);
+    out.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  drop.addEventListener('click', () => fileInp.click());
+  fileInp.addEventListener('change', e => { if (e.target.files[0]) load(e.target.files[0]); });
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) load(f); });
+})();
+</script>
+</body>
+</html>

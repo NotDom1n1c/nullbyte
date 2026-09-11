@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Tools — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 24px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.tool-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; padding-bottom: 70px; }
+.ctool { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 24px; }
+.ctool .top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.ctool .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: var(--violet); border: 1px solid var(--line-2); background: color-mix(in srgb, var(--violet) 12%, transparent); }
+.ctool h3 { font-size: 1.1rem; }
+.ctool .d { color: var(--muted); font-size: .86rem; margin-bottom: 14px; }
+.modes { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+.modes button { font-family: var(--mono); font-size: .72rem; padding: 7px 13px; border: none; background: transparent; color: var(--muted); cursor: pointer; }
+.modes button.active { background: var(--grad); color: #fff; font-weight: 700; }
+.ctool textarea, .ctool input.shift { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(0,0,0,.3); color: var(--ink); font-family: var(--mono); font-size: .86rem; outline: none; resize: vertical; }
+.ctool textarea:focus { border-color: var(--violet); }
+.ctool textarea.in { min-height: 64px; }
+.out-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; }
+.out { flex: 1; min-height: 48px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: #07070b; color: var(--violet); font-family: var(--mono); font-size: .86rem; word-break: break-all; white-space: pre-wrap; }
+.out.err { color: var(--pink); }
+.out.empty { color: var(--faint); }
+.copy { font-family: var(--mono); font-size: .64rem; text-transform: uppercase; padding: 8px 11px; border: 1px solid var(--line-2); border-radius: 8px; background: none; color: var(--muted); cursor: pointer; flex: none; }
+.copy:hover { border-color: var(--violet); color: var(--violet); }
+.copy.ok { color: #4dffa6; border-color: rgba(77,255,166,.5); }
+.shift-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-family: var(--mono); font-size: .76rem; color: var(--muted); }
+.shift-row input { width: 70px; }
+.hash-types { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.hash-types span { font-family: var(--mono); font-size: .68rem; padding: 4px 9px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--faint); }
+.hash-types span.hit { border-color: var(--violet); color: var(--violet); background: color-mix(in srgb,var(--violet) 12%,transparent); }
+@media (max-width:780px){ .tool-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ CRYPTO ]</span><span class="tag">// en- &amp; decoder</span></div>
+  <h1 class="display">Crypto tools.</h1>
+  <p class="lead" style="margin-top:20px">The classics for CTFs &amp; web security — all live in the browser, no server. Type and the result appears instantly.</p>
+</section>
+
+<section class="wrap"><div class="tool-grid" id="toolGrid"></div></section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+'use strict';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const enc = new TextEncoder(), dec = new TextDecoder();
+
+/* ---- transforms ---- */
+function b64enc(s){ return btoa(unescape(encodeURIComponent(s))); }
+function b64dec(s){ return decodeURIComponent(escape(atob(s.replace(/\s+/g,'')))); }
+function caesar(s, n){ n = ((n % 26) + 26) % 26; return s.replace(/[a-z]/gi, c => { const base = c <= 'Z' ? 65 : 97; return String.fromCharCode((c.charCodeAt(0) - base + n) % 26 + base); }); }
+function toHex(s){ return [...enc.encode(s)].map(b => b.toString(16).padStart(2,'0')).join(' '); }
+function fromHex(s){ const clean = s.replace(/0x/gi,'').replace(/[^0-9a-f]/gi,''); if (!clean || clean.length % 2) throw 0; return dec.decode(new Uint8Array(clean.match(/../g).map(h => parseInt(h,16)))); }
+function toBin(s){ return [...enc.encode(s)].map(b => b.toString(2).padStart(8,'0')).join(' '); }
+function fromBin(s){ const clean = s.replace(/[^01]/g,''); if (!clean || clean.length % 8) throw 0; return dec.decode(new Uint8Array(clean.match(/.{8}/g).map(b => parseInt(b,2)))); }
+
+const HASHES = [
+  { n:'MD5',        t:h => /^[a-f0-9]{32}$/i.test(h) },
+  { n:'NTLM',       t:h => /^[a-f0-9]{32}$/i.test(h) },
+  { n:'SHA-1',      t:h => /^[a-f0-9]{40}$/i.test(h) },
+  { n:'SHA-224',    t:h => /^[a-f0-9]{56}$/i.test(h) },
+  { n:'SHA-256',    t:h => /^[a-f0-9]{64}$/i.test(h) },
+  { n:'SHA-384',    t:h => /^[a-f0-9]{96}$/i.test(h) },
+  { n:'SHA-512',    t:h => /^[a-f0-9]{128}$/i.test(h) },
+  { n:'CRC32',      t:h => /^[a-f0-9]{8}$/i.test(h) },
+  { n:'bcrypt',     t:h => /^\$2[aby]\$\d{2}\$/.test(h) },
+  { n:'Argon2',     t:h => /^\$argon2(id|i|d)\$/.test(h) },
+  { n:'SHA-256 b64',t:h => /^[A-Za-z0-9+/]{43}=$/.test(h) }
+];
+
+const TOOLS = [
+  { id:'base64', name:'Base64', icon:'i-lock', desc:'Encode & decode Base64 — the classic web / CTF encoding.',
+    modes:['Encode','Decode'], fn:(s,m) => m === 0 ? b64enc(s) : b64dec(s) },
+  { id:'rot', name:'Caesar / ROT', icon:'i-refresh', desc:'Shift letters by N (13 = ROT13). Decode shifts the other way.',
+    modes:['Encode','Decode'], shift:13, fn:(s,m,n) => caesar(s, m === 0 ? n : -n) },
+  { id:'hex', name:'Hex', icon:'i-hex', desc:'Text ⇄ hexadecimal bytes (UTF-8).',
+    modes:['Encode','Decode'], fn:(s,m) => m === 0 ? toHex(s) : fromHex(s) },
+  { id:'url', name:'URL', icon:'i-globe', desc:'Percent-encoding for URLs & query strings.',
+    modes:['Encode','Decode'], fn:(s,m) => m === 0 ? encodeURIComponent(s) : decodeURIComponent(s) },
+  { id:'bin', name:'Binary', icon:'i-cpu', desc:'Text ⇄ 8-bit binary (UTF-8 bytes).',
+    modes:['Encode','Decode'], fn:(s,m) => m === 0 ? toBin(s) : fromBin(s) },
+  { id:'hashid', name:'Hash Identifier', icon:'i-key', desc:'Guess a hash type from its length & characters.', hashid:true }
+];
+
+/* ---- build cards ---- */
+const grid = document.getElementById('toolGrid');
+grid.innerHTML = TOOLS.map(t => {
+  const head = '<div class="top"><span class="ic"><svg class="ico"><use href="#' + t.icon + '"/></svg></span><h3>' + t.name + '</h3></div><div class="d">' + t.desc + '</div>';
+  if (t.hashid){
+    return '<div class="ctool" data-tool="' + t.id + '">' + head +
+      '<textarea class="in" placeholder="Paste a hash…" spellcheck="false"></textarea>' +
+      '<div class="out-row"><div class="out empty">// likely type appears here</div></div>' +
+      '<div class="hash-types">' + HASHES.map(h => '<span data-h="' + h.n + '">' + h.n + '</span>').join('') + '</div></div>';
+  }
+  const modes = '<div class="modes">' + t.modes.map((m,i) => '<button class="' + (i === 0 ? 'active' : '') + '" data-mode="' + i + '">' + m + '</button>').join('') + '</div>';
+  const shift = t.shift != null ? '<div class="shift-row">Shift <input type="number" class="shift" value="' + t.shift + '" min="0" max="25"></div>' : '';
+  return '<div class="ctool" data-tool="' + t.id + '">' + head + modes + shift +
+    '<textarea class="in" placeholder="Type here…" spellcheck="false"></textarea>' +
+    '<div class="out-row"><div class="out empty">// output</div><button class="copy">Copy</button></div></div>';
+}).join('');
+
+/* ---- wire each card ---- */
+TOOLS.forEach(t => {
+  const card = grid.querySelector('[data-tool="' + t.id + '"]');
+  const inp = card.querySelector('.in');
+  const out = card.querySelector('.out');
+
+  if (t.hashid){
+    const chips = card.querySelectorAll('.hash-types span');
+    const run = () => {
+      const v = inp.value.trim();
+      let hits = [];
+      chips.forEach(c => { const on = v && HASHES.find(h => h.n === c.dataset.h).t(v); c.classList.toggle('hit', !!on); if (on) hits.push(c.dataset.h); });
+      if (!v){ out.className = 'out empty'; out.textContent = '// likely type appears here'; }
+      else if (hits.length){ out.className = 'out'; out.textContent = 'Likely: ' + hits.join(', '); }
+      else { out.className = 'out err'; out.textContent = 'No known hash matches this length/format.'; }
+    };
+    inp.addEventListener('input', run);
+    return;
+  }
+
+  let mode = 0;
+  const shiftEl = card.querySelector('.shift');
+  const copyBtn = card.querySelector('.copy');
+  const run = () => {
+    const v = inp.value;
+    if (!v){ out.className = 'out empty'; out.textContent = '// output'; return; }
+    try {
+      const n = shiftEl ? (parseInt(shiftEl.value, 10) || 0) : 0;
+      const res = t.fn(v, mode, n);
+      out.className = 'out'; out.textContent = res === '' ? '(empty)' : res;
+    } catch(e){ out.className = 'out err'; out.textContent = '⚠ Invalid input for ' + t.modes[mode].toLowerCase() + '.'; }
+  };
+  inp.addEventListener('input', run);
+  if (shiftEl) shiftEl.addEventListener('input', run);
+  card.querySelectorAll('.modes button').forEach(b => b.addEventListener('click', () => {
+    mode = +b.dataset.mode;
+    card.querySelectorAll('.modes button').forEach(x => x.classList.toggle('active', x === b));
+    run();
+  }));
+  copyBtn.addEventListener('click', () => {
+    if (out.classList.contains('empty') || out.classList.contains('err')) return;
+    const done = () => { copyBtn.classList.add('ok'); copyBtn.textContent = 'Copied'; setTimeout(() => { copyBtn.classList.remove('ok'); copyBtn.textContent = 'Copy'; }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(out.textContent).then(done, done);
+    else { const r = document.createRange(); r.selectNode(out); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); getSelection().removeAllRanges(); done(); }
+  });
+});
+
+/* seed a demo so the page never looks empty */
+const demo = grid.querySelector('[data-tool="base64"] .in');
+if (demo){ demo.value = 'hello nullbyte'; demo.dispatchEvent(new Event('input')); }
+})();
+</script>
+</body>
+</html>

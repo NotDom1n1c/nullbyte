@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reaction Time — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 50px 14px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+
+.stage { user-select: none; cursor: pointer; border-radius: var(--r); min-height: 360px; display: grid; place-items: center; text-align: center; border: 1px solid var(--line); transition: background .08s; margin-top: 22px; }
+.stage .inner { padding: 30px; }
+.stage .big { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem,5vw,3rem); line-height: 1.05; }
+.stage .sub { font-family: var(--mono); font-size: .9rem; margin-top: 14px; opacity: .85; }
+.stage .ico-xl { width: 56px; height: 56px; margin: 0 auto 18px; opacity: .9; }
+
+/* states */
+.stage.idle  { background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); }
+.stage.wait  { background: linear-gradient(180deg, #4a1020, #2a0a14); border-color: rgba(244,63,94,.5); color: #ffd9e0; }
+.stage.go    { background: linear-gradient(180deg, #0a4a55, #06323a); border-color: #5cc8ff; color: #d6f6ff; }
+.stage.go .big { color: #5cc8ff; }
+.stage.result{ background: linear-gradient(180deg, rgba(245,158,11,.12), rgba(255,255,255,.01)); border-color: rgba(245,158,11,.5); }
+.stage.early { background: linear-gradient(180deg, #4a1020, #2a0a14); border-color: rgba(244,63,94,.6); color: #ffd9e0; }
+.stage .ms { font-family: var(--display); font-weight: 700; font-size: clamp(3rem,9vw,5.5rem); line-height: 1; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+.statline { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 22px; font-family: var(--mono); }
+.statline .s b { display: block; font-family: var(--display); font-weight: 700; font-size: 1.8rem; line-height: 1; color: var(--violet); }
+.statline .s span { font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.hist { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.hist .h { font-family: var(--mono); font-size: .76rem; padding: 6px 11px; border: 1px solid var(--line-2); border-radius: 7px; color: var(--muted); }
+.hint { font-family: var(--mono); font-size: .78rem; color: var(--faint); margin-top: 16px; }
+.scale { margin-top: 26px; }
+.scale h3 { font-size: 1.05rem; margin-bottom: 10px; }
+.scale .bars { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 10px; }
+.scale .bars > div { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.scale .bars b { display: block; color: var(--ink); font-size: .9rem; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html">Learn</a><a href="personal.html" class="active">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:14px; padding-bottom:0"><span class="idx">[ REFLEX ]</span><span class="tag">// reaction time test</span></div>
+  <h1 class="display">Reaction time.</h1>
+  <p class="lead" style="margin-top:14px">Wait for the panel to turn <span style="color:#5cc8ff">cyan</span>, then click as fast as you can. Click too early and the round resets. Average human is around 250&nbsp;ms.</p>
+
+  <div class="stage idle" id="stage" tabindex="0">
+    <div class="inner">
+      <svg class="ico-xl"><use href="#i-bolt"/></svg>
+      <div class="big" id="bigTxt">Click to start</div>
+      <div class="sub" id="subTxt">or press Space</div>
+    </div>
+  </div>
+
+  <div class="statline">
+    <div class="s"><b id="stLast">—</b><span>last</span></div>
+    <div class="s"><b id="stBest">—</b><span>best</span></div>
+    <div class="s"><b id="stAvg">—</b><span>avg (5)</span></div>
+    <div class="s"><b id="stTries">0</b><span>attempts</span></div>
+  </div>
+  <div class="hist" id="hist"></div>
+  <div class="hint">Tip: this measures visual reaction + click latency. Pro gamers land ~150 ms.</div>
+
+  <div class="scale">
+    <h3>Where you land</h3>
+    <div class="bars">
+      <div><b>&lt; 150 ms</b>Elite / pro reflexes</div>
+      <div><b>150–250 ms</b>Fast — above average</div>
+      <div><b>250–350 ms</b>Average human</div>
+      <div><b>&gt; 350 ms</b>Tired? Try again</div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="js/xp.js"></script>
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script>
+(function(){
+  const stage = document.getElementById('stage');
+  const bigTxt = document.getElementById('bigTxt'), subTxt = document.getElementById('subTxt');
+  const BKEY = 'nb_reaction_best';
+  let state = 'idle';      // idle | wait | go | result | early
+  let goTime = 0, timeout = null, tries = [];
+
+  function setStage(cls, big, sub){ stage.className = 'stage ' + cls; bigTxt.innerHTML = big; subTxt.textContent = sub || ''; }
+
+  function startRound(){
+    state = 'wait';
+    setStage('wait', 'Wait for cyan…', "don't click yet");
+    bigTxt.previousElementSibling && (stage.querySelector('.ico-xl').style.display = 'none');
+    const delay = 1200 + Math.random() * 2800;
+    timeout = setTimeout(() => { state = 'go'; goTime = performance.now(); setStage('go', 'CLICK!', ''); }, delay);
+  }
+
+  function bestVal(){ const b = +localStorage.getItem(BKEY); return b || 0; }
+  function fmt(n){ return n + ' ms'; }
+
+  function record(ms){
+    tries.push(ms);
+    document.getElementById('stLast').textContent = ms;
+    document.getElementById('stTries').textContent = tries.length;
+    const last5 = tries.slice(-5);
+    document.getElementById('stAvg').textContent = Math.round(last5.reduce((a,b)=>a+b,0)/last5.length);
+    const b = bestVal();
+    if (!b || ms < b) localStorage.setItem(BKEY, ms);
+    document.getElementById('stBest').textContent = bestVal() || ms;
+    const hist = document.getElementById('hist');
+    hist.innerHTML = tries.slice(-8).reverse().map((t,i)=>`<span class="h" style="${i===0?'border-color:var(--violet);color:var(--ink)':''}">${t} ms</span>`).join('');
+    try { if (window.NB) { NB.inc('reaction_tests'); if (ms < 250) NB.unlock('fast-reflex'); } } catch(e){}
+  }
+
+  function react(){
+    const ms = Math.round(performance.now() - goTime);
+    state = 'result';
+    setStage('result', `<span class="ms">${ms}</span>`, 'milliseconds · click to go again');
+    record(ms);
+  }
+
+  function trigger(){
+    if (state === 'idle' || state === 'result' || state === 'early') { startRound(); return; }
+    if (state === 'wait') { clearTimeout(timeout); state = 'early'; setStage('early', 'Too soon!', 'wait for cyan · click to retry'); return; }
+    if (state === 'go') { react(); return; }
+  }
+
+  stage.addEventListener('mousedown', trigger);
+  document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); trigger(); } });
+
+  // restore best
+  if (bestVal()) document.getElementById('stBest').textContent = bestVal();
+})();
+</script>
+</body>
+</html>

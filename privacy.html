@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy — NULLBYTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/shared.css">
+<link rel="stylesheet" href="assets/compat.css">
+<style>
+.page-head { padding-block: 60px 22px; }
+.page-head h1 { font-size: clamp(2.4rem,6vw,4.2rem); }
+.two-col { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; align-items: start; }
+.panel-c { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)); backdrop-filter: blur(14px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); padding: 28px; }
+.sec-t { font-family: var(--display); font-weight: 600; font-size: 1.5rem; font-style: italic; transform: skewX(-4deg); transform-origin: left; }
+.chk-prog { height: 6px; border-radius: 3px; background: rgba(255,255,255,.06); margin: 14px 0 20px; overflow: hidden; }
+.chk-prog i { display: block; height: 100%; background: var(--grad); width: 0; transition: width .3s; }
+.chk { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
+.chk:last-child { border-bottom: none; }
+.chk .box { flex: none; width: 24px; height: 24px; border: 1px solid var(--line-2); border-radius: 7px; display: grid; place-items: center; color: transparent; transition: .15s; margin-top: 2px; }
+.chk.on .box { background: var(--grad); border-color: transparent; color: #fff; }
+.chk .t { font-weight: 600; }
+.chk.on .t { text-decoration: line-through; color: var(--muted); }
+.chk p { color: var(--muted); font-size: .88rem; margin-top: 3px; }
+
+.vpn { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.vpn th, .vpn td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.vpn thead th { font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+.vpn thead th.m { color: #f59e0b; } .vpn thead th.p { color: #8b5cf6; }
+.vpn td.k { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); white-space: nowrap; }
+.vpn td { color: var(--muted); }
+.fazit { margin-top: 18px; padding: 16px 18px; border-radius: 10px; border: 1px solid var(--line); background: rgba(168,85,247,.07); font-size: .9rem; color: var(--muted); }
+.fazit b { color: var(--ink); }
+@media (max-width:880px){ .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="sky"></div><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div class="mesh"></div><div class="spot" id="spot"></div><div class="grain"></div>
+<header class="nav" id="nav">
+  <a class="brand" href="index.html"><span class="puck"><svg viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg"><path fill="#8f979f" d="M60 10c-26 0-44 20-44 48v54c0 4 5 6 8 3l10-10 12 12c2 2 6 2 8 0l6-6 6 6c2 2 6 2 8 0l12-12 10 10c3 3 8 1 8-3V58c0-28-18-48-44-48z"/><circle cx="44" cy="56" r="9" fill="#101216"/><circle cx="76" cy="56" r="9" fill="#101216"/><circle cx="47" cy="53" r="3" fill="#fff"/><circle cx="79" cy="53" r="3" fill="#fff"/><path fill="#2ee4ff" d="M52 72h16l-8 14z"/></svg></span><span><b>NULLBYTE</b><small>OPEN SOURCE</small></span></a>
+  <nav class="nav-links"><span class="glide" id="glide"></span><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></nav>
+  <a class="nav-cta" href="osint.html"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Launch OSINT</span></a>
+  <button class="nav-burger" id="burger" aria-label="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+<div class="sheet" id="sheet"><a href="features.html">Features</a><a href="learn.html" class="active">Learn</a><a href="personal.html">Personal</a><a href="osint.html">OSINT</a><a href="threatmap.html">Threat Map</a><a href="console.html">Console</a><a href="daily.html">Daily</a><a href="shop.html">Shop</a><a href="account.html">Account</a></div>
+
+<section class="wrap page-head reveal">
+  <div class="shead" style="border:none; margin-bottom:18px; padding-bottom:0"><span class="idx">[ PRIVACY ]</span><span class="tag">// protect yourself</span></div>
+  <h1 class="display">Privacy.</h1>
+  <p class="lead" style="margin-top:20px">A concrete checklist for better digital security — plus a solid VPN comparison.</p>
+</section>
+
+<section class="wrap" style="padding-bottom:70px">
+  <div class="two-col">
+    <!-- CHECKLIST -->
+    <div class="panel-c">
+      <div class="sec-t">Checklist</div>
+      <div class="chk-prog"><i id="chkBar"></i></div>
+      <div id="chkList"></div>
+    </div>
+
+    <!-- VPN -->
+    <div class="panel-c">
+      <div class="sec-t" style="margin-bottom:18px">VPN comparison</div>
+      <table class="vpn">
+        <thead><tr><th></th><th class="m">Mullvad</th><th class="p">Proton VPN</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Based in</td><td>Sweden</td><td>Switzerland</td></tr>
+          <tr><td class="k">Sign-up</td><td>Fully anonymous — no email, can pay with cash/crypto</td><td>Email required</td></tr>
+          <tr><td class="k">Server architecture</td><td>RAM-only — data is never physically stored anywhere</td><td>Disk-based, but audited no-logs policy</td></tr>
+          <tr><td class="k">Server count</td><td>~700–750 in 50+ countries</td><td>17,000+ in 127 countries</td></tr>
+          <tr><td class="k">Speed</td><td>up to ~350 Mbps</td><td>up to ~428 Mbps, more consistent over distance</td></tr>
+          <tr><td class="k">Audits</td><td>Cure53 (2018)</td><td>Multiple, most recently SOC 2 Type II (2025)</td></tr>
+          <tr><td class="k">Best for</td><td>Maximum anonymity (activists, journalists)</td><td>Everyday use, streaming, more comfort</td></tr>
+        </tbody>
+      </table>
+      <div class="fazit"><b>Verdict:</b> Mullvad for purist privacy fans focused on anonymity, Proton for anyone who wants strong privacy plus more features, servers &amp; streaming.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" style="padding:60px 0 40px"><div class="foot-pill rv"><span>NULLBYTE · OPEN SOURCE</span><span>100% CLIENT-SIDE · SAVED IN YOUR BROWSER</span></div></footer>
+
+<script src="assets/sprite.js"></script>
+<script src="assets/shared.js"></script>
+<script src="js/xp.js"></script>
+<script>
+const ITEMS = [
+  ['Use a password manager','A manager creates & stores long, unique passwords — you only remember one.'],
+  ['Enable 2FA','Two-factor (app/hardware key) protects you even if the password leaks.'],
+  ['Browser tracking protection','Tracker blockers / strict privacy settings reduce profiling.'],
+  ['VPN on public Wi-Fi','Encrypts your traffic on open networks where it could otherwise be read.'],
+  ['Software updates','Updates close known security holes — install them promptly.'],
+  ['Review app permissions','Does the flashlight app really need contacts & location? Revoke it.'],
+  ['Check for data breaches','Use the haveibeenpwned principle to check if your email appears in leaks.']
+];
+const list = document.getElementById('chkList'), bar = document.getElementById('chkBar');
+list.innerHTML = ITEMS.map((it,i)=>`<div class="chk" data-i="${i}"><span class="box"><svg class="ico ico-sm"><use href="#i-check"/></svg></span><div><div class="t">${it[0]}</div><p>${it[1]}</p></div></div>`).join('');
+let done = new Set();
+list.addEventListener('click', e => {
+  const row = e.target.closest('.chk'); if (!row) return;
+  const i = +row.dataset.i;
+  if (done.has(i)) { done.delete(i); row.classList.remove('on'); } else { done.add(i); row.classList.add('on'); }
+  bar.style.width = (done.size / ITEMS.length * 100) + '%';
+  if (done.size === ITEMS.length && window.NB) NB.unlock('privacy-aware');
+});
+</script>
+</body>
+</html>
