@@ -8,3 +8,7 @@ Thumbs.db
 
 # echte Firebase-Config nicht ins Repo
 assets/firebase.js
+
+# Firebase Deploy-Cache & Projekt-Zuordnung
+.firebase/
+.firebaserc
